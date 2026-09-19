@@ -1,0 +1,6 @@
+{
+  "name": "ToolPlaces",
+  "description": "Professional marketplace for developer tools, security utilities, API suites, and cloud sandboxes.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
