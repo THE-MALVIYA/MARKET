@@ -13,8 +13,8 @@ export const SupportView: React.FC = () => {
 
   const faqs = [
     {
-      q: 'What is ToolPlaces?',
-      a: 'ToolPlaces is an enterprise-grade digital software and developer toolkit marketplace providing audited security testing software, cloud infrastructure utilities, and automation modules.'
+      q: 'What is CyberPlaces?',
+      a: 'CyberPlaces is a cyber-grade digital software and developer toolkit marketplace providing audited security testing software, cloud infrastructure utilities, and automation modules.'
     },
     {
       q: 'How does USDT TRC-20 payment and proof verification work?',
@@ -47,7 +47,7 @@ export const SupportView: React.FC = () => {
       <div className="text-center max-w-2xl mx-auto mb-10">
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-950/40 border border-cyan-500/30 text-cyan-300 font-mono text-xs mb-3">
           <HelpCircle className="w-3.5 h-3.5 text-cyan-400" />
-          <span>TOOLPLACES CUSTOMER & TECHNICAL SUPPORT</span>
+          <span>CYBERPLACES CUSTOMER & TECHNICAL SUPPORT</span>
         </div>
         <h1 className="text-3xl font-mono font-extrabold text-white mb-2">
           SUPPORT & KNOWLEDGE BASE
@@ -98,7 +98,7 @@ export const SupportView: React.FC = () => {
               <span>QUALITY & SECURITY ASSURANCE STATEMENT</span>
             </div>
             <p className="text-[11px] text-slate-300">
-              ToolPlaces products are verified for high reliability, binary authenticity, and compliance with ethical security testing standards.
+              CyberPlaces products are verified for high reliability, binary authenticity, and compliance with ethical security testing standards.
             </p>
           </div>
         </div>
@@ -142,7 +142,7 @@ export const SupportView: React.FC = () => {
                     <option value="Payment Verification">Payment Verification</option>
                     <option value="Technical Specifications">Technical Specifications</option>
                     <option value="License Activation Key">License Activation</option>
-                    <option value="Enterprise Inquiries">Enterprise & Custom Build</option>
+                    <option value="Cyber Inquiries">Cyber & Custom Build</option>
                   </select>
                 </div>
 

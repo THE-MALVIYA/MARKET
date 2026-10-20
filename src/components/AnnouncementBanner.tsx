@@ -15,7 +15,7 @@ export const AnnouncementBanner: React.FC = () => {
             NEW RELEASE
           </span>
           <p className="text-slate-300 truncate text-[11px] font-mono">
-            <span className="text-cyan-300 font-semibold">ToolPlaces v2.4:</span> Enterprise Developer Toolkits & Security Research Suites now active with instant TRC-20 USDT settlement.
+            <span className="text-cyan-300 font-semibold">CyberPlaces v2.4:</span> Cyber Developer Toolkits & Security Research Suites now active with instant TRC-20 USDT settlement.
           </p>
         </div>
 

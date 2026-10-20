@@ -37,20 +37,20 @@ export const TerminalFooter: React.FC = () => {
                 <Shield className="w-3.5 h-3.5" />
               </div>
               <span className="font-extrabold text-sm tracking-wider text-white">
-                TOOLPLACES // DEVELOPER & SECURITY MARKETPLACE
+                CYBERPLACES // DEVELOPER & SECURITY MARKETPLACE
               </span>
             </div>
 
             <p className="text-xs text-slate-400 leading-relaxed max-w-md font-sans">
-              The premier marketplace for verified developer software, cybersecurity defense tools, automated vulnerability scanners, and enterprise cloud DevOps utilities.
+              The premier marketplace for verified developer software, cybersecurity defense tools, automated vulnerability scanners, and cyber cloud DevOps utilities.
             </p>
 
             <div className="p-3 rounded-lg bg-black/60 border border-cyan-500/30 text-[11px] text-cyan-300/90 leading-relaxed space-y-1">
               <div className="font-bold text-white uppercase tracking-wider">
-                ENTERPRISE-GRADE SOFTWARE ECOSYSTEM
+                CYBER-GRADE SOFTWARE ECOSYSTEM
               </div>
               <p className="text-[10px] text-slate-400">
-                Every tool in the ToolPlaces catalog undergoes source validation, binary verification, and cryptographic checksum auditing before distribution.
+                Every tool in the CyberPlaces catalog undergoes source validation, binary verification, and cryptographic checksum auditing before distribution.
               </p>
             </div>
           </div>
@@ -114,7 +114,7 @@ export const TerminalFooter: React.FC = () => {
         </div>
 
         <div className="pt-6 border-t border-slate-800/80 text-center text-[10px] text-slate-500">
-          TOOLPLACES &copy; 2026. All rights reserved. Professional Developer & Cybersecurity Solutions.
+          CYBERPLACES &copy; 2026. All rights reserved. Professional Developer & Cybersecurity Solutions.
         </div>
       </div>
     </footer>

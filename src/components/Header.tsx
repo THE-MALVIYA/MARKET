@@ -53,7 +53,7 @@ export const Header: React.FC = () => {
               <div>
                 <div className="flex items-center gap-1.5">
                   <span className="font-mono font-extrabold text-base tracking-wider bg-gradient-to-r from-cyan-400 via-teal-300 to-purple-400 bg-clip-text text-transparent">
-                    TOOLPLACES
+                    CYBERPLACES
                   </span>
                 </div>
                 <span className="text-[10px] font-mono text-slate-400 tracking-widest block uppercase">

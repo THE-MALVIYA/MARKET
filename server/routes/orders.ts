@@ -37,7 +37,7 @@ router.post('/', (req: AuthenticatedRequest, res: Response) => {
 
   const user = req.user || {
     id: 'user-agent-01',
-    email: 'developer@toolplaces.io',
+    email: 'developer@cyberplaces.io',
     username: 'dev_lead'
   };
 

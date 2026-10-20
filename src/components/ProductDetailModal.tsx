@@ -108,7 +108,7 @@ export const ProductDetailModal: React.FC = () => {
               </div>
               <div className="flex justify-between text-slate-400">
                 <span>Verification:</span>
-                <span className="text-emerald-400">Enterprise Audited</span>
+                <span className="text-emerald-400">Cyber Audited</span>
               </div>
             </div>
           </div>

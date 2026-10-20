@@ -14,7 +14,9 @@ import {
   UploadCloud,
   Check,
   Eye,
-  X
+  X,
+  Send,
+  Copy
 } from 'lucide-react';
 
 export const OrdersView: React.FC = () => {
@@ -22,6 +24,7 @@ export const OrdersView: React.FC = () => {
   const [filterStatus, setFilterStatus] = useState<string>('ALL');
   const [inspectOrder, setInspectOrder] = useState<Order | null>(null);
   const [previewProofImage, setPreviewProofImage] = useState<string | null>(null);
+  const [copiedBot, setCopiedBot] = useState(false);
 
   const filteredOrders = orders.filter((o) => {
     if (filterStatus === 'ALL') return true;
@@ -230,19 +233,51 @@ export const OrdersView: React.FC = () => {
                     </div>
                   )}
 
-                  {/* Proof preview badge if proof uploaded */}
+                  {/* Proof preview badge & Telegram Bot Access if proof uploaded */}
                   {order.paymentProof && (
-                    <div className="mt-3 flex items-center justify-between p-2 rounded-lg bg-cyan-950/20 border border-cyan-500/20 text-xs font-mono">
-                      <div className="flex items-center gap-2 text-cyan-300">
-                        <FileImage className="w-4 h-4 text-cyan-400" />
-                        <span>Proof Attached: {order.paymentProof.fileName}</span>
+                    <div className="mt-3 space-y-2">
+                      <div className="flex items-center justify-between p-2.5 rounded-lg bg-cyan-950/30 border border-cyan-500/30 text-xs font-mono">
+                        <div className="flex items-center gap-2 text-cyan-300">
+                          <FileImage className="w-4 h-4 text-cyan-400" />
+                          <span>Proof Attached: {order.paymentProof.fileName}</span>
+                        </div>
+                        <button
+                          onClick={() => setPreviewProofImage(order.paymentProof?.fileData || null)}
+                          className="text-cyan-400 hover:text-cyan-200 underline cursor-pointer text-[11px]"
+                        >
+                          Inspect Screenshot
+                        </button>
                       </div>
-                      <button
-                        onClick={() => setPreviewProofImage(order.paymentProof?.fileData || null)}
-                        className="text-cyan-400 hover:text-cyan-200 underline cursor-pointer text-[11px]"
-                      >
-                        Inspect Screenshot
-                      </button>
+
+                      {/* Official Bot Delivery Box */}
+                      <div className="p-3 rounded-xl bg-gradient-to-r from-[#0b1c2e] to-[#071320] border-2 border-cyan-400/80 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                        <div className="flex items-center gap-2.5">
+                          <div className="w-7 h-7 rounded-lg bg-cyan-500 flex items-center justify-center text-black flex-shrink-0">
+                            <Send className="w-3.5 h-3.5 fill-black text-black" />
+                          </div>
+                          <div>
+                            <span className="text-[10px] font-mono font-bold text-cyan-300 block uppercase">
+                              PRODUCT FILES & KEY BOT
+                            </span>
+                            <span className="text-white font-mono font-bold text-xs">
+                              Telegram: @getfilex_bot
+                            </span>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-2 w-full sm:w-auto">
+                          <a
+                            href="https://t.me/getfilex_bot"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex-1 sm:flex-none px-3 py-1.5 rounded-lg bg-cyan-400 hover:bg-cyan-300 text-black font-mono font-bold text-xs flex items-center justify-center gap-1.5 transition-colors no-underline"
+                          >
+                            <Send className="w-3 h-3 fill-black text-black" />
+                            <span>OPEN BOT</span>
+                            <ExternalLink className="w-3 h-3" />
+                          </a>
+                        </div>
+                      </div>
                     </div>
                   )}
                 </div>
@@ -321,6 +356,33 @@ export const OrdersView: React.FC = () => {
                       className="w-full h-auto object-contain"
                     />
                   </div>
+                </div>
+              )}
+
+              {/* Telegram Bot Delivery Link */}
+              {inspectOrder.paymentProof && (
+                <div className="p-3.5 rounded-xl bg-gradient-to-b from-[#0b1c2e] to-[#071320] border-2 border-cyan-400 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] font-mono font-bold text-cyan-300 uppercase tracking-wider">
+                      Product Files Delivery Bot:
+                    </span>
+                    <span className="text-white font-mono font-bold text-xs">
+                      @getfilex_bot
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-slate-300 font-sans">
+                    Payment proof received. Open the bot on Telegram to receive your files & license:
+                  </p>
+                  <a
+                    href="https://t.me/getfilex_bot"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-full py-2 px-3 rounded-lg bg-cyan-400 hover:bg-cyan-300 text-black font-mono font-bold text-xs flex items-center justify-center gap-1.5 transition-colors no-underline block text-center"
+                  >
+                    <Send className="w-3.5 h-3.5 fill-black text-black" />
+                    <span>OPEN TELEGRAM BOT (@getfilex_bot)</span>
+                    <ExternalLink className="w-3 h-3" />
+                  </a>
                 </div>
               )}
             </div>

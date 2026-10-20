@@ -80,13 +80,13 @@ export const Marketplace: React.FC = () => {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 pb-4 border-b border-cyan-500/20">
         <div>
           <h1 className="text-2xl sm:text-3xl font-mono font-extrabold text-white flex items-center gap-2.5">
-            <span>TOOLPLACES CATALOG</span>
+            <span>CYBERPLACES CATALOG</span>
             <span className="text-xs px-2.5 py-0.5 rounded-full bg-cyan-950/60 border border-cyan-800/60 text-cyan-300 font-semibold font-mono">
               {sortedProducts.length} PACKAGES AVAILABLE
             </span>
           </h1>
           <p className="text-xs font-mono text-slate-400 mt-1">
-            Curated security testing suites, developer utilities, and enterprise infrastructure tools.
+            Curated security testing suites, developer utilities, and cyber infrastructure tools.
           </p>
         </div>
 

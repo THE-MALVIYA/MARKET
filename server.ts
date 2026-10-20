@@ -45,10 +45,10 @@ async function startServer() {
   app.get('/api/health', (_req, res) => {
     res.json({
       status: 'ONLINE',
-      system: 'TOOLPLACES MARKETPLACE PLATFORM',
+      system: 'CYBERPLACES MARKETPLACE PLATFORM',
       timestamp: new Date().toISOString(),
       network: 'USDT-TRC20',
-      securityMode: 'ACTIVE_ENTERPRISE'
+      securityMode: 'ACTIVE_CYBER'
     });
   });
 
@@ -78,11 +78,11 @@ async function startServer() {
   }
 
   app.listen(PORT, '0.0.0.0', () => {
-    console.log(`[TOOLPLACES] Server running on http://0.0.0.0:${PORT}`);
+    console.log(`[CYBERPLACES] Server running on http://0.0.0.0:${PORT}`);
   });
 }
 
 startServer().catch((err) => {
-  console.error('[TOOLPLACES] Fatal server start error:', err);
+  console.error('[CYBERPLACES] Fatal server start error:', err);
   process.exit(1);
 });

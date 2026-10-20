@@ -76,7 +76,7 @@ export const AdminDashboard: React.FC = () => {
           <div className="flex items-center gap-2">
             <span className="w-2.5 h-2.5 rounded-full bg-purple-400 animate-pulse" />
             <h1 className="text-2xl sm:text-3xl font-mono font-extrabold text-white flex items-center gap-2">
-              <span>TOOLPLACES MANAGEMENT CONSOLE</span>
+              <span>CYBERPLACES MANAGEMENT CONSOLE</span>
             </h1>
             <span className="px-2 py-0.5 rounded bg-purple-950/80 border border-purple-500/40 text-purple-300 font-mono text-xs font-bold">
               ROOT CLEARANCE

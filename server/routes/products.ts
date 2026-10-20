@@ -79,7 +79,7 @@ router.post('/', requireAdmin, (req: AuthenticatedRequest, res: Response) => {
     category,
     price: Math.max(1, price),
     currency: 'USDT',
-    description: description || 'Enterprise developer toolkit and security utility module.',
+    description: description || 'Cyber developer toolkit and security utility module.',
     features: Array.isArray(features) ? features : [features].filter(Boolean),
     image: image || 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&w=800&q=80',
     rating: 4.9,

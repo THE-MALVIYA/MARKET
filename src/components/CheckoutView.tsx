@@ -13,7 +13,12 @@ import {
   Eye,
   Info,
   Layers,
-  ChevronRight
+  ChevronRight,
+  Send,
+  Copy,
+  Check,
+  ExternalLink,
+  MessageSquare
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 
@@ -44,6 +49,7 @@ export const CheckoutView: React.FC = () => {
   const [isUploading, setIsUploading] = useState(false);
   const [isDragOver, setIsDragOver] = useState(false);
   const [uploadSuccess, setUploadSuccess] = useState(false);
+  const [copiedBot, setCopiedBot] = useState(false);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   // Find active order if existing
@@ -424,21 +430,86 @@ export const CheckoutView: React.FC = () => {
 
             {/* If proof is already uploaded or verified */}
             {currentOrder?.paymentProof || uploadSuccess ? (
-              <div className="p-4 rounded-xl bg-cyan-950/30 border border-cyan-500/40 text-center space-y-3">
-                <div className="w-12 h-12 rounded-full bg-cyan-500/20 border border-cyan-400/40 flex items-center justify-center mx-auto text-cyan-400">
+              <div className="p-4 sm:p-5 rounded-xl bg-[#081220] border-2 border-cyan-400 shadow-2xl shadow-cyan-950/60 text-center space-y-4 animate-in fade-in duration-300">
+                <div className="w-12 h-12 rounded-full bg-emerald-500/20 border-2 border-emerald-400 flex items-center justify-center mx-auto text-emerald-400">
                   <CheckCircle2 className="w-6 h-6" />
                 </div>
                 <div>
-                  <div className="font-mono font-bold text-cyan-300 text-sm">
-                    PAYMENT PROOF SUBMITTED SUCCESSFULLY
+                  <div className="font-mono font-extrabold text-white text-base tracking-wide flex items-center justify-center gap-2">
+                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" />
+                    <span>PAYMENT PROOF SUBMITTED!</span>
                   </div>
-                  <div className="font-mono text-xs text-amber-300 font-semibold mt-1 flex items-center justify-center gap-1.5">
-                    <Clock className="w-3.5 h-3.5" />
-                    <span>Order Status: PENDING VERIFICATION</span>
+                  <div className="font-mono text-xs text-cyan-300 font-semibold mt-1">
+                    Receipt Captured & Verification In Progress
                   </div>
-                  <p className="text-[11px] text-slate-400 mt-2 max-w-sm mx-auto leading-relaxed">
-                    Notice: Your submitted screenshot proof is currently under review by our verification system before access is granted.
+                </div>
+
+                {/* TELEGRAM BOT ACCESS PANEL - REQUESTED BY USER */}
+                <div className="p-4 rounded-xl bg-gradient-to-b from-[#0b1c2e] to-[#06121d] border-2 border-cyan-400 text-left space-y-3 shadow-lg shadow-cyan-950/40">
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-cyan-500 to-teal-400 flex items-center justify-center text-black font-bold flex-shrink-0 shadow-md shadow-cyan-500/30">
+                        <Send className="w-4 h-4 fill-black text-black" />
+                      </div>
+                      <div>
+                        <span className="text-[10px] font-mono font-bold text-cyan-300 uppercase block tracking-wider">
+                          OFFICIAL DELIVERY BOT // INSTANT ACCESS
+                        </span>
+                        <span className="text-white font-mono font-extrabold text-sm sm:text-base">
+                          @getfilex_bot
+                        </span>
+                      </div>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        navigator.clipboard.writeText('@getfilex_bot');
+                        setCopiedBot(true);
+                        setTimeout(() => setCopiedBot(false), 2000);
+                        addToast({
+                          type: 'success',
+                          title: 'Copied to Clipboard',
+                          message: '@getfilex_bot copied! Open Telegram to start the bot.'
+                        });
+                      }}
+                      className="px-2.5 py-1.5 rounded-lg bg-black/60 hover:bg-black/90 border border-cyan-500/40 text-cyan-300 text-xs font-mono flex items-center gap-1.5 transition-colors cursor-pointer flex-shrink-0"
+                      title="Copy bot username"
+                    >
+                      {copiedBot ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                      <span>{copiedBot ? 'COPIED' : 'COPY'}</span>
+                    </button>
+                  </div>
+
+                  <p className="text-xs text-slate-200 font-sans leading-relaxed">
+                    Aapka payment proof upload ho chuka hai! Product files, setup bundle aur access key lene ke liye abhi niche diye gaye Telegram bot par click karein:
                   </p>
+
+                  <a
+                    href="https://t.me/getfilex_bot"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-cyan-400 via-teal-400 to-emerald-400 hover:from-cyan-300 hover:to-emerald-300 text-black font-mono font-black text-xs sm:text-sm flex items-center justify-center gap-2 shadow-lg shadow-cyan-500/30 transition-all transform hover:-translate-y-0.5 cursor-pointer no-underline block text-center"
+                  >
+                    <Send className="w-4 h-4 fill-black text-black" />
+                    <span>OPEN TELEGRAM BOT (@getfilex_bot)</span>
+                    <ExternalLink className="w-3.5 h-3.5" />
+                  </a>
+
+                  <div className="flex items-center justify-between text-[11px] font-mono text-cyan-300/90 pt-1 border-t border-cyan-900/40">
+                    <span className="flex items-center gap-1.5">
+                      <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                      <span>Bot Link:</span>
+                    </span>
+                    <a
+                      href="https://t.me/getfilex_bot"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-cyan-400 underline hover:text-cyan-200"
+                    >
+                      https://t.me/getfilex_bot
+                    </a>
+                  </div>
                 </div>
 
                 {/* Proof Details Preview */}
@@ -457,8 +528,8 @@ export const CheckoutView: React.FC = () => {
                       </span>
                     </div>
                     <div className="text-slate-400 flex justify-between">
-                      <span>Status:</span>
-                      <span className="text-yellow-400 font-bold">Pending Review</span>
+                      <span>Verification Status:</span>
+                      <span className="text-emerald-400 font-bold">Proof Received</span>
                     </div>
 
                     {/* Screenshot thumbnail */}
@@ -480,7 +551,7 @@ export const CheckoutView: React.FC = () => {
                 <div className="pt-2">
                   <button
                     onClick={() => setActiveTab('orders')}
-                    className="w-full py-2.5 rounded-lg bg-cyan-500 hover:bg-cyan-400 text-black font-mono font-bold text-xs transition-colors cursor-pointer"
+                    className="w-full py-2.5 rounded-lg bg-[#0e1726] hover:bg-[#15233a] border border-slate-700 text-slate-200 font-mono text-xs transition-colors cursor-pointer"
                   >
                     View Order Timeline & Status
                   </button>

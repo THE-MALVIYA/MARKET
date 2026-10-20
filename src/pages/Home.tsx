@@ -57,10 +57,12 @@ export const Home: React.FC = () => {
               <Layers className="w-4 h-4 text-cyan-400" />
               <span>EXPLORE RESEARCH CATEGORIES</span>
             </h3>
-            <span className="text-xs font-mono text-slate-500">6 Specialized Disciplines</span>
+            <span className="text-xs font-mono text-slate-500">
+              {categories.filter((c) => c !== 'All Categories').length} Specialized Disciplines
+            </span>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
             {categories
               .filter((c) => c !== 'All Categories')
               .map((cat) => {

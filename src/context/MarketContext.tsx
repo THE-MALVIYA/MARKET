@@ -93,7 +93,7 @@ export const MarketProvider: React.FC<{ children: ReactNode }> = ({ children }) 
   const [currentUser, setCurrentUser] = useState<User | null>({
     id: 'user-agent-01',
     username: 'dev_lead',
-    email: 'developer@toolplaces.io',
+    email: 'developer@cyberplaces.io',
     role: 'user',
     reputation: 99.8,
     createdAt: new Date().toISOString()

@@ -14,22 +14,22 @@ export interface DatabaseStore {
 }
 
 export function hashPassword(password: string): string {
-  return crypto.createHash('sha256').update(password + 'toolplaces_secret_salt_2026').digest('hex');
+  return crypto.createHash('sha256').update(password + 'cyberplaces_secret_salt_2026').digest('hex');
 }
 
-// Initial Products Catalog (7 High-Performance Enterprise Developer & Infrastructure Toolkits)
+// Initial Products Catalog (7 High-Performance Cyber Developer & Infrastructure Toolkits)
 const INITIAL_PRODUCTS: Product[] = [
   {
     id: 'prod-global-t',
     name: 'Global-T',
     slug: 'global-t',
-    category: 'Enterprise Telemetry & Observability',
-    price: 4276,
+    category: 'Cyber Telemetry & Observability',
+    price: 7630,
     currency: 'USDT',
     featured: true,
     rating: 4.96,
     productCode: 'GLB-T-4200',
-    version: 'v4.1.2-ENTERPRISE',
+    version: 'v4.1.2-CYBER',
     architecture: 'Distributed eBPF / Kubernetes / Multi-Cloud',
     description: 'Global-T is a high-performance distributed telemetry and system observability suite engineered for massive global-scale infrastructure. Features sub-millisecond event streaming, kernel-level eBPF tracing, automatic distributed mesh topology visualization, and autonomous anomaly detection.',
     features: [
@@ -57,14 +57,14 @@ const INITIAL_PRODUCTS: Product[] = [
     name: 'SP-kIT',
     slug: 'sp-kit',
     category: 'Stream Processing & Pipelines',
-    price: 2214,
+    price: 4890,
     currency: 'USDT',
     featured: true,
     rating: 4.92,
     productCode: 'SPK-PROC-220',
     version: 'v3.8.0-STABLE',
     architecture: 'Zero-Copy Native C++ / Rust Core',
-    description: 'SP-kIT delivers ultra-low latency real-time stream processing and high-throughput event routing for mission-critical enterprise systems. Optimized for zero-copy memory allocation, parallel pipelining, and fault-tolerant state management across distributed event clusters.',
+    description: 'SP-kIT delivers ultra-low latency real-time stream processing and high-throughput event routing for mission-critical cyber systems. Optimized for zero-copy memory allocation, parallel pipelining, and fault-tolerant state management across distributed event clusters.',
     features: [
       'Zero-copy memory mapped stream ingestion',
       'High-throughput distributed event broker connector',
@@ -88,7 +88,7 @@ const INITIAL_PRODUCTS: Product[] = [
     id: 'prod-enternalx',
     name: 'Enternalx',
     slug: 'enternalx',
-    category: 'Enterprise Infrastructure & Gateways',
+    category: 'Cyber Infrastructure & Gateways',
     price: 5213,
     currency: 'USDT',
     featured: true,
@@ -96,9 +96,9 @@ const INITIAL_PRODUCTS: Product[] = [
     productCode: 'ENX-CORE-5200',
     version: 'v5.4.0-LTS',
     architecture: 'Cloud-Native Microservices / Multi-AZ',
-    description: 'Enternalx is a premier enterprise internal systems architecture and zero-trust service gateway. Provides unified API federation, cryptographic identity-based access control, distributed configuration consensus, and automated resilience management for hybrid cloud deployments.',
+    description: 'Enternalx is a premier cyber internal systems architecture and zero-trust service gateway. Provides unified API federation, cryptographic identity-based access control, distributed configuration consensus, and automated resilience management for hybrid cloud deployments.',
     features: [
-      'Unified enterprise API federation and service mesh',
+      'Unified cyber API federation and service mesh',
       'Cryptographic mutual TLS (mTLS) identity verification',
       'Distributed Raft-based configuration synchronization',
       'Automatic circuit breaking and dynamic traffic shedding',
@@ -107,7 +107,7 @@ const INITIAL_PRODUCTS: Product[] = [
     requirements: [
       'Kubernetes 1.25+ or Docker Engine 24.0+',
       '16GB RAM recommended for production clusters',
-      'Dedicated private VPC or internal enterprise network'
+      'Dedicated private VPC or internal cyber network'
     ],
     screenshots: [
       'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&w=800&q=80',
@@ -158,7 +158,7 @@ const INITIAL_PRODUCTS: Product[] = [
     featured: true,
     rating: 4.95,
     productCode: 'GLC-COMP-670',
-    version: 'v6.0.2-ENTERPRISE',
+    version: 'v6.0.2-CYBER',
     architecture: 'High Performance Compute (HPC) / GPU Accelerated',
     description: 'global-c is an industrial-grade distributed compute cluster coordinator designed for intense parallel computational workloads, algorithmic simulations, and massive data processing. Features hardware-accelerated scheduling and memory-locality optimizations.',
     features: [
@@ -192,7 +192,7 @@ const INITIAL_PRODUCTS: Product[] = [
     productCode: 'CPR-CRYPT-421',
     version: 'v4.6.0-PRO',
     architecture: 'FIPS 140-2 Level 3 Ready / Air-Gapped Capable',
-    description: 'Cryptopro provides enterprise-grade cryptographic key management, zero-knowledge verification proofs, and post-quantum resilient cryptographic primitives. Built for banking-grade security architectures, audit compliance, and hardened air-gapped cryptographic workstations.',
+    description: 'Cryptopro provides cyber-grade cryptographic key management, zero-knowledge verification proofs, and post-quantum resilient cryptographic primitives. Built for banking-grade security architectures, audit compliance, and hardened air-gapped cryptographic workstations.',
     features: [
       'Post-quantum lattice-based encryption algorithms (Kyber, Dilithium)',
       'Zero-knowledge zk-SNARK computation and verification suite',
@@ -230,10 +230,10 @@ const INITIAL_PRODUCTS: Product[] = [
       'Automated kernel coredump and thread deadlock inspector',
       'BGP route flapping and microburst packet-drop isolation',
       'One-click synthetic remediation scripts with rollback guarantees',
-      '24/7 dedicated enterprise priority telemetry bridge'
+      '24/7 dedicated cyber priority telemetry bridge'
     ],
     requirements: [
-      'Enterprise Linux 8+, FreeBSD 13+, or Unix server',
+      'Cyber Linux 8+, FreeBSD 13+, or Unix server',
       '16GB minimum system memory',
       'Root supervisor permissions for diagnostic probing'
     ],
@@ -243,6 +243,166 @@ const INITIAL_PRODUCTS: Product[] = [
     ],
     image: 'https://images.unsplash.com/photo-1504639725590-34d0984388bd?auto=format&fit=crop&w=800&q=80',
     createdAt: new Date('2026-02-25T18:00:00Z').toISOString()
+  },
+  {
+    id: 'prod-nessus-expert',
+    name: 'Nessus Expert',
+    slug: 'nessus-expert',
+    category: 'Vulnerability Assessment & Surface Management',
+    price: 3560,
+    currency: 'USDT',
+    featured: true,
+    rating: 4.95,
+    productCode: 'NSS-EXP-356',
+    version: 'v10.7.2-EXPERT',
+    architecture: 'Multi-Platform Vulnerability & Attack Surface Scanner',
+    description: 'Nessus Expert is the premier vulnerability assessment and external attack surface management solution. Engineered for security consultants and cyber penetration testers to uncover CVEs, misconfigurations, cloud infrastructure weaknesses (IaC), and discover unmapped internet-facing assets.',
+    features: [
+      'Comprehensive CVE and zero-day vulnerability scanning engine',
+      'External Attack Surface Management (EASM) domain discovery',
+      'Infrastructure as Code (IaC) security posture scanning (Terraform, CloudFormation)',
+      'Over 75,000+ pre-built compliance and configuration audit checks',
+      'Low false-positive rate with CVSS v3 prioritized remediation guidance'
+    ],
+    requirements: [
+      'Windows 10/11, Windows Server, Linux (RHEL, Ubuntu, Debian), or macOS',
+      'Minimum 8GB RAM (16GB recommended for cyber ranges)',
+      'Internet connectivity for live plugin updates'
+    ],
+    screenshots: [
+      'https://images.unsplash.com/photo-1563986768609-322da13575f3?auto=format&fit=crop&w=800&q=80',
+      'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&w=800&q=80'
+    ],
+    image: 'https://images.unsplash.com/photo-1563986768609-322da13575f3?auto=format&fit=crop&w=800&q=80',
+    createdAt: new Date('2026-03-01T10:00:00Z').toISOString()
+  },
+  {
+    id: 'prod-cobalt-strike',
+    name: 'Cobalt Strike',
+    slug: 'cobalt-strike',
+    category: 'Adversary Simulation & Red Teaming',
+    price: 6780,
+    currency: 'USDT',
+    featured: true,
+    rating: 4.98,
+    productCode: 'CS-BEACON-678',
+    version: 'v4.9.1-ADVANCED',
+    architecture: 'Team Server & Asynchronous Beacon C2 Framework',
+    description: 'Cobalt Strike is the industry-standard adversary simulation software designed for mature red teams and elite penetration testers. Emulates advanced persistent threat (APT) tactics, featuring stealthy in-memory post-exploitation, customizable Malleable C2 network profiles, and collaborative multi-operator team servers.',
+    features: [
+      'Malleable C2 network traffic profile evasion and shaping',
+      'Asynchronous Beacon agent with in-memory reflective DLL loading',
+      'Collaborative multi-operator Team Server architecture with session sharing',
+      'Comprehensive MITRE ATT&CK adversary technique replication',
+      'Covert pivoting, SOCKS proxy tunneling, and browser exploitation harness'
+    ],
+    requirements: [
+      'Linux Team Server (Ubuntu 20.04+, Debian, or Kali Linux)',
+      'Java Runtime Environment (OpenJDK 17+)',
+      'Dedicated command-and-control server infrastructure with public IP'
+    ],
+    screenshots: [
+      'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=800&q=80',
+      'https://images.unsplash.com/photo-1544197150-b99a580bb7a8?auto=format&fit=crop&w=800&q=80'
+    ],
+    image: 'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=800&q=80',
+    createdAt: new Date('2026-03-05T12:00:00Z').toISOString()
+  },
+  {
+    id: 'prod-cymulate',
+    name: 'Cymulate',
+    slug: 'cymulate',
+    category: 'Breach & Attack Simulation (BAS)',
+    price: 3390,
+    currency: 'USDT',
+    featured: true,
+    rating: 4.92,
+    productCode: 'CYM-BAS-339',
+    version: 'v5.2.0-CYBER',
+    architecture: 'Cloud-Native Continuous Automated Security Validation',
+    description: 'Cymulate provides automated breach and attack simulation (BAS) to continuously test and validate cyber security posture. Evaluates endpoint detection (EDR), email gateways, web filters, and internal network perimeters against current threat intelligence campaigns in safe, controlled environments.',
+    features: [
+      'Continuous automated multi-vector attack path validation',
+      'Endpoint security & EDR evasion stress-testing framework',
+      'Email gateway phishing and weaponized payload filtering validation',
+      'Web Application Firewall (WAF) and DLP egress bypass assessment',
+      'Actionable mitigation guidance and automated SIEM/SOAR integration'
+    ],
+    requirements: [
+      'Lightweight agent for Windows, Linux, or macOS test endpoints',
+      'Web browser access for centralized SaaS command console',
+      'Outbound HTTPS connectivity to validation cluster'
+    ],
+    screenshots: [
+      'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&w=800&q=80',
+      'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=800&q=80'
+    ],
+    image: 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&w=800&q=80',
+    createdAt: new Date('2026-03-10T14:30:00Z').toISOString()
+  },
+  {
+    id: 'prod-core-impact',
+    name: 'Core Impact',
+    slug: 'core-impact',
+    category: 'Automated Penetration Testing & Exploitation',
+    price: 5230,
+    currency: 'USDT',
+    featured: true,
+    rating: 4.94,
+    productCode: 'CR-IMP-523',
+    version: 'v21.4-PRO',
+    architecture: 'Multi-Vector Exploit Engine / Client-Server',
+    description: 'Core Impact is a cyber-grade automated penetration testing and vulnerability validation platform. Enables security teams to safely replicate real-world multi-vector attacks across networks, endpoints, web applications, and Wi-Fi using commercially developed, peer-reviewed exploits.',
+    features: [
+      'Commercially certified, stable exploit library with zero collateral risk',
+      'Multi-stage automated pivoting across compromised network segments',
+      'Web application penetration testing and OWASP Top 10 vulnerability checks',
+      'Bi-directional vulnerability scanner import (Nessus, Qualys, Rapid7)',
+      'Executive and technical regulatory compliance reporting (PCI-DSS, ISO 27001)'
+    ],
+    requirements: [
+      'Windows 10/11, Windows Server 2019/2022',
+      'Minimum 8GB RAM (16GB recommended)',
+      'Network interface supporting promiscuous mode for network discovery'
+    ],
+    screenshots: [
+      'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=800&q=80',
+      'https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=800&q=80'
+    ],
+    image: 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=800&q=80',
+    createdAt: new Date('2026-03-15T09:15:00Z').toISOString()
+  },
+  {
+    id: 'prod-metasploit-pro',
+    name: 'Metasploit Pro',
+    slug: 'metasploit-pro',
+    category: 'Penetration Testing & Vulnerability Validation',
+    price: 8010,
+    currency: 'USDT',
+    featured: true,
+    rating: 4.97,
+    productCode: 'MSP-PRO-801',
+    version: 'v4.22.0-COMMERCIAL',
+    architecture: 'Multi-Tier Web Console / Post-Exploitation Framework',
+    description: 'Metasploit Pro is the comprehensive commercial penetration testing platform by Rapid7. Accelerates security assessments with automated exploitation wizards, dynamic payload antivirus evasion, team collaboration workspaces, credential harvesting, and integrated social engineering simulations.',
+    features: [
+      'Automated Quick PenTest wizard for rapid network-wide vulnerability validation',
+      'Dynamic payload generation with advanced anti-virus / EDR evasion',
+      'Cyber team collaboration with multi-user access controls and shared workspaces',
+      'Automated credential harvesting, tag analysis, and credential re-use testing',
+      'Comprehensive compliance audit logs and customizable report generation'
+    ],
+    requirements: [
+      'Ubuntu Linux, Red Hat Cyber Linux, Kali Linux, or Windows Server',
+      'Minimum 8GB RAM (16GB recommended for concurrent scans)',
+      'PostgreSQL 14+ database backend'
+    ],
+    screenshots: [
+      'https://images.unsplash.com/photo-1510511459019-5dda7724fd87?auto=format&fit=crop&w=800&q=80',
+      'https://images.unsplash.com/photo-1563986768609-322da13575f3?auto=format&fit=crop&w=800&q=80'
+    ],
+    image: 'https://images.unsplash.com/photo-1510511459019-5dda7724fd87?auto=format&fit=crop&w=800&q=80',
+    createdAt: new Date('2026-03-20T16:00:00Z').toISOString()
   }
 ];
 
@@ -251,7 +411,7 @@ const INITIAL_USERS: User[] = [
   {
     id: 'user-admin-01',
     username: 'root_overseer',
-    email: 'admin@toolplaces.io',
+    email: 'admin@cyberplaces.io',
     passwordHash: hashPassword('admin123'),
     role: 'admin',
     avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=200&q=80',
@@ -261,7 +421,7 @@ const INITIAL_USERS: User[] = [
   {
     id: 'user-agent-01',
     username: 'cipher_agent',
-    email: 'agent@toolplaces.io',
+    email: 'agent@cyberplaces.io',
     passwordHash: hashPassword('user123'),
     role: 'user',
     avatar: 'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?auto=format&fit=crop&w=200&q=80',
@@ -278,7 +438,7 @@ const INITIAL_LOGS: ActivityLog[] = [
     id: 'log-01',
     action: 'SYSTEM_BOOT',
     category: 'ADMIN',
-    details: 'ToolPlaces platform initialized. Catalog cleared.',
+    details: 'CyberPlaces platform initialized. Catalog cleared.',
     actor: 'system',
     timestamp: new Date().toISOString()
   }
