@@ -403,6 +403,40 @@ const INITIAL_PRODUCTS: Product[] = [
     ],
     image: 'https://images.unsplash.com/photo-1510511459019-5dda7724fd87?auto=format&fit=crop&w=800&q=80',
     createdAt: new Date('2026-03-20T16:00:00Z').toISOString()
+  },
+  {
+    id: 'prod-xtransaction-sqm',
+    name: 'XTRANSACTION SQM',
+    slug: 'xtransaction-sqm',
+    category: 'Cyber Transaction & Settlement Systems',
+    price: 6310,
+    currency: 'USDT',
+    featured: true,
+    rating: 4.99,
+    productCode: 'XTX-SQM-6310',
+    version: 'v5.8.0-SQM',
+    architecture: 'Distributed SQM Node Mesh / Quantum-Resistant Settlement Gateway',
+    description: 'XTRANSACTION SQM is a premier cyber-grade decentralized transaction execution and global settlement gateway. Engineered for ultra-high throughput node synchronization, sub-millisecond crypto-routing telemetry, and quantum-resistant cryptographic validation across multi-region distributed networks. Features real-time SQM telemetry, automated ledger consensus reconciliation, and zero-loss failover pipelines.',
+    features: [
+      'Sub-millisecond high-frequency transaction execution engine',
+      'Autonomous SQM global node consensus & peer telemetry mesh',
+      'Quantum-resistant cryptographic signature & zero-knowledge validation',
+      'Real-time multi-threaded mempool analytics and dynamic priority routing',
+      'Encrypted RPC tunneling with automated DDoS deflection and failover'
+    ],
+    requirements: [
+      '64-bit Linux (Ubuntu 22.04+, RHEL 9+) or FreeBSD',
+      'Dedicated NVMe SSD storage with minimum 32GB RAM',
+      'High-speed synchronous fiber uplink (1Gbps+ recommended)',
+      'Multi-core x86_64 architecture with hardware AES-NI acceleration'
+    ],
+    screenshots: [
+      '/assets/aistudio/photo_2026-10-28_15-38-07_94d5651a.jpg',
+      'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=800&q=80',
+      'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&w=800&q=80'
+    ],
+    image: '/assets/aistudio/photo_2026-10-28_15-38-07_94d5651a.jpg',
+    createdAt: new Date('2026-03-25T10:00:00Z').toISOString()
   }
 ];
 
