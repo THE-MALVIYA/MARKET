@@ -3,15 +3,11 @@ import { useMarket } from '../context/MarketContext';
 import { ProductCard } from '../components/ProductCard';
 import {
   Search,
-  SlidersHorizontal,
   Grid,
   List,
-  Terminal,
   Zap,
   RotateCcw,
-  Package,
-  Layers,
-  Sparkles
+  Package
 } from 'lucide-react';
 
 export const Marketplace: React.FC = () => {
@@ -31,13 +27,10 @@ export const Marketplace: React.FC = () => {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [onlyFeatured, setOnlyFeatured] = useState<boolean>(false);
 
-  // Filter products
   const filteredProducts = products.filter((p) => {
-    // Category filter
     if (selectedCategory !== 'All Categories' && p.category !== selectedCategory) {
       return false;
     }
-    // Search query filter
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
       const matchName = p.name.toLowerCase().includes(q);
@@ -48,20 +41,17 @@ export const Marketplace: React.FC = () => {
         return false;
       }
     }
-    // Only featured filter
     if (onlyFeatured && !p.featured) {
       return false;
     }
     return true;
   });
 
-  // Sort products
   const sortedProducts = [...filteredProducts].sort((a, b) => {
     if (sortBy === 'price-asc') return a.price - b.price;
     if (sortBy === 'price-desc') return b.price - a.price;
     if (sortBy === 'rating') return b.rating - a.rating;
     if (sortBy === 'newest') return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-    // Default featured first
     if (a.featured && !b.featured) return -1;
     if (!a.featured && b.featured) return 1;
     return 0;
@@ -76,45 +66,47 @@ export const Marketplace: React.FC = () => {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 font-sans">
-      {/* Header bar */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 pb-4 border-b border-cyan-500/20">
+      {/* Directory Header */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 pb-4 border-b border-[#1d271d]">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-mono font-extrabold text-white flex items-center gap-2.5">
-            <span>CYBERPLACES CATALOG</span>
-            <span className="text-xs px-2.5 py-0.5 rounded-full bg-cyan-950/60 border border-cyan-800/60 text-cyan-300 font-semibold font-mono">
-              {sortedProducts.length} PACKAGES AVAILABLE
+          <div className="flex flex-wrap items-center gap-3">
+            <h1 className="text-2xl sm:text-3xl font-mono font-bold text-white">
+              ONION MARKET INDEX
+            </h1>
+            <span className="text-xs font-mono text-emerald-400 tabular-nums">
+              {sortedProducts.length} Packages Available
             </span>
-          </h1>
-          <p className="text-xs font-mono text-slate-400 mt-1">
-            Curated security testing suites, developer utilities, and cyber infrastructure tools.
+          </div>
+          <p className="text-xs font-mono text-zinc-400 mt-1">
+            Verified security suites, exploit frameworks, and cyber infrastructure listings.
           </p>
         </div>
 
-        {/* Quick highlight banner for F-SHOOT v9.7.0 */}
+        {/* Quick highlight for TRANSACTION KIT */}
         <button
           onClick={() => {
-            setSearchQuery('F-SHOOT');
+            setSearchQuery('TRANSACTION KIT');
             setSelectedCategory('All Categories');
           }}
-          className="px-3.5 py-2 rounded-xl bg-cyan-950/40 border border-cyan-500/40 hover:border-cyan-400 text-cyan-300 text-xs font-mono flex items-center gap-2 transition-all cursor-pointer group"
+          className="px-3.5 py-2 bg-[#0a0e0a] border border-amber-500/40 hover:border-amber-400 text-amber-300 text-xs font-mono flex items-center gap-2 transition-colors cursor-pointer group whitespace-nowrap shrink-0"
         >
-          <Zap className="w-4 h-4 text-yellow-400 group-hover:scale-110 transition-transform" />
-          <span>Quick Filter: F-SHOOT v9.7.0 (27,453 USDT)</span>
+          <Zap className="w-3.5 h-3.5 text-amber-400" />
+          <span>Quick Filter: TRANSACTION KIT (38,547 USDT)</span>
         </button>
       </div>
 
-      {/* Filter and Search Bar Controls */}
-      <div className="bg-[#090d16] border border-slate-800 p-4 rounded-2xl mb-8 space-y-4">
+      {/* Filter & Query Bar */}
+      <div className="bg-[#070907] border border-[#1d271d] p-4 mb-8 space-y-3">
         <div className="grid grid-cols-1 md:grid-cols-12 gap-3">
           {/* Search input */}
           <div className="md:col-span-5 relative">
-            <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+            <Search className="w-4 h-4 text-zinc-500 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Filter by toolkit name, ID, category or description..."
-              className="w-full bg-black/60 border border-slate-700 rounded-xl pl-10 pr-4 py-2 text-xs text-slate-100 placeholder-slate-500 font-mono focus:border-cyan-400 focus:outline-none"
+              placeholder="Filter by package name, code, sector or spec..."
+              className="w-full bg-[#040504] border border-[#222e22] pl-9 pr-4 py-2 text-xs text-zinc-100 placeholder-zinc-600 font-mono focus:border-emerald-500 focus:outline-none"
             />
           </div>
 
@@ -123,7 +115,7 @@ export const Marketplace: React.FC = () => {
             <select
               value={selectedCategory}
               onChange={(e) => setSelectedCategory(e.target.value)}
-              className="w-full bg-black/60 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-200 font-mono focus:border-cyan-400 focus:outline-none cursor-pointer"
+              className="w-full bg-[#040504] border border-[#222e22] px-3 py-2 text-xs text-zinc-200 font-mono focus:border-emerald-500 focus:outline-none cursor-pointer"
             >
               {categories.map((c) => (
                 <option key={c} value={c}>
@@ -137,14 +129,14 @@ export const Marketplace: React.FC = () => {
           <div className="md:col-span-2">
             <select
               value={sortBy}
-              onChange={(e: any) => setSortBy(e.target.value)}
-              className="w-full bg-black/60 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-200 font-mono focus:border-cyan-400 focus:outline-none cursor-pointer"
+              onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
+              className="w-full bg-[#040504] border border-[#222e22] px-3 py-2 text-xs text-zinc-200 font-mono focus:border-emerald-500 focus:outline-none cursor-pointer"
             >
               <option value="featured">Featured First</option>
               <option value="price-asc">Price: Low to High</option>
               <option value="price-desc">Price: High to Low</option>
               <option value="rating">Highest Rated</option>
-              <option value="newest">Newest Releases</option>
+              <option value="newest">Newest Drops</option>
             </select>
           </div>
 
@@ -152,21 +144,21 @@ export const Marketplace: React.FC = () => {
           <div className="md:col-span-2 flex items-center justify-end gap-2">
             <button
               onClick={() => setOnlyFeatured(!onlyFeatured)}
-              className={`px-3 py-2 rounded-xl font-mono text-xs border transition-all cursor-pointer flex items-center gap-1.5 ${
+              className={`px-3 py-2 font-mono text-xs border transition-colors cursor-pointer flex items-center gap-1.5 whitespace-nowrap ${
                 onlyFeatured
-                  ? 'bg-cyan-500 text-black font-bold border-cyan-400'
-                  : 'bg-black/60 text-slate-400 border-slate-700 hover:text-white'
+                  ? 'bg-emerald-500 text-black font-bold border-emerald-400'
+                  : 'bg-[#040504] text-zinc-400 border-[#222e22] hover:text-zinc-100'
               }`}
             >
               <Zap className="w-3.5 h-3.5" />
               <span>Featured</span>
             </button>
 
-            <div className="flex bg-black/60 border border-slate-700 rounded-xl p-0.5">
+            <div className="flex bg-[#040504] border border-[#222e22]">
               <button
                 onClick={() => setViewMode('grid')}
-                className={`p-1.5 rounded-lg transition-colors cursor-pointer ${
-                  viewMode === 'grid' ? 'bg-cyan-500 text-black' : 'text-slate-400 hover:text-white'
+                className={`p-2 transition-colors cursor-pointer ${
+                  viewMode === 'grid' ? 'bg-emerald-500 text-black' : 'text-zinc-400 hover:text-white'
                 }`}
                 title="Grid view"
               >
@@ -174,10 +166,10 @@ export const Marketplace: React.FC = () => {
               </button>
               <button
                 onClick={() => setViewMode('list')}
-                className={`p-1.5 rounded-lg transition-colors cursor-pointer ${
-                  viewMode === 'list' ? 'bg-cyan-500 text-black' : 'text-slate-400 hover:text-white'
+                className={`p-2 transition-colors cursor-pointer ${
+                  viewMode === 'list' ? 'bg-emerald-500 text-black' : 'text-zinc-400 hover:text-white'
                 }`}
-                title="List view"
+                title="Directory list view"
               >
                 <List className="w-3.5 h-3.5" />
               </button>
@@ -185,31 +177,25 @@ export const Marketplace: React.FC = () => {
           </div>
         </div>
 
-        {/* Active filters pill bar */}
+        {/* Active filters bar */}
         {(selectedCategory !== 'All Categories' || searchQuery || onlyFeatured) && (
-          <div className="pt-2 border-t border-slate-800/80 flex flex-wrap items-center gap-2 font-mono text-xs">
-            <span className="text-slate-500 text-[11px]">ACTIVE FILTERS:</span>
+          <div className="pt-2.5 border-t border-[#182018] flex flex-wrap items-center gap-2 font-mono text-xs">
+            <span className="text-zinc-500 text-[11px]">Active Query:</span>
             {selectedCategory !== 'All Categories' && (
-              <span className="px-2 py-0.5 rounded bg-cyan-950/60 border border-cyan-800/60 text-cyan-300">
-                {selectedCategory}
-              </span>
+              <span className="text-emerald-400">{selectedCategory}</span>
             )}
             {searchQuery && (
-              <span className="px-2 py-0.5 rounded bg-cyan-950/60 border border-cyan-800/60 text-cyan-300">
-                Query: "{searchQuery}"
-              </span>
+              <span className="text-emerald-400">"{searchQuery}"</span>
             )}
             {onlyFeatured && (
-              <span className="px-2 py-0.5 rounded bg-cyan-950/60 border border-cyan-800/60 text-cyan-300">
-                Featured Only
-              </span>
+              <span className="text-amber-400">Featured Only</span>
             )}
             <button
               onClick={resetFilters}
-              className="text-slate-400 hover:text-red-400 ml-auto flex items-center gap-1 text-[11px] cursor-pointer"
+              className="text-zinc-400 hover:text-red-400 ml-auto flex items-center gap-1 text-[11px] cursor-pointer"
             >
               <RotateCcw className="w-3 h-3" />
-              <span>Reset All</span>
+              <span>Reset Filters</span>
             </button>
           </div>
         )}
@@ -217,29 +203,29 @@ export const Marketplace: React.FC = () => {
 
       {/* Product Catalog Display */}
       {products.length === 0 ? (
-        <div className="p-16 rounded-2xl bg-[#090d16] border border-slate-800 text-center font-mono">
-          <Package className="w-12 h-12 text-cyan-500/40 mx-auto mb-3" />
-          <h3 className="text-lg font-bold text-slate-200 mb-1">Catalog Is Empty</h3>
-          <p className="text-xs text-slate-400 max-w-md mx-auto mb-5">
-            All previous tool items have been removed from the platform. The catalog is clean and ready for new software packages and developer toolkits.
+        <div className="p-16 bg-[#070907] border border-[#1d271d] text-center font-mono">
+          <Package className="w-12 h-12 text-emerald-500/40 mx-auto mb-3" />
+          <h3 className="text-lg font-bold text-zinc-200 mb-1">Directory Is Empty</h3>
+          <p className="text-xs text-zinc-400 max-w-md mx-auto mb-5">
+            No packages currently mounted in this directory.
           </p>
           <button
             onClick={() => { setSelectedCategory('All Categories'); setSearchQuery(''); }}
-            className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-teal-400 hover:from-cyan-400 hover:to-teal-300 text-black text-xs font-mono font-bold transition-all shadow-lg shadow-cyan-500/20 cursor-pointer inline-flex items-center gap-2"
+            className="px-4 py-2.5 bg-emerald-500 hover:bg-emerald-400 text-black text-xs font-mono font-bold transition-colors cursor-pointer inline-flex items-center gap-2"
           >
-            <span>Explore All Categories</span>
+            <span>Explore All Sectors</span>
           </button>
         </div>
       ) : sortedProducts.length === 0 ? (
-        <div className="p-16 rounded-2xl bg-[#090d16] border border-slate-800 text-center font-mono">
-          <Package className="w-12 h-12 text-slate-600 mx-auto mb-3" />
-          <h3 className="text-lg font-bold text-slate-200 mb-1">No Matching Toolkits Found</h3>
-          <p className="text-xs text-slate-500 max-w-sm mx-auto mb-4">
-            Try adjusting your search query or reset the category filter to explore all available software packages.
+        <div className="p-16 bg-[#070907] border border-[#1d271d] text-center font-mono">
+          <Package className="w-12 h-12 text-zinc-600 mx-auto mb-3" />
+          <h3 className="text-lg font-bold text-zinc-200 mb-1">No Matching Packages Found</h3>
+          <p className="text-xs text-zinc-500 max-w-sm mx-auto mb-4">
+            Adjust search parameters or clear active directory filters.
           </p>
           <button
             onClick={resetFilters}
-            className="px-4 py-2 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-black text-xs font-bold transition-colors cursor-pointer"
+            className="px-4 py-2 bg-emerald-500 hover:bg-emerald-400 text-black text-xs font-bold transition-colors cursor-pointer"
           >
             Reset Filters
           </button>
@@ -251,37 +237,39 @@ export const Marketplace: React.FC = () => {
           ))}
         </div>
       ) : (
-        /* List view representation */
-        <div className="space-y-3 font-mono text-xs">
+        /* Darkweb Index List View */
+        <div className="border border-[#1d271d] divide-y divide-[#182018] bg-[#070907] font-mono text-xs">
           {sortedProducts.map((product) => (
             <div
               key={product.id}
               onClick={() => setSelectedProduct(product)}
-              className="p-4 rounded-xl bg-[#090d16] border border-slate-800 hover:border-cyan-500/40 transition-all flex flex-col md:flex-row items-start md:items-center justify-between gap-4 cursor-pointer"
+              className="p-4 hover:bg-[#0c100c] transition-colors flex flex-col md:flex-row items-start md:items-center justify-between gap-4 cursor-pointer"
             >
               <div className="flex items-center gap-4 min-w-0">
                 <img
                   src={product.image}
                   alt={product.name}
                   referrerPolicy="no-referrer"
-                  className="w-16 h-16 rounded-lg object-cover bg-black flex-shrink-0"
+                  className="w-16 h-16 object-cover bg-[#040504] border border-[#1f291f] flex-shrink-0"
                 />
                 <div className="min-w-0">
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="text-[10px] px-1.5 py-0.5 rounded bg-black text-cyan-400 border border-slate-800">
-                      {product.productCode || 'TP-PRO'}
+                  <div className="flex flex-wrap items-center gap-2 mb-1 text-[11px] text-zinc-500">
+                    <span className="text-emerald-400 font-semibold">
+                      {product.productCode || 'PKG-PRO'}
                     </span>
-                    <span className="text-[10px] text-slate-400">{product.category}</span>
+                    <span aria-hidden="true">·</span>
+                    <span>{product.category}</span>
                     {product.featured && (
-                      <span className="text-[10px] px-1.5 py-0.2 rounded bg-cyan-500 text-black font-bold">
-                        FEATURED
-                      </span>
+                      <>
+                        <span aria-hidden="true">·</span>
+                        <span className="text-amber-400 font-bold">FEATURED</span>
+                      </>
                     )}
                   </div>
-                  <h3 className="font-bold text-slate-100 text-sm hover:text-cyan-300 transition-colors truncate">
+                  <h3 className="font-bold text-zinc-100 text-sm hover:text-emerald-400 transition-colors truncate">
                     {product.name}
                   </h3>
-                  <p className="text-slate-400 text-xs line-clamp-1 font-sans mt-0.5">
+                  <p className="text-zinc-400 text-xs line-clamp-1 font-sans mt-0.5">
                     {product.description}
                   </p>
                 </div>
@@ -289,9 +277,9 @@ export const Marketplace: React.FC = () => {
 
               <div className="flex items-center gap-4 flex-shrink-0 self-end md:self-center">
                 <div className="text-right">
-                  <span className="text-[10px] text-slate-500 block">PRICE</span>
-                  <span className="text-base font-extrabold text-emerald-400 font-mono">
-                    {product.price} USDT
+                  <span className="text-[10px] text-zinc-500 block">ESCROW</span>
+                  <span className="text-base font-bold text-emerald-400 font-mono tabular-nums">
+                    {product.price.toLocaleString()} USDT
                   </span>
                 </div>
 
@@ -301,7 +289,7 @@ export const Marketplace: React.FC = () => {
                       e.stopPropagation();
                       addToCart(product, 1);
                     }}
-                    className="px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-800 text-xs cursor-pointer"
+                    className="px-3 py-1.5 bg-[#0c100c] hover:bg-[#141c14] text-zinc-300 border border-[#222c22] text-xs cursor-pointer whitespace-nowrap"
                   >
                     Add Cart
                   </button>
@@ -311,7 +299,7 @@ export const Marketplace: React.FC = () => {
                       addToCart(product, 1);
                       setActiveTab('checkout');
                     }}
-                    className="px-3 py-1.5 rounded-lg bg-cyan-500 hover:bg-cyan-400 text-black font-bold text-xs cursor-pointer"
+                    className="px-3 py-1.5 bg-emerald-500 hover:bg-emerald-400 text-black font-bold text-xs cursor-pointer whitespace-nowrap"
                   >
                     Buy Now
                   </button>

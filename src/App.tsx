@@ -42,11 +42,11 @@ const MainContent: React.FC = () => {
 export default function App() {
   return (
     <MarketProvider>
-      <div className="min-h-screen bg-[#03060a] text-slate-100 flex flex-col relative selection:bg-cyan-500 selection:text-black font-sans antialiased">
-        {/* Subtle Cyberpunk Matrix/Grid and Particle Atmosphere */}
+      <div className="min-h-screen bg-[#040504] text-zinc-200 flex flex-col relative selection:bg-emerald-500 selection:text-black font-sans antialiased darknet-grid">
+        {/* Subtle Onion Circuit & Phosphor Matrix Atmosphere */}
         <CyberParticles />
 
-        {/* Global Platform Announcement Banner */}
+        {/* Onion Circuit & Mirror Banner */}
         <AnnouncementBanner />
 
         {/* Market Header */}
@@ -55,7 +55,7 @@ export default function App() {
         {/* Dynamic Main App Section */}
         <MainContent />
 
-        {/* Terminal Status & Compliance Footer */}
+        {/* Darknet Escrow & Node Footer */}
         <TerminalFooter />
 
         {/* Interactive Overlays */}

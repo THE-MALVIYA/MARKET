@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Shield, HelpCircle, Send, CheckCircle2, Terminal, AlertTriangle, FileText, ChevronDown } from 'lucide-react';
+import { Shield, Send, CheckCircle2, Terminal, FileText, ChevronDown } from 'lucide-react';
 import { useMarket } from '../context/MarketContext';
 
 export const SupportView: React.FC = () => {
@@ -14,15 +14,15 @@ export const SupportView: React.FC = () => {
   const faqs = [
     {
       q: 'What is CyberPlaces?',
-      a: 'CyberPlaces is a cyber-grade digital software and developer toolkit marketplace providing audited security testing software, cloud infrastructure utilities, and automation modules.'
+      a: 'CyberPlaces is an encrypted onion marketplace providing verified security testing suites, penetration frameworks, cryptographic toolkits, and cyber infrastructure modules.'
     },
     {
-      q: 'How does USDT TRC-20 payment and proof verification work?',
-      a: 'When you place an order, an order reference (e.g. TP-2026-XXXXXX) and the TRC-20 deposit address are generated. After transferring via your Tron-compatible wallet, upload your transaction receipt screenshot. Once submitted, our verification system confirms the blockchain transaction and activates your software license.'
+      q: 'How does USDT TRC-20 escrow and proof verification work?',
+      a: 'When you initiate checkout, an escrow reference and the TRC-20 deposit address are generated. Transfer the exact USDT amount on Tron TRC-20 and upload your confirmation screenshot. Once captured, the verification relay confirms the hash and unlocks your package bundle via Telegram bot delivery.'
     },
     {
-      q: 'How are licenses delivered after confirmation?',
-      a: 'Once your payment proof is confirmed, cryptographic keys, container images, and repository access links are immediately made available in your Orders view with 24/7 technical support.'
+      q: 'How are toolkits delivered after proof submission?',
+      a: 'Immediately after uploading payment proof, encrypted archive links, license keys, and setup files are accessible through the official Telegram delivery bot (@getfilex_bot) and tracked inside Escrow Orders.'
     }
   ];
 
@@ -30,60 +30,58 @@ export const SupportView: React.FC = () => {
     e.preventDefault();
     if (!ticketSubject || !ticketMessage) return;
 
-    const fakeTicketId = 'TICK-' + Math.floor(100000 + Math.random() * 900000);
+    const fakeTicketId = 'PGP-' + Math.floor(100000 + Math.random() * 900000);
     setSubmittedTicketId(fakeTicketId);
     setTicketSubject('');
     setTicketMessage('');
 
     addToast({
       type: 'success',
-      title: 'Support Ticket Dispatched',
-      message: `Ticket ${fakeTicketId} created. Our engineering team will review it.`
+      title: 'Encrypted Ticket Dispatched',
+      message: `Ticket ${fakeTicketId} routed to support queue.`
     });
   };
 
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 font-sans">
-      <div className="text-center max-w-2xl mx-auto mb-10">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-950/40 border border-cyan-500/30 text-cyan-300 font-mono text-xs mb-3">
-          <HelpCircle className="w-3.5 h-3.5 text-cyan-400" />
-          <span>CYBERPLACES CUSTOMER & TECHNICAL SUPPORT</span>
+      <div className="text-center max-w-2xl mx-auto mb-10 pb-6 border-b border-[#1d271d]">
+        <div className="text-xs font-mono text-emerald-400 mb-2">
+          PGP SUPPORT RELAY · FINGERPRINT 0x8F4C92E1
         </div>
-        <h1 className="text-3xl font-mono font-extrabold text-white mb-2">
-          SUPPORT & KNOWLEDGE BASE
+        <h1 className="text-3xl font-mono font-bold text-white mb-2">
+          SUPPORT &amp; ESCROW FAQ
         </h1>
-        <p className="text-xs font-mono text-slate-400">
-          Frequently asked questions, settlement guidelines, and direct engineering helpdesk.
+        <p className="text-xs font-mono text-zinc-400">
+          Escrow settlement rules, PGP key verification, and encrypted operator helpdesk.
         </p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
-        {/* Left: FAQs */}
         <div className="md:col-span-7 space-y-4">
-          <h3 className="text-sm font-mono font-bold text-cyan-300 flex items-center gap-2 mb-2">
+          <h3 className="text-sm font-mono font-bold text-emerald-400 flex items-center gap-2 mb-2">
             <FileText className="w-4 h-4" />
-            <span>COMMONLY ASKED QUESTIONS</span>
+            <span>FREQUENTLY ASKED QUESTIONS</span>
           </h3>
 
-          <div className="space-y-3">
+          <div className="space-y-2.5">
             {faqs.map((faq, idx) => (
               <div
                 key={idx}
-                className="rounded-xl bg-[#090d16] border border-slate-800 overflow-hidden"
+                className="bg-[#070907] border border-[#1d271d] overflow-hidden"
               >
                 <button
                   onClick={() => setOpenFaq(openFaq === idx ? null : idx)}
-                  className="w-full text-left p-4 flex items-center justify-between gap-2 text-xs font-mono font-bold text-slate-200 hover:text-cyan-300 transition-colors cursor-pointer"
+                  className="w-full text-left p-4 flex items-center justify-between gap-2 text-xs font-mono font-bold text-zinc-200 hover:text-emerald-400 transition-colors cursor-pointer"
                 >
                   <span>{faq.q}</span>
                   <ChevronDown
-                    className={`w-4 h-4 text-slate-400 transition-transform ${
-                      openFaq === idx ? 'rotate-180 text-cyan-400' : ''
+                    className={`w-4 h-4 text-zinc-500 transition-transform ${
+                      openFaq === idx ? 'rotate-180 text-emerald-400' : ''
                     }`}
                   />
                 </button>
                 {openFaq === idx && (
-                  <div className="p-4 pt-0 text-xs text-slate-400 leading-relaxed font-sans border-t border-slate-800/40 mt-1">
+                  <div className="p-4 pt-2 text-xs text-zinc-400 leading-relaxed font-sans border-t border-[#161e16]">
                     {faq.a}
                   </div>
                 )}
@@ -91,91 +89,89 @@ export const SupportView: React.FC = () => {
             ))}
           </div>
 
-          {/* Verification Quality Assurance Card */}
-          <div className="p-4 rounded-xl bg-purple-950/20 border border-purple-500/30 text-xs text-purple-200/90 leading-relaxed space-y-1 font-mono">
-            <div className="font-bold text-purple-300 flex items-center gap-1.5 mb-1">
-              <Shield className="w-4 h-4 text-purple-400" />
-              <span>QUALITY & SECURITY ASSURANCE STATEMENT</span>
+          <div className="p-4 bg-[#070907] border border-amber-500/35 text-xs text-zinc-300 leading-relaxed space-y-1 font-mono">
+            <div className="font-bold text-amber-400 flex items-center gap-1.5 mb-1">
+              <Shield className="w-4 h-4" />
+              <span>ZERO-LOG CRYPTOGRAPHIC ESCROW</span>
             </div>
-            <p className="text-[11px] text-slate-300">
-              CyberPlaces products are verified for high reliability, binary authenticity, and compliance with ethical security testing standards.
+            <p className="text-[11px] text-zinc-400">
+              All CyberPlaces releases undergo SHA-256 checksum validation and PGP signature auditing prior to marketplace indexing.
             </p>
           </div>
         </div>
 
-        {/* Right: Dispatch Ticket */}
         <div className="md:col-span-5">
-          <div className="p-5 rounded-2xl bg-[#090d16] border border-cyan-500/30">
+          <div className="p-5 bg-[#070907] border border-[#223022]">
             <h3 className="text-sm font-mono font-bold text-white mb-2 flex items-center gap-2">
-              <Terminal className="w-4 h-4 text-cyan-400" />
-              <span>OPEN SUPPORT TICKET</span>
+              <Terminal className="w-4 h-4 text-emerald-400" />
+              <span>DISPATCH SUPPORT TICKET</span>
             </h3>
-            <p className="text-[11px] font-mono text-slate-400 mb-4">
-              Send an inquiry regarding order status, license keys, or technical specifications.
+            <p className="text-[11px] font-mono text-zinc-400 mb-4">
+              Send an inquiry regarding escrow verification, access keys, or package binaries.
             </p>
 
             {submittedTicketId ? (
-              <div className="p-4 rounded-xl bg-cyan-950/40 border border-cyan-500/40 text-center font-mono space-y-3">
+              <div className="p-4 bg-[#040504] border border-emerald-500/40 text-center font-mono space-y-3">
                 <CheckCircle2 className="w-8 h-8 text-emerald-400 mx-auto" />
                 <div>
-                  <div className="font-bold text-cyan-300 text-xs">TICKET CREATED SUCCESSFULLY</div>
-                  <div className="text-[11px] text-slate-400 mt-1">
+                  <div className="font-bold text-emerald-400 text-xs">TICKET DISPATCHED</div>
+                  <div className="text-[11px] text-zinc-400 mt-1">
                     Reference ID: <span className="text-white font-bold">{submittedTicketId}</span>
                   </div>
                 </div>
                 <button
                   onClick={() => setSubmittedTicketId(null)}
-                  className="px-3 py-1.5 rounded-lg bg-cyan-500 text-black font-bold text-xs cursor-pointer"
+                  className="px-3 py-1.5 bg-emerald-500 text-black font-bold text-xs cursor-pointer"
                 >
-                  Create Another Inquiry
+                  Open Another Ticket
                 </button>
               </div>
             ) : (
               <form onSubmit={handleTicketSubmit} className="space-y-3 font-mono text-xs">
                 <div>
-                  <label className="text-slate-400 block mb-1">Inquiry Sector</label>
+                  <label className="text-zinc-400 block mb-1">Inquiry Sector</label>
                   <select
                     value={ticketCategory}
                     onChange={(e) => setTicketCategory(e.target.value)}
-                    className="w-full bg-black/60 border border-slate-700 rounded-lg p-2 text-slate-200 focus:border-cyan-400"
+                    className="w-full bg-[#040504] border border-[#222e22] p-2 text-zinc-200 focus:border-emerald-500 focus:outline-none"
                   >
                     <option value="Payment Verification">Payment Verification</option>
                     <option value="Technical Specifications">Technical Specifications</option>
                     <option value="License Activation Key">License Activation</option>
-                    <option value="Cyber Inquiries">Cyber & Custom Build</option>
+                    <option value="Cyber Inquiries">Custom Package Request</option>
                   </select>
                 </div>
 
                 <div>
-                  <label className="text-slate-400 block mb-1">Subject Header</label>
+                  <label className="text-zinc-400 block mb-1">Subject</label>
                   <input
                     type="text"
                     required
-                    placeholder="e.g. Order payment verification inquiry..."
+                    placeholder="e.g. Escrow TXID verification inquiry..."
                     value={ticketSubject}
                     onChange={(e) => setTicketSubject(e.target.value)}
-                    className="w-full bg-black/60 border border-slate-700 rounded-lg p-2 text-slate-200 placeholder-slate-600 focus:border-cyan-400"
+                    className="w-full bg-[#040504] border border-[#222e22] p-2 text-zinc-200 placeholder-zinc-600 focus:border-emerald-500 focus:outline-none"
                   />
                 </div>
 
                 <div>
-                  <label className="text-slate-400 block mb-1">Message Body</label>
+                  <label className="text-zinc-400 block mb-1">Encrypted Message</label>
                   <textarea
                     rows={4}
                     required
-                    placeholder="Describe your inquiry or order details..."
+                    placeholder="Enter order reference or inquiry details..."
                     value={ticketMessage}
                     onChange={(e) => setTicketMessage(e.target.value)}
-                    className="w-full bg-black/60 border border-slate-700 rounded-lg p-2 text-slate-200 placeholder-slate-600 focus:border-cyan-400 font-sans text-xs"
+                    className="w-full bg-[#040504] border border-[#222e22] p-2 text-zinc-200 placeholder-zinc-600 focus:border-emerald-500 focus:outline-none font-sans text-xs"
                   />
                 </div>
 
                 <button
                   type="submit"
-                  className="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-cyan-500 to-teal-400 hover:from-cyan-400 text-black font-bold text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-lg shadow-cyan-500/20"
+                  className="w-full py-2.5 px-4 bg-emerald-500 hover:bg-emerald-400 text-black font-bold text-xs flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
                 >
                   <Send className="w-3.5 h-3.5" />
-                  <span>SUBMIT TICKET</span>
+                  <span>Submit Ticket</span>
                 </button>
               </form>
             )}

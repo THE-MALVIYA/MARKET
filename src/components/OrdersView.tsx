@@ -3,35 +3,27 @@ import { useMarket } from '../context/MarketContext';
 import { Order, OrderStatus } from '../types';
 import {
   Package,
-  Clock,
   CheckCircle2,
   AlertCircle,
   FileImage,
   ExternalLink,
-  ChevronRight,
-  ShieldAlert,
-  ArrowRight,
   UploadCloud,
-  Check,
   Eye,
   X,
-  Send,
-  Copy
+  Send
 } from 'lucide-react';
 
 export const OrdersView: React.FC = () => {
-  const { orders, setActiveTab, setActiveOrderNumber, activeOrderNumber } = useMarket();
+  const { orders, setActiveTab, setActiveOrderNumber } = useMarket();
   const [filterStatus, setFilterStatus] = useState<string>('ALL');
   const [inspectOrder, setInspectOrder] = useState<Order | null>(null);
   const [previewProofImage, setPreviewProofImage] = useState<string | null>(null);
-  const [copiedBot, setCopiedBot] = useState(false);
 
   const filteredOrders = orders.filter((o) => {
     if (filterStatus === 'ALL') return true;
     return o.status.toLowerCase().replace(/\s+/g, '-') === filterStatus.toLowerCase();
   });
 
-  // Timeline stage helper
   const timelineStages: OrderStatus[] = [
     'Pending Payment',
     'Proof Uploaded',
@@ -49,42 +41,41 @@ export const OrdersView: React.FC = () => {
     switch (status) {
       case 'Approved':
       case 'Completed':
-        return 'bg-emerald-950/80 text-emerald-300 border-emerald-500/50';
+        return 'bg-emerald-950/60 text-emerald-300 border-emerald-500/50';
       case 'Proof Uploaded':
       case 'Under Review':
-        return 'bg-cyan-950/80 text-cyan-300 border-cyan-500/50';
+        return 'bg-emerald-950/30 text-emerald-400 border-emerald-500/40';
       case 'Rejected':
-        return 'bg-red-950/80 text-red-300 border-red-500/50';
+        return 'bg-red-950/60 text-red-300 border-red-500/50';
       default:
-        return 'bg-amber-950/80 text-amber-300 border-amber-500/50';
+        return 'bg-amber-950/60 text-amber-300 border-amber-500/50';
     }
   };
 
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 font-sans">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 pb-4 border-b border-slate-800">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 pb-4 border-b border-[#1d271d]">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-mono font-extrabold text-white flex items-center gap-2.5">
-            <Package className="w-6 h-6 text-cyan-400" />
-            <span>ORDER TRACKING & LICENSES</span>
+          <h1 className="text-2xl sm:text-3xl font-mono font-bold text-white flex items-center gap-2.5">
+            <Package className="w-6 h-6 text-emerald-400" />
+            <span>ESCROW ORDERS &amp; LICENSES</span>
           </h1>
-          <p className="text-xs font-mono text-slate-400 mt-1">
-            Real-time status tracking for developer toolkits, licenses, and transaction verifications.
+          <p className="text-xs font-mono text-zinc-400 mt-1">
+            Cryptographic order logs, TRC-20 verification status, and encrypted delivery links.
           </p>
         </div>
       </div>
 
-      {/* Filter Chips */}
+      {/* Filter Tabs */}
       <div className="flex flex-wrap gap-2 mb-6">
         {['ALL', 'Pending Payment', 'Proof Uploaded', 'Under Review', 'Approved', 'Rejected'].map((status) => (
           <button
             key={status}
             onClick={() => setFilterStatus(status)}
-            className={`px-3 py-1.5 rounded-lg font-mono text-xs transition-all cursor-pointer ${
+            className={`px-3 py-1.5 font-mono text-xs border transition-colors cursor-pointer whitespace-nowrap ${
               filterStatus === status
-                ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 font-semibold'
-                : 'bg-[#090d16] text-slate-400 border border-slate-800 hover:border-slate-700'
+                ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/50 font-semibold'
+                : 'bg-[#070907] text-zinc-400 border-[#1d271d] hover:border-[#2e3d2e] hover:text-zinc-200'
             }`}
           >
             {status}
@@ -92,19 +83,18 @@ export const OrdersView: React.FC = () => {
         ))}
       </div>
 
-      {/* Orders List */}
       {filteredOrders.length === 0 ? (
-        <div className="p-12 rounded-2xl bg-[#090d16] border border-slate-800 text-center font-mono">
-          <Package className="w-12 h-12 text-slate-600 mx-auto mb-3" />
-          <h3 className="text-base font-bold text-slate-200 mb-1">No Orders Found</h3>
-          <p className="text-xs text-slate-500 max-w-sm mx-auto mb-4">
-            There are currently no orders matching this status filter.
+        <div className="p-12 bg-[#070907] border border-[#1d271d] text-center font-mono">
+          <Package className="w-10 h-10 text-zinc-600 mx-auto mb-3" />
+          <h3 className="text-base font-bold text-zinc-200 mb-1">No Escrow Orders Found</h3>
+          <p className="text-xs text-zinc-500 max-w-sm mx-auto mb-4">
+            No orders match the selected escrow status filter.
           </p>
           <button
             onClick={() => setActiveTab('marketplace')}
-            className="px-4 py-2 rounded-lg bg-cyan-500 hover:bg-cyan-400 text-black text-xs font-bold transition-colors cursor-pointer"
+            className="px-4 py-2 bg-emerald-500 hover:bg-emerald-400 text-black text-xs font-bold transition-colors cursor-pointer"
           >
-            Browse Products
+            Browse Directory
           </button>
         </div>
       ) : (
@@ -116,70 +106,67 @@ export const OrdersView: React.FC = () => {
             return (
               <div
                 key={order.id}
-                className="p-5 rounded-2xl bg-[#090d16]/90 border border-slate-800 hover:border-cyan-500/30 transition-all"
+                className="p-5 bg-[#070907] border border-[#1d271d] hover:border-emerald-500/35 transition-colors"
               >
-                {/* Top Info Bar */}
-                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pb-3 border-b border-slate-800/80">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className="font-mono text-sm font-bold text-cyan-300">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pb-3 border-b border-[#182018]">
+                  <div className="flex flex-wrap items-center gap-2.5">
+                    <span className="font-mono text-sm font-bold text-emerald-400">
                       {order.orderNumber}
                     </span>
                     <span
-                      className={`text-[10px] font-mono px-2 py-0.5 rounded border font-semibold ${getStatusBadgeClass(
+                      className={`text-[10px] font-mono px-2 py-0.5 border font-semibold ${getStatusBadgeClass(
                         order.status
                       )}`}
                     >
                       {order.status.toUpperCase()}
                     </span>
-                    <span className="text-[11px] font-mono text-slate-500">
+                    <span className="text-[11px] font-mono text-zinc-500 tabular-nums">
                       {new Date(order.createdAt).toLocaleString()}
                     </span>
                   </div>
 
                   <div className="flex items-center gap-3">
-                    <span className="font-mono font-extrabold text-base text-emerald-400">
-                      {order.amount} USDT
+                    <span className="font-mono font-bold text-base text-emerald-400 tabular-nums">
+                      {order.amount.toLocaleString()} USDT
                     </span>
                     <button
                       onClick={() => setInspectOrder(order)}
-                      className="px-3 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 text-cyan-300 border border-slate-700 font-mono text-xs flex items-center gap-1 transition-colors cursor-pointer"
+                      className="px-3 py-1 bg-[#0b0e0b] hover:bg-[#131a13] text-emerald-400 border border-[#243224] font-mono text-xs flex items-center gap-1.5 transition-colors cursor-pointer"
                     >
                       <Eye className="w-3.5 h-3.5" />
-                      <span>Details</span>
+                      <span>Inspect</span>
                     </button>
                   </div>
                 </div>
 
-                {/* Items in this order */}
-                <div className="py-3 flex flex-wrap gap-3">
+                <div className="py-3 flex flex-wrap gap-2.5">
                   {order.items.map((item, idx) => (
                     <div
                       key={idx}
-                      className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-black/50 border border-slate-800 text-xs font-mono"
+                      className="flex items-center gap-2 px-2.5 py-1.5 bg-[#040504] border border-[#1a221a] text-xs font-mono"
                     >
                       <img
                         src={item.image}
                         alt=""
                         referrerPolicy="no-referrer"
-                        className="w-7 h-7 rounded object-cover"
+                        className="w-7 h-7 object-cover"
                       />
-                      <span className="text-slate-200">{item.name}</span>
-                      <span className="text-slate-500">x{item.quantity}</span>
+                      <span className="text-zinc-200">{item.name}</span>
+                      <span className="text-zinc-500 tabular-nums">x{item.quantity}</span>
                     </div>
                   ))}
                 </div>
 
-                {/* Progress Timeline */}
-                <div className="pt-3 border-t border-slate-800/60">
-                  <div className="text-[10px] font-mono text-slate-500 uppercase mb-2">
-                    Verification & Fulfillment Progress:
+                <div className="pt-3 border-t border-[#161e16]">
+                  <div className="text-[10px] font-mono text-zinc-500 uppercase mb-2">
+                    Escrow &amp; Fulfillment Pipeline:
                   </div>
 
                   {isRejected ? (
-                    <div className="p-2.5 rounded-lg bg-red-950/30 border border-red-500/30 flex items-center gap-2 text-xs font-mono text-red-300">
-                      <AlertCircle className="w-4 h-4 text-red-400" />
+                    <div className="p-2.5 bg-red-950/30 border border-red-500/40 flex items-center gap-2 text-xs font-mono text-red-300">
+                      <AlertCircle className="w-4 h-4 text-red-400 shrink-0" />
                       <span>
-                        Order rejected by reviewer. Reason: Payment transaction proof verification could not be confirmed.
+                        Order rejected. Payment transaction proof verification could not be confirmed.
                       </span>
                     </div>
                   ) : (
@@ -191,19 +178,19 @@ export const OrdersView: React.FC = () => {
                         return (
                           <div
                             key={stage}
-                            className={`p-2 rounded-lg border text-center font-mono text-[11px] transition-colors ${
+                            className={`p-2 border text-center font-mono text-[11px] transition-colors ${
                               isCurrent
-                                ? 'bg-cyan-500/20 border-cyan-400 text-cyan-200 font-bold'
+                                ? 'bg-emerald-500/15 border-emerald-400 text-emerald-300 font-bold'
                                 : isPastOrCurrent
-                                ? 'bg-emerald-950/30 border-emerald-500/40 text-emerald-300'
-                                : 'bg-black/30 border-slate-800/70 text-slate-600'
+                                ? 'bg-[#0b120b] border-emerald-500/40 text-emerald-400'
+                                : 'bg-[#040504] border-[#182018] text-zinc-600'
                             }`}
                           >
                             <div className="flex items-center justify-center gap-1 mb-0.5">
                               {isPastOrCurrent ? (
                                 <CheckCircle2 className="w-3 h-3 text-emerald-400" />
                               ) : (
-                                <span className="w-2 h-2 rounded-full bg-slate-700" />
+                                <span className="text-[10px] text-zinc-600">[{idx + 1}]</span>
                               )}
                               <span>Step {idx + 1}</span>
                             </div>
@@ -214,18 +201,17 @@ export const OrdersView: React.FC = () => {
                     </div>
                   )}
 
-                  {/* Upload proof prompt if pending payment */}
                   {order.status === 'Pending Payment' && !order.paymentProof && (
-                    <div className="mt-3 flex items-center justify-between p-2.5 rounded-lg bg-amber-950/20 border border-amber-500/30 text-xs font-mono">
+                    <div className="mt-3 flex items-center justify-between p-2.5 bg-[#0e0c06] border border-amber-500/35 text-xs font-mono">
                       <span className="text-amber-300">
-                        Payment proof required to initiate review.
+                        Transaction proof upload required to initiate verification.
                       </span>
                       <button
                         onClick={() => {
                           setActiveOrderNumber(order.orderNumber);
                           setActiveTab('checkout');
                         }}
-                        className="px-3 py-1 rounded bg-amber-500 text-black font-bold hover:bg-amber-400 transition-colors cursor-pointer flex items-center gap-1"
+                        className="px-3 py-1 bg-amber-500 text-black font-bold hover:bg-amber-400 transition-colors cursor-pointer flex items-center gap-1 whitespace-nowrap"
                       >
                         <UploadCloud className="w-3.5 h-3.5" />
                         <span>Upload Proof</span>
@@ -233,31 +219,29 @@ export const OrdersView: React.FC = () => {
                     </div>
                   )}
 
-                  {/* Proof preview badge & Telegram Bot Access if proof uploaded */}
                   {order.paymentProof && (
                     <div className="mt-3 space-y-2">
-                      <div className="flex items-center justify-between p-2.5 rounded-lg bg-cyan-950/30 border border-cyan-500/30 text-xs font-mono">
-                        <div className="flex items-center gap-2 text-cyan-300">
-                          <FileImage className="w-4 h-4 text-cyan-400" />
+                      <div className="flex items-center justify-between p-2.5 bg-[#040504] border border-[#1d271d] text-xs font-mono">
+                        <div className="flex items-center gap-2 text-emerald-400">
+                          <FileImage className="w-4 h-4" />
                           <span>Proof Attached: {order.paymentProof.fileName}</span>
                         </div>
                         <button
                           onClick={() => setPreviewProofImage(order.paymentProof?.fileData || null)}
-                          className="text-cyan-400 hover:text-cyan-200 underline cursor-pointer text-[11px]"
+                          className="text-emerald-400 hover:text-emerald-300 underline cursor-pointer text-[11px]"
                         >
                           Inspect Screenshot
                         </button>
                       </div>
 
-                      {/* Official Bot Delivery Box */}
-                      <div className="p-3 rounded-xl bg-gradient-to-r from-[#0b1c2e] to-[#071320] border-2 border-cyan-400/80 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                      <div className="p-3 bg-[#080c08] border border-emerald-500/50 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                         <div className="flex items-center gap-2.5">
-                          <div className="w-7 h-7 rounded-lg bg-cyan-500 flex items-center justify-center text-black flex-shrink-0">
+                          <div className="w-7 h-7 bg-emerald-500 flex items-center justify-center text-black flex-shrink-0">
                             <Send className="w-3.5 h-3.5 fill-black text-black" />
                           </div>
                           <div>
-                            <span className="text-[10px] font-mono font-bold text-cyan-300 block uppercase">
-                              PRODUCT FILES & KEY BOT
+                            <span className="text-[10px] font-mono font-bold text-emerald-400 block uppercase">
+                              Product Files &amp; Key Bot
                             </span>
                             <span className="text-white font-mono font-bold text-xs">
                               Telegram: @getfilex_bot
@@ -265,18 +249,16 @@ export const OrdersView: React.FC = () => {
                           </div>
                         </div>
 
-                        <div className="flex items-center gap-2 w-full sm:w-auto">
-                          <a
-                            href="https://t.me/getfilex_bot"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="flex-1 sm:flex-none px-3 py-1.5 rounded-lg bg-cyan-400 hover:bg-cyan-300 text-black font-mono font-bold text-xs flex items-center justify-center gap-1.5 transition-colors no-underline"
-                          >
-                            <Send className="w-3 h-3 fill-black text-black" />
-                            <span>OPEN BOT</span>
-                            <ExternalLink className="w-3 h-3" />
-                          </a>
-                        </div>
+                        <a
+                          href="https://t.me/getfilex_bot"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="w-full sm:w-auto px-3.5 py-1.5 bg-emerald-500 hover:bg-emerald-400 text-black font-mono font-bold text-xs flex items-center justify-center gap-1.5 transition-colors no-underline"
+                        >
+                          <Send className="w-3 h-3 fill-black text-black" />
+                          <span>Open Bot</span>
+                          <ExternalLink className="w-3 h-3" />
+                        </a>
                       </div>
                     </div>
                   )}
@@ -287,69 +269,66 @@ export const OrdersView: React.FC = () => {
         </div>
       )}
 
-      {/* Order Details Modal */}
+      {/* Order Audit Modal */}
       {inspectOrder && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
-          <div className="bg-[#090d16] border border-cyan-500/40 rounded-2xl max-w-xl w-full p-6 relative max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 z-50 bg-black/90 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-[#070907] border border-emerald-500/40 max-w-xl w-full p-6 relative max-h-[90vh] overflow-y-auto">
             <button
               onClick={() => setInspectOrder(null)}
-              className="absolute top-4 right-4 p-1 rounded text-slate-400 hover:text-white"
+              className="absolute top-4 right-4 p-1 text-zinc-400 hover:text-white cursor-pointer"
             >
               <X className="w-5 h-5" />
             </button>
 
-            <div className="flex items-center gap-2 mb-2">
-              <span className="font-mono text-xs px-2 py-0.5 rounded bg-cyan-950 text-cyan-400 border border-cyan-800">
-                ORDER AUDIT LOG
-              </span>
-              <span className="font-mono text-xs text-slate-400">{inspectOrder.orderNumber}</span>
+            <div className="flex items-center gap-2 mb-2 font-mono text-xs">
+              <span className="text-emerald-400 font-bold">ORDER AUDIT LOG</span>
+              <span className="text-zinc-600">·</span>
+              <span className="text-zinc-400">{inspectOrder.orderNumber}</span>
             </div>
 
             <h3 className="text-xl font-mono font-bold text-white mb-4">
-              Order Details & Manifest
+              Escrow Manifest &amp; Trail
             </h3>
 
             <div className="space-y-3 font-mono text-xs mb-4">
-              <div className="p-3 rounded-lg bg-black/60 border border-slate-800 space-y-1.5">
+              <div className="p-3 bg-[#040504] border border-[#1a221a] space-y-1.5">
                 <div className="flex justify-between">
-                  <span className="text-slate-400">Total Amount:</span>
-                  <span className="text-emerald-400 font-bold">{inspectOrder.amount} USDT</span>
+                  <span className="text-zinc-500">Total Amount:</span>
+                  <span className="text-emerald-400 font-bold tabular-nums">{inspectOrder.amount.toLocaleString()} USDT</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-slate-400">Current Status:</span>
-                  <span className="text-cyan-300 font-bold">{inspectOrder.status}</span>
+                  <span className="text-zinc-500">Status:</span>
+                  <span className="text-emerald-400 font-bold">{inspectOrder.status}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-slate-400">Settlement Address:</span>
-                  <span className="text-slate-300 truncate max-w-[220px]">{inspectOrder.paymentAddress}</span>
+                  <span className="text-zinc-500">Settlement Address:</span>
+                  <span className="text-zinc-300 truncate max-w-[220px]">{inspectOrder.paymentAddress}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-slate-400">Created At:</span>
-                  <span className="text-slate-400">{new Date(inspectOrder.createdAt).toLocaleString()}</span>
+                  <span className="text-zinc-500">Created At:</span>
+                  <span className="text-zinc-400 tabular-nums">{new Date(inspectOrder.createdAt).toLocaleString()}</span>
                 </div>
               </div>
 
-              {/* Status transition history audit trail */}
               <div>
-                <h4 className="text-slate-400 uppercase text-[10px] mb-1.5">Status Audit Trail:</h4>
+                <h4 className="text-zinc-500 uppercase text-[10px] mb-1.5">Audit Trail:</h4>
                 <div className="space-y-1.5">
                   {inspectOrder.statusHistory.map((step, idx) => (
-                    <div key={idx} className="p-2 rounded bg-black/40 border border-slate-800 text-[11px]">
-                      <div className="flex justify-between text-slate-300 font-bold">
+                    <div key={idx} className="p-2 bg-[#040504] border border-[#1a221a] text-[11px]">
+                      <div className="flex justify-between text-zinc-200 font-bold">
                         <span>{step.status}</span>
-                        <span className="text-[10px] text-slate-500">{new Date(step.timestamp).toLocaleTimeString()}</span>
+                        <span className="text-[10px] text-zinc-500 tabular-nums">{new Date(step.timestamp).toLocaleTimeString()}</span>
                       </div>
-                      {step.note && <div className="text-slate-400 mt-0.5">{step.note}</div>}
+                      {step.note && <div className="text-zinc-400 mt-0.5">{step.note}</div>}
                     </div>
                   ))}
                 </div>
               </div>
 
-              {/* Payment Proof Screenshot Preview */}
               {inspectOrder.paymentProof && (
                 <div>
-                  <h4 className="text-slate-400 uppercase text-[10px] mb-1.5">Uploaded Screenshot:</h4>
-                  <div className="rounded-lg overflow-hidden border border-slate-700 bg-black max-h-48">
+                  <h4 className="text-zinc-500 uppercase text-[10px] mb-1.5">Uploaded Screenshot:</h4>
+                  <div className="overflow-hidden border border-[#222e22] bg-black max-h-48">
                     <img
                       src={inspectOrder.paymentProof.fileData}
                       alt="Payment proof"
@@ -359,38 +338,37 @@ export const OrdersView: React.FC = () => {
                 </div>
               )}
 
-              {/* Telegram Bot Delivery Link */}
               {inspectOrder.paymentProof && (
-                <div className="p-3.5 rounded-xl bg-gradient-to-b from-[#0b1c2e] to-[#071320] border-2 border-cyan-400 space-y-2">
+                <div className="p-3.5 bg-[#080c08] border border-emerald-500/50 space-y-2">
                   <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-mono font-bold text-cyan-300 uppercase tracking-wider">
-                      Product Files Delivery Bot:
+                    <span className="text-[10px] font-mono font-bold text-emerald-400 uppercase tracking-wider">
+                      Files Delivery Bot:
                     </span>
                     <span className="text-white font-mono font-bold text-xs">
                       @getfilex_bot
                     </span>
                   </div>
-                  <p className="text-[11px] text-slate-300 font-sans">
-                    Payment proof received. Open the bot on Telegram to receive your files & license:
+                  <p className="text-[11px] text-zinc-300 font-sans">
+                    Payment proof received. Open the bot on Telegram to receive your files &amp; key:
                   </p>
                   <a
                     href="https://t.me/getfilex_bot"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="w-full py-2 px-3 rounded-lg bg-cyan-400 hover:bg-cyan-300 text-black font-mono font-bold text-xs flex items-center justify-center gap-1.5 transition-colors no-underline block text-center"
+                    className="w-full py-2 px-3 bg-emerald-500 hover:bg-emerald-400 text-black font-mono font-bold text-xs flex items-center justify-center gap-1.5 transition-colors no-underline"
                   >
                     <Send className="w-3.5 h-3.5 fill-black text-black" />
-                    <span>OPEN TELEGRAM BOT (@getfilex_bot)</span>
+                    <span>Open Telegram Bot (@getfilex_bot)</span>
                     <ExternalLink className="w-3 h-3" />
                   </a>
                 </div>
               )}
             </div>
 
-            <div className="flex justify-end gap-2 pt-2 border-t border-slate-800">
+            <div className="flex justify-end gap-2 pt-3 border-t border-[#182018]">
               <button
                 onClick={() => setInspectOrder(null)}
-                className="px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-mono text-slate-200"
+                className="px-4 py-2 bg-[#0c100c] hover:bg-[#141c14] border border-[#222e22] text-xs font-mono text-zinc-200 cursor-pointer"
               >
                 Close Audit
               </button>
@@ -399,15 +377,14 @@ export const OrdersView: React.FC = () => {
         </div>
       )}
 
-      {/* Screenshot Lightbox */}
       {previewProofImage && (
         <div
           onClick={() => setPreviewProofImage(null)}
-          className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4 cursor-pointer"
+          className="fixed inset-0 z-50 bg-black/95 flex items-center justify-center p-4 cursor-pointer"
         >
-          <div className="max-w-2xl w-full p-2 relative bg-[#090d16] border border-cyan-500/40 rounded-xl">
-            <img src={previewProofImage} alt="Payment Proof" className="w-full h-auto max-h-[80vh] object-contain rounded" />
-            <div className="text-center text-xs font-mono text-slate-400 mt-2">Click anywhere to dismiss</div>
+          <div className="max-w-2xl w-full p-2 relative bg-[#070907] border border-emerald-500/40">
+            <img src={previewProofImage} alt="Payment Proof" className="w-full h-auto max-h-[80vh] object-contain" />
+            <div className="text-center text-xs font-mono text-zinc-400 mt-2">Click anywhere to close</div>
           </div>
         </div>
       )}
