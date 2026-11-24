@@ -17,6 +17,7 @@ import { TerminalFooter } from './components/TerminalFooter';
 import { ProductDetailModal } from './components/ProductDetailModal';
 import { CartDrawer } from './components/CartDrawer';
 import { ToastContainer } from './components/Toast';
+import { OfflineIndicator } from './components/OfflineIndicator';
 
 // Pages and views
 import { Home } from './pages/Home';
@@ -62,6 +63,7 @@ export default function App() {
         <ProductDetailModal />
         <CartDrawer />
         <ToastContainer />
+        <OfflineIndicator />
       </div>
     </MarketProvider>
   );

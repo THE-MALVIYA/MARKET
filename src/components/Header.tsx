@@ -7,6 +7,7 @@ import {
   ChevronDown,
   Key
 } from 'lucide-react';
+import { PWAInstallButton } from './PWAInstallButton';
 
 export const Header: React.FC = () => {
   const {
@@ -134,9 +135,9 @@ export const Header: React.FC = () => {
             </button>
           </nav>
 
-          {/* Zone 3: Search, Cart & Operator Identity */}
-          <div className="flex items-center gap-2.5 flex-1 md:flex-initial justify-end shrink-0">
-            <div className="relative hidden lg:block w-52">
+          {/* Zone 3: Search, Install App, Cart & Operator Identity */}
+          <div className="flex items-center gap-2 flex-1 md:flex-initial justify-end shrink-0">
+            <div className="relative hidden xl:block w-48">
               <Search className="w-3.5 h-3.5 text-zinc-500 absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
               <input
                 type="text"
@@ -157,6 +158,9 @@ export const Header: React.FC = () => {
                 </button>
               )}
             </div>
+
+            {/* Install App Button (Hides automatically in standalone mode) */}
+            <PWAInstallButton />
 
             {/* Cart Button */}
             <button

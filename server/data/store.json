@@ -440,6 +440,37 @@
       ],
       "image": "/assets/aistudio/photo_2026-10-28_15-38-07_94d5651a.jpg",
       "createdAt": "2026-03-25T10:00:00.000Z"
+    },
+    {
+      "id": "prod-sql-flash",
+      "name": "SQL-FLASH V7.9.1",
+      "slug": "sql-flash-v7-9-1",
+      "category": "Database Acceleration & Flash Storage",
+      "price": 881,
+      "currency": "USDT",
+      "featured": true,
+      "rating": 4.94,
+      "productCode": "SQL-FLS-791",
+      "version": "v7.9.1-LTS",
+      "architecture": "NVMe Smart Flash Cache / Zero-Copy SQL Storage Engine",
+      "description": "SQL-FLASH V7.9.1 is an enterprise-grade database flash-cache and NVMe storage acceleration engine engineered for ultra-low-latency relational workloads. Eliminates disk I/O bottlenecks through intelligent hot-page pinning, parallel WAL flash tiering, and ACID-compliant snapshot recovery across high-throughput PostgreSQL, MySQL, and distributed SQL clusters.",
+      "features": [
+        "Sub-millisecond NVMe flash-cache indexing for hot SQL query pages",
+        "Parallel Write-Ahead Log (WAL) flash buffer acceleration",
+        "Zero-downtime live cache warming and adaptive wear-leveling",
+        "ACID-compliant atomic checkpointing and instant snapshot rollback",
+        "Real-time IOPS telemetry and query-plan latency profiler"
+      ],
+      "requirements": [
+        "64-bit Linux Kernel 5.10+ with NVMe-oF or local PCIe Gen4/Gen5 NVMe",
+        "Minimum 16GB system RAM and 64GB dedicated flash-cache volume",
+        "PostgreSQL 14+, MySQL 8.0+, or MariaDB 10.6+ engine"
+      ],
+      "screenshots": [
+        "/assets/sql_flash_module.jpg"
+      ],
+      "image": "/assets/sql_flash_module.jpg",
+      "createdAt": "2026-03-28T10:00:00.000Z"
     }
   ],
   "orders": [],
