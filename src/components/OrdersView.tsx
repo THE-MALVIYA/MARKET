@@ -19,15 +19,15 @@ export const OrdersView: React.FC = () => {
   if (!currentUser) {
     return (
       <div className="max-w-3xl mx-auto px-4 py-16 text-center">
-        <div className="p-8 rounded-xl bg-[#11161D] border border-[#1E2936] space-y-4">
+        <div className="dsk-surface p-8 rounded-xl space-y-4">
           <Lock className="w-10 h-10 text-[#00D69A] mx-auto" />
-          <h2 className="text-xl font-bold text-[#F4F7F6]">Sign in to View Orders</h2>
-          <p className="text-xs text-[#8F9CA8] max-w-md mx-auto">
+          <h2 className="text-xl font-bold text-white">Sign in to View Orders</h2>
+          <p className="text-xs text-[#CBD5E1] max-w-md mx-auto">
             Order ledgers, blockchain confirmation details, and issued license manifests are scoped strictly to authenticated accounts.
           </p>
           <button
             onClick={() => setAuthModalOpen(true)}
-            className="px-5 py-2.5 rounded-lg bg-[#00D69A] hover:bg-[#0EA5A4] text-[#07090B] font-semibold text-xs cursor-pointer"
+            className="dsk-btn-3d px-5 py-2.5 rounded-lg text-xs cursor-pointer"
           >
             Sign In / Create Account
           </button>
@@ -73,13 +73,13 @@ export const OrdersView: React.FC = () => {
 
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 pb-5 border-b border-[#1E2936]">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 pb-5 border-b border-[#253445]">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-[#F4F7F6] flex items-center gap-2.5">
+          <h1 className="text-2xl sm:text-3xl font-bold text-white flex items-center gap-2.5">
             <Package className="w-6 h-6 text-[#00D69A]" />
             <span>Orders &amp; Verification Status</span>
           </h1>
-          <p className="text-xs sm:text-sm text-[#8F9CA8] mt-1">
+          <p className="text-xs sm:text-sm text-[#CBD5E1] mt-1">
             Track Tron TRC-20 payment confirmations and software license provisioning.
           </p>
         </div>
@@ -101,7 +101,7 @@ export const OrdersView: React.FC = () => {
             className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors cursor-pointer whitespace-nowrap ${
               filterStatus === status
                 ? 'bg-[#00D69A]/15 text-[#00D69A] border-[#00D69A]/50 font-semibold'
-                : 'bg-[#11161D] text-[#8F9CA8] border-[#1E2936] hover:text-[#F4F7F6]'
+                : 'dsk-btn-secondary-3d text-[#CBD5E1]'
             }`}
           >
             {status}
@@ -110,15 +110,15 @@ export const OrdersView: React.FC = () => {
       </div>
 
       {filteredOrders.length === 0 ? (
-        <div className="p-12 rounded-xl bg-[#11161D] border border-[#1E2936] text-center">
-          <Package className="w-10 h-10 text-[#8F9CA8] mx-auto mb-3" />
-          <h3 className="text-base font-bold text-[#F4F7F6] mb-1">No Matching Orders</h3>
-          <p className="text-xs text-[#8F9CA8] max-w-sm mx-auto mb-4">
+        <div className="dsk-surface p-12 rounded-xl text-center">
+          <Package className="w-10 h-10 text-[#CBD5E1] mx-auto mb-3" />
+          <h3 className="text-base font-bold text-white mb-1">No Matching Orders</h3>
+          <p className="text-xs text-[#CBD5E1] max-w-sm mx-auto mb-4">
             Orders placed through your DEEPSEEK account will appear here.
           </p>
           <button
             onClick={() => setActiveTab('products')}
-            className="px-4 py-2 rounded-lg bg-[#00D69A] hover:bg-[#0EA5A4] text-[#07090B] text-xs font-semibold cursor-pointer"
+            className="dsk-btn-3d px-4 py-2 rounded-lg text-xs cursor-pointer"
           >
             Explore Products
           </button>
@@ -133,9 +133,9 @@ export const OrdersView: React.FC = () => {
             return (
               <div
                 key={order.id}
-                className="p-5 rounded-xl bg-[#11161D] border border-[#1E2936] space-y-4"
+                className="dsk-surface p-5 rounded-xl space-y-4"
               >
-                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pb-3 border-b border-[#1E2936]">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pb-3 border-b border-[#253445]">
                   <div className="flex flex-wrap items-center gap-2.5">
                     <span className="font-mono text-sm font-bold text-[#00D69A]">
                       {order.orderNumber}
@@ -147,18 +147,18 @@ export const OrdersView: React.FC = () => {
                     >
                       {normStatus.toUpperCase()}
                     </span>
-                    <span className="text-[11px] font-mono text-[#8F9CA8] tabular-nums">
+                    <span className="text-[11px] font-mono text-[#CBD5E1] tabular-nums">
                       {new Date(order.createdAt).toLocaleString()}
                     </span>
                   </div>
 
                   <div className="flex items-center gap-3">
-                    <span className="font-mono font-bold text-base text-[#F4F7F6] tabular-nums">
+                    <span className="font-mono font-bold text-base text-white tabular-nums">
                       {order.amount.toLocaleString()} <span className="text-xs text-[#00D69A]">USDT</span>
                     </span>
                     <button
                       onClick={() => setInspectOrder(order)}
-                      className="px-3 py-1.5 rounded-lg bg-[#0D1116] hover:bg-[#151C24] text-[#00D69A] border border-[#1E2936] text-xs font-medium flex items-center gap-1.5 cursor-pointer"
+                      className="dsk-btn-secondary-3d px-3 py-1.5 rounded-lg text-[#00D69A] text-xs font-medium flex items-center gap-1.5 cursor-pointer"
                     >
                       <Eye className="w-3.5 h-3.5" />
                       <span>Details</span>
@@ -170,11 +170,11 @@ export const OrdersView: React.FC = () => {
                   {order.items.map((item, idx) => (
                     <div
                       key={idx}
-                      className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-[#0D1116] border border-[#1E2936] text-xs"
+                      className="dsk-panel-3d flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs"
                     >
                       <img src={item.image} alt="" className="w-7 h-7 rounded object-cover" />
-                      <span className="text-[#F4F7F6] font-medium">{item.name}</span>
-                      <span className="font-mono text-[#8F9CA8] tabular-nums">x{item.quantity}</span>
+                      <span className="text-white font-medium">{item.name}</span>
+                      <span className="font-mono text-[#CBD5E1] tabular-nums">x{item.quantity}</span>
                     </div>
                   ))}
                 </div>
@@ -235,35 +235,35 @@ export const OrdersView: React.FC = () => {
       )}
 
       {inspectOrder && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-[#11161D] border border-[#1E2936] rounded-xl max-w-xl w-full p-6 relative max-h-[90vh] overflow-y-auto shadow-2xl">
+        <div className="fixed inset-0 z-50 bg-black/84 flex items-center justify-center p-4">
+          <div className="dsk-surface rounded-xl max-w-xl w-full p-6 relative max-h-[90vh] overflow-y-auto">
             <button
               onClick={() => setInspectOrder(null)}
-              className="absolute top-4 right-4 p-1.5 rounded-lg text-[#8F9CA8] hover:text-[#F4F7F6] cursor-pointer"
+              className="dsk-btn-secondary-3d absolute top-4 right-4 p-1.5 rounded-lg text-[#CBD5E1] hover:text-white cursor-pointer"
             >
               <X className="w-4 h-4" />
             </button>
 
-            <h3 className="text-lg font-bold text-[#F4F7F6] mb-4">
+            <h3 className="text-lg font-bold text-white mb-4">
               Transaction Details · {inspectOrder.orderNumber}
             </h3>
 
             <div className="space-y-3 font-mono text-xs mb-4">
-              <div className="p-3.5 rounded-lg bg-[#0D1116] border border-[#1E2936] space-y-1.5">
+              <div className="dsk-panel-3d p-3.5 rounded-lg space-y-1.5">
                 <div className="flex justify-between">
-                  <span className="text-[#8F9CA8]">Total Amount</span>
+                  <span className="text-[#CBD5E1]">Total Amount</span>
                   <span className="text-[#00D69A] font-bold tabular-nums">
                     {inspectOrder.amount.toLocaleString()} USDT
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-[#8F9CA8]">Status</span>
-                  <span className="text-[#F4F7F6] font-bold">{normalizeStatus(inspectOrder.status)}</span>
+                  <span className="text-[#CBD5E1]">Status</span>
+                  <span className="text-white font-bold">{normalizeStatus(inspectOrder.status)}</span>
                 </div>
                 {inspectOrder.txHash && (
-                  <div className="pt-1 border-t border-[#1E2936]">
-                    <span className="text-[#8F9CA8] block">Transaction Hash</span>
-                    <span className="text-[#0EA5A4] break-all">{inspectOrder.txHash}</span>
+                  <div className="pt-1 border-t border-[#253445]">
+                    <span className="text-[#CBD5E1] block">Transaction Hash</span>
+                    <span className="text-[#38BDF8] break-all">{inspectOrder.txHash}</span>
                   </div>
                 )}
               </div>
@@ -272,24 +272,24 @@ export const OrdersView: React.FC = () => {
                 {inspectOrder.statusHistory.map((step, idx) => (
                   <div
                     key={idx}
-                    className="p-2.5 rounded-lg bg-[#0D1116] border border-[#1E2936] text-[11px]"
+                    className="dsk-panel-3d p-2.5 rounded-lg text-[11px]"
                   >
-                    <div className="flex justify-between text-[#F4F7F6] font-bold">
+                    <div className="flex justify-between text-white font-bold">
                       <span>{step.status}</span>
-                      <span className="text-[10px] text-[#8F9CA8] tabular-nums">
+                      <span className="text-[10px] text-[#CBD5E1] tabular-nums">
                         {new Date(step.timestamp).toLocaleString()}
                       </span>
                     </div>
-                    {step.note && <div className="text-[#8F9CA8] mt-0.5">{step.note}</div>}
+                    {step.note && <div className="text-[#CBD5E1] mt-0.5">{step.note}</div>}
                   </div>
                 ))}
               </div>
             </div>
 
-            <div className="flex justify-end pt-3 border-t border-[#1E2936]">
+            <div className="flex justify-end pt-3 border-t border-[#253445]">
               <button
                 onClick={() => setInspectOrder(null)}
-                className="px-4 py-2 rounded-lg bg-[#0D1116] border border-[#1E2936] text-xs font-medium text-[#F4F7F6] cursor-pointer"
+                className="dsk-btn-secondary-3d px-4 py-2 rounded-lg text-xs cursor-pointer"
               >
                 Close
               </button>

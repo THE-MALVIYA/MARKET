@@ -22,16 +22,37 @@ router.get('/activity-logs', (req: AuthenticatedRequest, res: Response) => {
 
 // GET /api/admin/users
 router.get('/users', (_req: AuthenticatedRequest, res: Response) => {
-  const users = db.getUsers().map((u) => ({
-    id: u.id,
-    username: u.username,
-    email: u.email,
-    role: u.role,
-    organization: u.organization,
-    reputation: u.reputation,
-    avatar: u.avatar,
-    createdAt: u.createdAt
-  }));
+  const allOrders = db.getOrders();
+  const allLicenses = db.getLicenses();
+  const users = db.getUsers().map((u) => {
+    const userOrders = allOrders.filter((o) => o.userId === u.id || o.userEmail === u.email);
+    const confirmedSpent = userOrders
+      .filter(
+        (o) =>
+          o.status === 'Payment Confirmed' || o.status === 'Approved' || o.status === 'Completed'
+      )
+      .reduce((sum, o) => sum + o.amount, 0);
+    const userLicenses = allLicenses.filter((l) => l.userId === u.id || l.userEmail === u.email);
+
+    return {
+      id: u.id,
+      username: u.username,
+      email: u.email,
+      role: u.role,
+      organization: u.organization,
+      reputation: u.reputation,
+      avatar: u.avatar,
+      createdAt: u.createdAt,
+      lastLoginAt: u.lastLoginAt,
+      lastIp: u.lastIp,
+      lastDevice: u.lastDevice,
+      lastLocation: u.lastLocation,
+      orderCount: userOrders.length,
+      totalSpentUSDT: confirmedSpent,
+      licenseCount: userLicenses.length,
+      lastOrderAt: userOrders[0]?.createdAt || null
+    };
+  });
   res.json({ users });
 });
 
@@ -108,6 +129,15 @@ router.post('/orders/:orderNumber/review', (req: AuthenticatedRequest, res: Resp
   res.json({ success: true, order: updated });
 });
 
+// DELETE /api/admin/orders/:orderNumber
+router.delete('/orders/:orderNumber', (req: AuthenticatedRequest, res: Response) => {
+  const ok = db.deleteOrder(req.params.orderNumber, req.user!.username);
+  if (!ok) {
+    return res.status(404).json({ error: 'ORDER_NOT_FOUND', message: 'Order not found.' });
+  }
+  res.json({ success: true });
+});
+
 // GET /api/admin/licenses
 router.get('/licenses', (_req: AuthenticatedRequest, res: Response) => {
   res.json({ licenses: db.getLicenses() });
@@ -181,6 +211,24 @@ router.post('/tickets/:id/reply', (req: AuthenticatedRequest, res: Response) => 
   );
   if (!ticket) return res.status(404).json({ error: 'NOT_FOUND' });
   res.json({ ticket });
+});
+
+// PATCH /api/admin/tickets/:id/status
+router.patch('/tickets/:id/status', (req: AuthenticatedRequest, res: Response) => {
+  const { status } = req.body;
+  if (!['Open', 'In Progress', 'Resolved'].includes(status)) {
+    return res.status(400).json({ error: 'INVALID_STATUS', message: 'Invalid ticket status.' });
+  }
+  const ticket = db.getTickets().find((t) => t.id === req.params.id || t.ticketNumber === req.params.id);
+  if (!ticket) return res.status(404).json({ error: 'NOT_FOUND' });
+  const updated = db.replyToTicket(
+    ticket.id,
+    req.user!.username,
+    'admin',
+    `Ticket status changed to ${status}.`,
+    status as SupportTicket['status']
+  );
+  res.json({ ticket: updated });
 });
 
 // GET & PUT /api/admin/settings

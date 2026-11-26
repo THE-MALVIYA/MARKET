@@ -99,6 +99,11 @@ export interface Order {
     note?: string;
     actor?: string;
   }[];
+  buyerName?: string;
+  buyerOrganization?: string;
+  buyerIp?: string;
+  buyerDevice?: string;
+  buyerLocation?: string;
 }
 
 export interface User {
@@ -111,6 +116,10 @@ export interface User {
   avatar?: string;
   reputation: number;
   createdAt: string;
+  lastLoginAt?: string;
+  lastIp?: string;
+  lastDevice?: string;
+  lastLocation?: string;
 }
 
 export interface LicenseRecord {
@@ -182,5 +191,7 @@ export interface ActivityLog {
   details: string;
   actor: string;
   targetId?: string;
+  ip?: string;
+  device?: string;
   timestamp: string;
 }

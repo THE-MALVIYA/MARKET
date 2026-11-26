@@ -16,6 +16,7 @@ import { ToastContainer } from './components/Toast';
 import { OfflineIndicator } from './components/OfflineIndicator';
 import { AuthModal } from './components/AuthModal';
 import { WelcomeBriefingModal } from './components/WelcomeBriefingModal';
+import { SpatialBackdrop3D } from './components/SpatialBackdrop3D';
 import { AnimatePresence, motion } from 'motion/react';
 
 // Pages and views
@@ -80,10 +81,11 @@ export default function App() {
           }}
         />
       ) : (
-        <div className="min-h-screen bg-[#07090B] text-[#F4F7F6] flex flex-col relative selection:bg-[#00D69A] selection:text-[#07090B] font-sans antialiased dsk-subtle-grid overflow-x-hidden dsk-website-reveal">
+        <div className="min-h-screen bg-[#050709] text-white flex flex-col relative selection:bg-[#00D69A] selection:text-[#050709] font-sans antialiased overflow-x-hidden dsk-website-reveal">
+          <SpatialBackdrop3D />
           <div
             aria-hidden="true"
-            className="pointer-events-none fixed inset-x-0 bottom-0 h-[42vh] opacity-35 dsk-3d-horizon z-0"
+            className="pointer-events-none fixed inset-x-0 bottom-0 h-[38vh] opacity-30 dsk-3d-horizon z-0"
             style={{
               maskImage: 'linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.9) 75%)',
               WebkitMaskImage: 'linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.9) 75%)'

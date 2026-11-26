@@ -34,13 +34,13 @@ export const QRCodeDisplay: React.FC<QRCodeDisplayProps> = ({
   };
 
   return (
-    <div className="bg-[#11161D] border border-[#1E2936] rounded-xl p-5">
-      <div className="flex items-center justify-between pb-3 border-b border-[#1E2936]">
+    <div className="dsk-surface rounded-2xl p-5">
+      <div className="flex items-center justify-between pb-3 border-b border-[#253445]">
         <div className="flex items-center gap-2">
           <QrCode className="w-4 h-4 text-[#00D69A]" />
-          <span className="text-sm font-bold text-[#F4F7F6]">USDT TRC-20 Payment Scanner</span>
+          <span className="text-sm font-bold text-white">USDT TRC-20 Payment Scanner</span>
         </div>
-        <span className="text-[11px] font-mono text-[#0EA5A4] font-semibold uppercase flex items-center gap-1">
+        <span className="text-[11px] font-mono text-[#00D69A] font-semibold uppercase flex items-center gap-1">
           <ShieldCheck className="w-3.5 h-3.5 text-[#00D69A]" />
           {network}
         </span>
@@ -50,7 +50,7 @@ export const QRCodeDisplay: React.FC<QRCodeDisplayProps> = ({
         <button
           type="button"
           onClick={() => setShowModal(true)}
-          className="group relative p-2.5 rounded-2xl bg-white border-2 border-[#00D69A]/70 shadow-[0_18px_40px_-14px_rgba(0,214,154,0.35)] w-[228px] h-[228px] flex items-center justify-center overflow-hidden cursor-pointer transition-transform duration-200 hover:scale-[1.02]"
+          className="group relative p-2.5 rounded-2xl bg-white border-2 border-[#00D69A]/80 shadow-[0_18px_40px_-14px_rgba(0,214,154,0.45)] w-[228px] h-[228px] flex items-center justify-center overflow-hidden cursor-pointer transition-transform duration-200 hover:scale-[1.02]"
           aria-label="Enlarge payment scanner QR code"
         >
           <img
@@ -63,7 +63,7 @@ export const QRCodeDisplay: React.FC<QRCodeDisplayProps> = ({
         <button
           type="button"
           onClick={() => setShowModal(true)}
-          className="mt-2.5 text-xs text-[#8F9CA8] hover:text-[#00D69A] flex items-center gap-1.5 transition-colors cursor-pointer py-1 font-mono"
+          className="mt-2.5 text-xs text-[#CBD5E1] hover:text-[#00D69A] flex items-center gap-1.5 transition-colors cursor-pointer py-1 font-mono"
         >
           <Maximize2 className="w-3.5 h-3.5" />
           <span>Expand Payment Scanner</span>
@@ -72,8 +72,8 @@ export const QRCodeDisplay: React.FC<QRCodeDisplayProps> = ({
 
       <div className="mt-4 space-y-3">
         {amount !== undefined && (
-          <div className="flex items-center justify-between p-3 rounded-lg bg-[#0D1116] border border-[#1E2936]">
-            <span className="text-xs text-[#8F9CA8]">Exact Amount Due</span>
+          <div className="flex items-center justify-between p-3 rounded-lg dsk-panel-3d">
+            <span className="text-xs text-[#CBD5E1]">Exact Amount Due</span>
             <span className="font-mono font-bold text-base text-[#00D69A] tabular-nums">
               {amount.toLocaleString()} USDT
             </span>
@@ -81,17 +81,17 @@ export const QRCodeDisplay: React.FC<QRCodeDisplayProps> = ({
         )}
 
         {orderNumber && (
-          <div className="flex items-center justify-between p-3 rounded-lg bg-[#0D1116] border border-[#1E2936]">
-            <span className="text-xs text-[#8F9CA8]">Order Reference</span>
+          <div className="flex items-center justify-between p-3 rounded-lg dsk-panel-3d">
+            <span className="text-xs text-[#CBD5E1]">Order Reference</span>
             <span className="font-mono text-xs font-semibold text-[#E5B84B]">{orderNumber}</span>
           </div>
         )}
 
         <div>
-          <label className="block text-xs text-[#8F9CA8] mb-1.5">
+          <label className="block text-xs text-[#CBD5E1] mb-1.5">
             Merchant Settlement Address ({network})
           </label>
-          <div className="flex items-center gap-2 rounded-lg bg-[#0D1116] border border-[#1E2936] p-2.5">
+          <div className="flex items-center gap-2 rounded-lg dsk-panel-3d p-2.5">
             <code className="text-xs font-mono text-[#00D69A] break-all select-all flex-1">
               {address || 'Fetching merchant settlement address...'}
             </code>
@@ -99,10 +99,10 @@ export const QRCodeDisplay: React.FC<QRCodeDisplayProps> = ({
               type="button"
               onClick={handleCopy}
               disabled={!address}
-              className={`px-2.5 py-1.5 rounded-md font-mono text-xs flex items-center gap-1.5 transition-colors cursor-pointer shrink-0 ${
+              className={`px-2.5 py-1.5 rounded-md font-mono text-xs flex items-center gap-1.5 cursor-pointer shrink-0 ${
                 copied
-                  ? 'bg-[#00D69A] text-[#07090B] font-bold'
-                  : 'bg-[#11161D] text-[#00D69A] hover:bg-[#00D69A]/15 border border-[#1E2936]'
+                  ? 'dsk-btn-3d'
+                  : 'dsk-btn-secondary-3d text-[#00D69A]'
               }`}
             >
               {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
@@ -111,7 +111,7 @@ export const QRCodeDisplay: React.FC<QRCodeDisplayProps> = ({
           </div>
         </div>
 
-        <div className="p-3 rounded-lg bg-[#0D1116] border border-[#E5B84B]/35 flex items-start gap-2.5 text-[11px] text-[#E5B84B]">
+        <div className="p-3 rounded-lg dsk-panel-3d border-[#E5B84B]/40 flex items-start gap-2.5 text-[11px] text-[#E5B84B]">
           <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
           <span>
             Scan the official USDT ({network}) scanner above or copy the settlement address. Transfers on ERC-20, BEP-20, or other chains cannot be recovered.
@@ -120,20 +120,20 @@ export const QRCodeDisplay: React.FC<QRCodeDisplayProps> = ({
       </div>
 
       {showModal && (
-        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-[#11161D] border border-[#1E2936] rounded-xl max-w-sm w-full p-6 relative shadow-2xl">
+        <div className="fixed inset-0 z-50 bg-black/86 flex items-center justify-center p-4">
+          <div className="dsk-surface rounded-2xl max-w-sm w-full p-6 relative">
             <button
               type="button"
               onClick={() => setShowModal(false)}
-              className="absolute top-3 right-3 p-1.5 rounded-lg text-[#8F9CA8] hover:text-[#F4F7F6] hover:bg-[#0D1116] cursor-pointer"
+              className="absolute top-3 right-3 p-1.5 rounded-lg text-[#CBD5E1] hover:text-white dsk-btn-secondary-3d cursor-pointer"
               aria-label="Close scanner modal"
             >
               <X className="w-4 h-4" />
             </button>
-            <h3 className="font-bold text-[#F4F7F6] text-center mb-1">
+            <h3 className="font-bold text-white text-center mb-1">
               Official USDT ({network}) Scanner
             </h3>
-            <p className="text-xs text-[#8F9CA8] text-center mb-4">
+            <p className="text-xs text-[#CBD5E1] text-center mb-4">
               Scan directly from Binance, Trust Wallet, TronLink, or any {network} wallet
             </p>
 
@@ -152,7 +152,7 @@ export const QRCodeDisplay: React.FC<QRCodeDisplayProps> = ({
                 </div>
               )}
               {address && (
-                <code className="text-xs font-mono text-[#D1D9E0] break-all block mb-3">
+                <code className="text-xs font-mono text-[#E2E8F0] break-all block mb-3">
                   {address}
                 </code>
               )}
@@ -160,7 +160,7 @@ export const QRCodeDisplay: React.FC<QRCodeDisplayProps> = ({
                 type="button"
                 onClick={handleCopy}
                 disabled={!address}
-                className="w-full py-2.5 px-4 rounded-lg bg-[#00D69A] hover:bg-[#0EA5A4] text-[#07090B] font-semibold text-xs flex items-center justify-center gap-2 transition-colors cursor-pointer disabled:opacity-40"
+                className="w-full py-2.5 px-4 rounded-lg dsk-btn-3d text-xs flex items-center justify-center gap-2 cursor-pointer disabled:opacity-40"
               >
                 {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
                 <span>{copied ? 'Address Copied' : 'Copy Wallet Address'}</span>

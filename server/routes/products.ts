@@ -67,34 +67,89 @@ router.get('/:slugOrId', (req: Request, res: Response) => {
 
 // POST /api/products - Admin create product
 router.post('/', requireAdmin, (req: AuthenticatedRequest, res: Response) => {
-  const { name, category, price, description, features, image, featured, requirements, productCode } = req.body;
+  const {
+    name,
+    category,
+    price,
+    description,
+    features,
+    image,
+    featured,
+    requirements,
+    productCode,
+    version,
+    architecture,
+    supportedPlatforms,
+    licenseType
+  } = req.body;
 
   if (!name || !category || typeof price !== 'number') {
     return res.status(400).json({ error: 'INVALID_INPUT', message: 'Name, category, and price are required.' });
   }
 
-  const newProduct = db.addProduct({
-    name,
-    slug: name.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
-    category,
-    price: Math.max(1, price),
-    currency: 'USDT',
-    description: description || 'Cyber developer toolkit and security utility module.',
-    features: Array.isArray(features) ? features : [features].filter(Boolean),
-    image: image || 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&w=800&q=80',
-    rating: 4.9,
-    featured: !!featured,
-    requirements: Array.isArray(requirements) ? requirements : ['Standard modern Linux/macOS/Windows environment'],
-    productCode: productCode || 'TP-' + Math.floor(1000 + Math.random() * 9000),
-    version: 'v1.0.0'
-  });
+  const newProduct = db.addProduct(
+    {
+      name: String(name).trim(),
+      slug: String(name).toLowerCase().replace(/[^a-z0-9]+/g, '-'),
+      category: String(category).trim(),
+      price: Math.max(1, price),
+      currency: 'USDT',
+      description: description || 'Enterprise security infrastructure and developer software suite.',
+      features: Array.isArray(features) ? features : [features].filter(Boolean),
+      image: image || '/assets/sql_flash_module.jpg',
+      rating: 4.9,
+      featured: !!featured,
+      requirements: Array.isArray(requirements)
+        ? requirements
+        : ['Linux / macOS / Windows x86_64 or ARM64 environment'],
+      productCode: productCode || 'DSK-' + Math.floor(1000 + Math.random() * 9000),
+      version: version ? String(version).trim() : 'v1.0.0',
+      architecture: architecture ? String(architecture).trim() : 'x86_64 / ARM64',
+      supportedPlatforms: Array.isArray(supportedPlatforms)
+        ? supportedPlatforms
+        : ['Linux', 'Docker', 'macOS', 'Windows'],
+      licenseType: licenseType ? String(licenseType).trim() : 'Enterprise Perpetual / 1-Year Updates'
+    },
+    req.user!.username
+  );
 
   res.status(201).json({ product: newProduct });
 });
 
 // PUT /api/products/:id - Admin update product
 router.put('/:id', requireAdmin, (req: AuthenticatedRequest, res: Response) => {
-  const updated = db.updateProduct(req.params.id, req.body);
+  const {
+    name,
+    category,
+    price,
+    description,
+    features,
+    image,
+    featured,
+    requirements,
+    productCode,
+    version,
+    architecture,
+    supportedPlatforms,
+    licenseType
+  } = req.body;
+
+  const updates: Record<string, unknown> = {};
+  if (name !== undefined) updates.name = String(name).trim();
+  if (category !== undefined) updates.category = String(category).trim();
+  if (typeof price === 'number' && !Number.isNaN(price)) updates.price = Math.max(1, price);
+  if (description !== undefined) updates.description = String(description);
+  if (Array.isArray(features)) updates.features = features.map(String);
+  if (image !== undefined) updates.image = String(image).trim();
+  if (typeof featured === 'boolean') updates.featured = featured;
+  if (Array.isArray(requirements)) updates.requirements = requirements.map(String);
+  if (productCode !== undefined) updates.productCode = String(productCode).trim();
+  if (version !== undefined) updates.version = String(version).trim();
+  if (architecture !== undefined) updates.architecture = String(architecture).trim();
+  if (Array.isArray(supportedPlatforms)) updates.supportedPlatforms = supportedPlatforms.map(String);
+  if (licenseType !== undefined) updates.licenseType = String(licenseType).trim();
+
+  const updated = db.updateProduct(req.params.id, updates);
   if (!updated) {
     return res.status(404).json({ error: 'PRODUCT_NOT_FOUND', message: 'Product could not be found' });
   }

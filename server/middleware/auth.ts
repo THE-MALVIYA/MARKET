@@ -84,3 +84,56 @@ export function requireAdmin(req: AuthenticatedRequest, res: Response, next: Nex
   }
   next();
 }
+
+export function extractClientMeta(req: Request): {
+  ip: string;
+  device: string;
+  location: string;
+} {
+  const fwd = req.headers['x-forwarded-for'];
+  const cfIp = req.headers['cf-connecting-ip'];
+  const realIp = req.headers['x-real-ip'];
+  let ip =
+    (typeof cfIp === 'string' && cfIp.trim()) ||
+    (typeof realIp === 'string' && realIp.trim()) ||
+    (typeof fwd === 'string' ? fwd.split(',')[0].trim() : Array.isArray(fwd) ? fwd[0] : '') ||
+    req.ip ||
+    req.socket?.remoteAddress ||
+    'unknown';
+  if (ip.startsWith('::ffff:')) {
+    ip = ip.slice(7);
+  }
+
+  const ua = String(req.headers['user-agent'] || '');
+  let os = 'Desktop';
+  if (/android/i.test(ua)) os = 'Android';
+  else if (/iphone/i.test(ua)) os = 'iPhone';
+  else if (/ipad/i.test(ua)) os = 'iPad';
+  else if (/windows/i.test(ua)) os = 'Windows';
+  else if (/macintosh|mac os x/i.test(ua)) os = 'macOS';
+  else if (/linux/i.test(ua)) os = 'Linux';
+
+  let browser = 'Browser';
+  if (/edg/i.test(ua)) browser = 'Edge';
+  else if (/opr|opera/i.test(ua)) browser = 'Opera';
+  else if (/chrome|crios/i.test(ua)) browser = 'Chrome';
+  else if (/firefox|fxios/i.test(ua)) browser = 'Firefox';
+  else if (/safari/i.test(ua)) browser = 'Safari';
+  else if (/curl|node|axios|postman/i.test(ua)) browser = 'API Client';
+
+  const country =
+    req.headers['cf-ipcountry'] ||
+    req.headers['x-vercel-ip-country'] ||
+    req.headers['x-appengine-country'] ||
+    req.headers['x-country-code'];
+  const location =
+    typeof country === 'string' && country.trim() && country.trim() !== 'XX'
+      ? country.trim().toUpperCase()
+      : 'Global Web';
+
+  return {
+    ip,
+    device: `${os} · ${browser}`,
+    location
+  };
+}

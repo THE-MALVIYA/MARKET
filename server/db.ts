@@ -92,18 +92,7 @@ const INITIAL_DISCOUNTS: DiscountCode[] = [
   }
 ];
 
-const INITIAL_USERS: User[] = [
-  {
-    id: 'user-agent-01',
-    username: 'alex_mercer',
-    email: 'security@deepseek-client.io',
-    passwordHash: hashPassword('DeepSeekClient#2026'),
-    role: 'user',
-    organization: 'Apex Infrastructure Group',
-    reputation: 99.4,
-    createdAt: new Date('2026-01-05T00:00:00Z').toISOString()
-  }
-];
+const INITIAL_USERS: User[] = [];
 
 const INITIAL_LOGS: ActivityLog[] = [
   {
@@ -444,6 +433,11 @@ class Database {
   createOrder(orderData: {
     userId: string;
     userEmail: string;
+    buyerName?: string;
+    buyerOrganization?: string;
+    buyerIp?: string;
+    buyerDevice?: string;
+    buyerLocation?: string;
     items: Order['items'];
     subtotal: number;
     discountCode?: string;
@@ -470,6 +464,11 @@ class Database {
       orderNumber,
       userId: orderData.userId,
       userEmail: orderData.userEmail,
+      buyerName: orderData.buyerName,
+      buyerOrganization: orderData.buyerOrganization,
+      buyerIp: orderData.buyerIp,
+      buyerDevice: orderData.buyerDevice,
+      buyerLocation: orderData.buyerLocation,
       items: orderData.items,
       subtotal: orderData.subtotal,
       discountCode: orderData.discountCode,
@@ -499,9 +498,10 @@ class Database {
     this.logActivity(
       'ORDER_CREATED',
       'ORDER',
-      `Order ${orderNumber} created for ${newOrder.amount} USDT`,
+      `Order ${orderNumber} created by ${orderData.buyerName || orderData.userEmail} for ${newOrder.amount} USDT`,
       orderData.userEmail,
-      orderNumber
+      orderNumber,
+      { ip: orderData.buyerIp, device: orderData.buyerDevice }
     );
     return newOrder;
   }
@@ -607,6 +607,18 @@ class Database {
       orderNumber
     );
     return order;
+  }
+
+  deleteOrder(orderNumber: string, actor = 'admin'): boolean {
+    const idx = this.store.orders.findIndex((o) => o.orderNumber === orderNumber);
+    if (idx === -1) return false;
+    const removed = this.store.orders.splice(idx, 1)[0];
+    if (removed.txHash) {
+      delete this.store.usedTxHashes[removed.txHash.trim().toLowerCase()];
+    }
+    this.saveStore();
+    this.logActivity('ORDER_DELETED', 'ORDER', `Order ${orderNumber} removed by administrator`, actor, orderNumber);
+    return true;
   }
 
   // Licenses
@@ -758,9 +770,11 @@ class Database {
     email: string,
     passwordHash: string,
     role: 'user' | 'admin' = 'user',
-    organization?: string
+    organization?: string,
+    meta?: { ip?: string; device?: string; location?: string }
   ): User {
     const id = 'user-' + crypto.randomBytes(4).toString('hex');
+    const now = new Date().toISOString();
     const newUser: User = {
       id,
       username,
@@ -769,12 +783,29 @@ class Database {
       role,
       organization: organization || 'Independent Engineering Team',
       reputation: 100,
-      createdAt: new Date().toISOString()
+      createdAt: now,
+      lastLoginAt: now,
+      lastIp: meta?.ip,
+      lastDevice: meta?.device,
+      lastLocation: meta?.location
     };
     this.store.users.push(newUser);
     this.saveStore();
-    this.logActivity('USER_REGISTER', 'AUTH', `New account registered: ${username}`, email, id);
+    this.logActivity('USER_REGISTER', 'AUTH', `New account registered: ${username}`, email, id, meta);
     return newUser;
+  }
+
+  recordUserLoginMeta(
+    userId: string,
+    meta?: { ip?: string; device?: string; location?: string }
+  ) {
+    const user = this.getUserById(userId);
+    if (!user) return;
+    user.lastLoginAt = new Date().toISOString();
+    if (meta?.ip) user.lastIp = meta.ip;
+    if (meta?.device) user.lastDevice = meta.device;
+    if (meta?.location) user.lastLocation = meta.location;
+    this.saveStore();
   }
 
   // Activity Logs
@@ -787,7 +818,8 @@ class Database {
     category: ActivityLog['category'],
     details: string,
     actor: string,
-    targetId?: string
+    targetId?: string,
+    meta?: { ip?: string; device?: string }
   ) {
     const log: ActivityLog = {
       id: 'log-' + crypto.randomBytes(4).toString('hex'),
@@ -796,6 +828,8 @@ class Database {
       details,
       actor,
       targetId,
+      ip: meta?.ip,
+      device: meta?.device,
       timestamp: new Date().toISOString()
     };
     this.store.activityLogs.unshift(log);
@@ -834,7 +868,7 @@ class Database {
       rejectedOrders,
       totalVolumeUSDT,
       totalProducts: this.store.products.length,
-      totalUsers: this.store.users.length,
+      totalUsers: this.store.users.filter((u) => u.role !== 'admin').length,
       activeLicenses: this.store.licenses.filter((l) => l.status === 'Active').length,
       openTickets: this.store.tickets.filter((t) => t.status !== 'Resolved').length
     };

@@ -6,21 +6,27 @@ interface RateLimitBucket {
   resetTime: number;
 }
 
-const buckets = new Map<string, RateLimitBucket>();
-
 export function rateLimit(windowMs = 60000, maxRequests = 120) {
+  const buckets = new Map<string, RateLimitBucket>();
+
   return (req: Request, res: Response, next: NextFunction) => {
-    const ip = req.ip || req.headers['x-forwarded-for'] || 'anonymous';
-    const key = `${ip}`;
+    const rawIp = req.ip || req.headers['x-forwarded-for'] || 'anonymous';
+    const key = Array.isArray(rawIp) ? rawIp[0] : String(rawIp);
     const now = Date.now();
 
-    let bucket = buckets.get(key as string);
+    if (buckets.size > 5000) {
+      for (const [k, b] of buckets.entries()) {
+        if (now > b.resetTime) buckets.delete(k);
+      }
+    }
+
+    let bucket = buckets.get(key);
     if (!bucket || now > bucket.resetTime) {
       bucket = {
         count: 1,
         resetTime: now + windowMs
       };
-      buckets.set(key as string, bucket);
+      buckets.set(key, bucket);
     } else {
       bucket.count += 1;
       if (bucket.count > maxRequests) {

@@ -1,234 +1,142 @@
 import React, { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
-import { Volume2, VolumeX, FastForward, Terminal, ShieldAlert } from 'lucide-react';
+import {
+  Volume2,
+  FastForward,
+  Terminal,
+  Sparkles,
+  Play,
+  Cpu
+} from 'lucide-react';
 import { INTRO_VOICE_CUES, IntroAudioEngine } from '../utils/introAudioEngine';
 
 interface CinematicIntro3DProps {
   onComplete: (completedNaturally: boolean) => void;
 }
 
-const INTRO_DURATION = 120;
+type IntroPhase = 'video' | 'transition' | 'animation';
+
+const INTRO_VIDEO_SRC = '/assets/aistudio/video_2026-11-26_10-51-07_ca5d36bf.mp4';
+const ANIMATION_DURATION = 30; // Exact 30-second ultra-powerful 4K 3D sequence
 
 const _v1 = new THREE.Vector3();
-const _v2 = new THREE.Vector3();
 const _camPos = new THREE.Vector3();
 const _lookTarget = new THREE.Vector3();
 const _c1 = new THREE.Color();
 const _c2 = new THREE.Color();
+const _c3 = new THREE.Color();
 const _m4 = new THREE.Matrix4();
 const _q = new THREE.Quaternion();
 const _e = new THREE.Euler();
 const _s = new THREE.Vector3();
 
-const HACKER_LINES_RED = [
-  'root@node-09:~# ./exploit_kernel --target 0.0.0.0/0',
-  '[+] Bypassing WAF & TLS 1.3 Pinning .......... OK',
-  '[!] MEMORY DUMP: 0x7FFE89A2 -> 4F 9C 00 FF A1 3D',
-  '[+] Cracking RSA-4096 Master Entropy [99.4%]',
-  'WARN: IDS Watchdog Terminated (PID 4401)',
-  '[+] Injecting Ring-0 Payload into /dev/kmem',
-  'TRACE: 185.220.101.44 -> PORT 443 OVERRIDE',
-  '[CRITICAL] SYSTEM ACCESS ESCALATED: UID=0 (ROOT)',
-  '>>> STREAMING ENCRYPTED PAYLOAD: 1.42 GB/s <<<',
-  '[!] FIREWALL LAYER 7 SHATTERED // NO ESCAPE'
-];
+function createHexQuantumFloorTexture(maxAnisotropy: number): THREE.CanvasTexture {
+  const S = 1024;
+  const c = document.createElement('canvas');
+  c.width = S;
+  c.height = S;
+  const ctx = c.getContext('2d')!;
 
-const HACKER_LINES_EMERALD = [
-  'root@deepseek-core:~# ./deephat_lock --engage',
-  '[+] Deephat Containment Mesh Verified ........ 100%',
-  '[+] Modules Armed: X-TX SQM | SQL Flash | TX Kit',
-  '[+] Live 3D Global Threat Earth Synchronized',
-  '[+] Verifying SHA-256 Package Manifests ...... OK',
-  '[+] Tron TRC-20 On-Chain Scanner Ready',
-  '[+] Zero-Trust Quantum Vaults Sealed',
-  '[+] Issuing Sovereign License Infrastructure',
-  '>>> DEEPSEEK COMMAND GRID: ONLINE <<<'
-];
+  ctx.fillStyle = '#020408';
+  ctx.fillRect(0, 0, S, S);
 
-function drawTerminalCanvas(
-  ctx: CanvasRenderingContext2D,
-  width: number,
-  height: number,
-  tickCount: number,
-  isContainment: boolean,
-  isBreachFlash: boolean,
-  variant: number
-) {
-  ctx.fillStyle = isBreachFlash ? '#2b0208' : '#030608';
-  ctx.fillRect(0, 0, width, height);
-
-  const accent = isContainment ? '#00D69A' : '#FF1E38';
-  const dimAccent = isContainment ? 'rgba(0, 214, 154, 0.24)' : 'rgba(255, 30, 56, 0.26)';
-  const subText = isContainment ? '#8CEAD0' : '#FF8F9C';
-
-  // Scanline grid
-  ctx.strokeStyle = dimAccent;
+  // Subtle architectural sub-grid
+  ctx.strokeStyle = 'rgba(34, 211, 238, 0.08)';
   ctx.lineWidth = 1;
-  for (let y = 0; y < height; y += 20) {
+  for (let i = 0; i <= S; i += 64) {
     ctx.beginPath();
-    ctx.moveTo(0, y);
-    ctx.lineTo(width, y);
+    ctx.moveTo(i, 0);
+    ctx.lineTo(i, S);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(0, i);
+    ctx.lineTo(S, i);
     ctx.stroke();
   }
 
-  // Header Bar
-  ctx.fillStyle = accent;
-  ctx.fillRect(0, 0, width, 34);
-  ctx.fillStyle = '#040608';
-  ctx.font = 'bold 16px monospace';
-  ctx.fillText(
-    isContainment
-      ? `DEEPSEEK // DEEPHAT SHELL #0${variant + 1}`
-      : `ROOT BREACH // NODE-0${variant + 4} [UID=0]`,
-    14,
-    22
-  );
-
-  // Scrolling terminal lines
-  const lines = isContainment ? HACKER_LINES_EMERALD : HACKER_LINES_RED;
-  ctx.font = '14px monospace';
-  for (let i = 0; i < 8; i++) {
-    const idx = (tickCount + i + variant * 2) % lines.length;
-    ctx.fillStyle = i === 7 ? '#FFFFFF' : i % 2 === 0 ? accent : subText;
-    ctx.fillText(lines[idx], 16, 64 + i * 24);
-  }
-
-  // Live Hex Matrix Block at bottom
-  ctx.fillStyle = 'rgba(0, 0, 0, 0.55)';
-  ctx.fillRect(14, height - 74, width - 28, 58);
-  ctx.strokeStyle = accent;
-  ctx.strokeRect(14, height - 74, width - 28, 58);
-
-  const pct = isContainment ? 100 : Math.min(99, ((tickCount * 7 + variant * 19) % 100));
-  ctx.fillStyle = accent;
-  ctx.font = 'bold 13px monospace';
-  ctx.fillText(
-    isContainment
-      ? `CONTAINMENT INTEGRITY: 100%  [SHA-256 LOCKED]`
-      : `DECRYPTING CORE ENTROPY: ${pct}%  [0x${((tickCount * 4919 + variant * 997) & 0xffff).toString(16).toUpperCase().padStart(4, '0')}]`,
-    24,
-    height - 49
-  );
-
-  ctx.fillStyle = '#11161D';
-  ctx.fillRect(24, height - 36, width - 48, 10);
-  ctx.fillStyle = accent;
-  ctx.fillRect(24, height - 36, ((width - 48) * pct) / 100, 10);
-}
-
-function createServerRackTexture(maxAnisotropy: number): THREE.CanvasTexture {
-  const c = document.createElement('canvas');
-  c.width = 256;
-  c.height = 512;
-  const ctx = c.getContext('2d')!;
-  ctx.fillStyle = '#06080b';
-  ctx.fillRect(0, 0, 256, 512);
-
-  for (let y = 12; y < 500; y += 22) {
-    ctx.fillStyle = '#0d1118';
-    ctx.fillRect(14, y, 228, 16);
-    ctx.strokeStyle = '#18222e';
-    ctx.strokeRect(14, y, 228, 16);
-
-    for (let x = 24; x < 190; x += 18) {
-      const r = (x * 13 + y * 7) % 11;
-      ctx.fillStyle = r < 2 ? '#ff1e38' : r === 3 ? '#00d69a' : '#1b2634';
-      ctx.fillRect(x, y + 5, 8, 5);
-    }
-    ctx.fillStyle = y % 66 === 12 ? '#ff1e38' : '#243242';
-    ctx.fillRect(210, y + 4, 22, 8);
-  }
-
-  const tex = new THREE.CanvasTexture(c);
-  tex.colorSpace = THREE.SRGBColorSpace;
-  tex.anisotropy = maxAnisotropy;
-  return tex;
-}
-
-function createFloorGridTexture(maxAnisotropy: number): THREE.CanvasTexture {
-  const c = document.createElement('canvas');
-  c.width = 512;
-  c.height = 512;
-  const ctx = c.getContext('2d')!;
-  ctx.fillStyle = '#020305';
-  ctx.fillRect(0, 0, 512, 512);
-
-  ctx.strokeStyle = 'rgba(255, 30, 56, 0.34)';
+  // Crisp 4K-grade hexagonal lattice
+  const r = 44;
+  const dx = r * 1.5;
+  const dy = r * Math.sqrt(3);
+  ctx.strokeStyle = 'rgba(0, 214, 154, 0.32)';
   ctx.lineWidth = 2;
-  for (let i = 0; i <= 512; i += 64) {
-    ctx.beginPath();
-    ctx.moveTo(i, 0);
-    ctx.lineTo(i, 512);
-    ctx.stroke();
-    ctx.beginPath();
-    ctx.moveTo(0, i);
-    ctx.lineTo(512, i);
-    ctx.stroke();
-  }
 
-  ctx.strokeStyle = 'rgba(0, 214, 154, 0.14)';
-  ctx.lineWidth = 1;
-  for (let i = 32; i < 512; i += 64) {
-    ctx.beginPath();
-    ctx.moveTo(i, 0);
-    ctx.lineTo(i, 512);
-    ctx.stroke();
-    ctx.beginPath();
-    ctx.moveTo(0, i);
-    ctx.lineTo(512, i);
-    ctx.stroke();
+  for (let col = -1; col < S / dx + 2; col++) {
+    for (let row = -1; row < S / dy + 2; row++) {
+      const cx = col * dx;
+      const cy = row * dy + (col % 2 === 0 ? 0 : dy / 2);
+      ctx.beginPath();
+      for (let k = 0; k < 6; k++) {
+        const a = (Math.PI / 3) * k;
+        const px = cx + r * Math.cos(a);
+        const py = cy + r * Math.sin(a);
+        if (k === 0) ctx.moveTo(px, py);
+        else ctx.lineTo(px, py);
+      }
+      ctx.closePath();
+      ctx.stroke();
+    }
   }
 
   const tex = new THREE.CanvasTexture(c);
   tex.wrapS = THREE.RepeatWrapping;
   tex.wrapT = THREE.RepeatWrapping;
-  tex.repeat.set(20, 20);
+  tex.repeat.set(16, 16);
   tex.colorSpace = THREE.SRGBColorSpace;
   tex.anisotropy = maxAnisotropy;
   return tex;
 }
 
-function createHackerSpriteTexture(): THREE.CanvasTexture {
+function createStarSpriteTexture(): THREE.CanvasTexture {
+  const S = 128;
   const c = document.createElement('canvas');
-  c.width = 64;
-  c.height = 64;
+  c.width = S;
+  c.height = S;
   const ctx = c.getContext('2d')!;
-  ctx.clearRect(0, 0, 64, 64);
-
-  const grad = ctx.createRadialGradient(32, 32, 2, 32, 32, 30);
+  const grad = ctx.createRadialGradient(S / 2, S / 2, 1, S / 2, S / 2, S / 2);
   grad.addColorStop(0, 'rgba(255, 255, 255, 1)');
-  grad.addColorStop(0.45, 'rgba(255, 255, 255, 0.65)');
-  grad.addColorStop(1, 'rgba(255, 255, 255, 0)');
+  grad.addColorStop(0.22, 'rgba(255, 255, 255, 0.85)');
+  grad.addColorStop(0.55, 'rgba(180, 248, 255, 0.28)');
+  grad.addColorStop(1, 'rgba(0, 0, 0, 0)');
   ctx.fillStyle = grad;
-  ctx.fillRect(0, 0, 64, 64);
-
-  ctx.fillStyle = '#FFFFFF';
-  ctx.font = 'bold 28px monospace';
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-  ctx.fillText('01', 32, 32);
-
+  ctx.fillRect(0, 0, S, S);
   const tex = new THREE.CanvasTexture(c);
   tex.colorSpace = THREE.SRGBColorSpace;
   return tex;
 }
 
+function formatTime(sec: number): string {
+  const safe = Math.max(0, Math.floor(sec));
+  const m = String(Math.floor(safe / 60)).padStart(2, '0');
+  const s = String(safe % 60).padStart(2, '0');
+  return `${m}:${s}`;
+}
+
 export const CinematicIntro3D: React.FC<CinematicIntro3DProps> = ({ onComplete }) => {
   const mountRef = useRef<HTMLDivElement | null>(null);
+  const videoRef = useRef<HTMLVideoElement | null>(null);
   const audioRef = useRef<IntroAudioEngine | null>(null);
   const completedRef = useRef(false);
   const elapsedRef = useRef(0);
+  const phaseRef = useRef<IntroPhase>('video');
   const onCompleteRef = useRef(onComplete);
   onCompleteRef.current = onComplete;
 
+  const [phase, setPhase] = useState<IntroPhase>('video');
+  const [videoTime, setVideoTime] = useState(0);
+  const [videoDuration, setVideoDuration] = useState(0);
+  const [videoMutedPrompt, setVideoMutedPrompt] = useState(false);
+  const [videoNeedsPlayClick, setVideoNeedsPlayClick] = useState(false);
+
   const [elapsed, setElapsed] = useState(0);
-  const [act, setAct] = useState<1 | 2 | 3 | 4>(1);
+  const [act, setAct] = useState<1 | 2 | 3>(1);
   const [audioActive, setAudioActive] = useState(false);
-  const [muted, setMuted] = useState(false);
   const [fadingOut, setFadingOut] = useState(false);
-  const [blackoutFlash, setBlackoutFlash] = useState(false);
+  const [surgeFlash, setSurgeFlash] = useState(false);
   const [activeCueIndex, setActiveCueIndex] = useState(0);
+
+  phaseRef.current = phase;
 
   const exitIntro = (natural: boolean) => {
     if (completedRef.current) return;
@@ -237,63 +145,157 @@ export const CinematicIntro3D: React.FC<CinematicIntro3DProps> = ({ onComplete }
     window.setTimeout(() => {
       audioRef.current?.dispose();
       onCompleteRef.current(natural);
-    }, 550);
+    }, 520);
   };
 
-  const unlockAndPlayAudio = async () => {
-    const engine = audioRef.current;
-    if (!engine) return;
-    const ok = await engine.start();
-    if (ok) {
-      setAudioActive(true);
-      setMuted(false);
-      engine.setMuted(false);
-      const idx = engine.updateVoiceCues(Math.max(1.05, elapsedRef.current));
-      setActiveCueIndex(idx);
+  const transitionToAnimation = () => {
+    if (phaseRef.current !== 'video' || completedRef.current) return;
+    phaseRef.current = 'transition';
+    setPhase('transition');
+    if (videoRef.current) {
+      videoRef.current.pause();
     }
+    window.setTimeout(() => {
+      if (completedRef.current) return;
+      phaseRef.current = 'animation';
+      setPhase('animation');
+    }, 440);
   };
 
-  const toggleMute = async () => {
-    const engine = audioRef.current;
-    if (!engine) return;
-    if (!audioActive) {
-      await unlockAndPlayAudio();
-      return;
-    }
-    const nextMuted = !muted;
-    setMuted(nextMuted);
-    engine.setMuted(nextMuted);
-  };
-
+  // Phase 1: Immediate Full-Screen 4K-Enhanced Video Playback with Sound
   useEffect(() => {
+    if (phase !== 'video') return;
+    const video = videoRef.current;
+    if (!video) return;
+
+    let cancelled = false;
+
+    const tryStartWithSound = async () => {
+      try {
+        video.muted = false;
+        video.volume = 1.0;
+        await video.play();
+        if (!cancelled) {
+          setVideoMutedPrompt(false);
+          setVideoNeedsPlayClick(false);
+          setAudioActive(true);
+        }
+      } catch {
+        try {
+          video.muted = true;
+          await video.play();
+          if (!cancelled) {
+            setVideoMutedPrompt(true);
+            setVideoNeedsPlayClick(false);
+          }
+        } catch {
+          if (!cancelled) {
+            setVideoNeedsPlayClick(true);
+            setVideoMutedPrompt(true);
+          }
+        }
+      }
+    };
+
+    void tryStartWithSound();
+
+    const unlockSoundOnGesture = () => {
+      if (cancelled || phaseRef.current !== 'video') return;
+      const v = videoRef.current;
+      if (!v) return;
+      if (v.paused) {
+        void v.play().catch(() => {});
+      }
+      if (v.muted) {
+        v.muted = false;
+        v.volume = 1.0;
+        setVideoMutedPrompt(false);
+        setVideoNeedsPlayClick(false);
+        setAudioActive(true);
+      }
+      if (!audioRef.current) {
+        audioRef.current = new IntroAudioEngine();
+      }
+      audioRef.current.setMuted(false);
+      void audioRef.current.start().then((ok) => {
+        if (ok) setAudioActive(true);
+      });
+    };
+
+    window.addEventListener('pointerdown', unlockSoundOnGesture, { passive: true, capture: true });
+    window.addEventListener('touchstart', unlockSoundOnGesture, { passive: true, capture: true });
+    window.addEventListener('click', unlockSoundOnGesture, { passive: true, capture: true });
+    window.addEventListener('keydown', unlockSoundOnGesture, { passive: true, capture: true });
+
+    return () => {
+      cancelled = true;
+      window.removeEventListener('pointerdown', unlockSoundOnGesture, true);
+      window.removeEventListener('touchstart', unlockSoundOnGesture, true);
+      window.removeEventListener('click', unlockSoundOnGesture, true);
+      window.removeEventListener('keydown', unlockSoundOnGesture, true);
+    };
+  }, [phase]);
+
+  const handleEnableVideoSound = (e?: React.MouseEvent) => {
+    e?.stopPropagation();
+    const v = videoRef.current;
+    if (v) {
+      v.muted = false;
+      v.volume = 1.0;
+      if (v.paused) {
+        void v.play().catch(() => {});
+      }
+      setVideoMutedPrompt(false);
+      setVideoNeedsPlayClick(false);
+      setAudioActive(true);
+    }
+    if (!audioRef.current) {
+      audioRef.current = new IntroAudioEngine();
+    }
+    audioRef.current.setMuted(false);
+    void audioRef.current.start().then((ok) => {
+      if (ok) setAudioActive(true);
+    });
+  };
+
+  // Phase 2: Brand-New 30-Second Ultra-HD 4K Quantum Astrolabe & Singularity Animation
+  useEffect(() => {
+    if (phase !== 'animation') return;
     const container = mountRef.current;
     if (!container) return;
 
-    const engine = new IntroAudioEngine();
+    const engine = audioRef.current || new IntroAudioEngine();
     audioRef.current = engine;
+    engine.setMuted(false);
 
     void engine.start().then((ok) => {
       if (ok) {
         setAudioActive(true);
-        const idx = engine.updateVoiceCues(Math.max(1.05, elapsedRef.current));
+        engine.setMuted(false);
+        engine.triggerHorrorHorn(1.0);
+        const idx = engine.updateVoiceCues(Math.max(0.85, elapsedRef.current));
         setActiveCueIndex(idx);
       }
     });
 
     const handleFirstGesture = () => {
+      engine.setMuted(false);
       if (engine.getState() !== 'running') {
         void engine.start().then((ok) => {
           if (ok) {
             setAudioActive(true);
-            const idx = engine.updateVoiceCues(Math.max(1.05, elapsedRef.current));
+            engine.setMuted(false);
+            const idx = engine.updateVoiceCues(Math.max(0.85, elapsedRef.current));
             setActiveCueIndex(idx);
           }
         });
       }
     };
 
-    window.addEventListener('pointerdown', handleFirstGesture, { passive: true });
-    window.addEventListener('keydown', handleFirstGesture, { passive: true });
+    window.addEventListener('pointerdown', handleFirstGesture, { passive: true, capture: true });
+    window.addEventListener('touchstart', handleFirstGesture, { passive: true, capture: true });
+    window.addEventListener('click', handleFirstGesture, { passive: true, capture: true });
+    window.addEventListener('keydown', handleFirstGesture, { passive: true, capture: true });
 
     let renderer: THREE.WebGLRenderer | null = null;
     let scene: THREE.Scene | null = null;
@@ -303,8 +305,8 @@ export const CinematicIntro3D: React.FC<CinematicIntro3DProps> = ({ onComplete }
     let frameId = 0;
     let resizeObserver: ResizeObserver | null = null;
     let disposed = false;
-    let lastAct: 1 | 2 | 3 | 4 = 1;
-    const firedBreaches = new Set<number>();
+    let lastAct: 1 | 2 | 3 = 1;
+    const firedPulses = new Set<number>();
 
     const geos: THREE.BufferGeometry[] = [];
     const mats: THREE.Material[] = [];
@@ -318,17 +320,20 @@ export const CinematicIntro3D: React.FC<CinematicIntro3DProps> = ({ onComplete }
         const t = window.setInterval(() => {
           const sec = (performance.now() - startTs) / 1000;
           elapsedRef.current = sec;
-          setElapsed(Math.min(INTRO_DURATION, sec));
+          setElapsed(Math.min(ANIMATION_DURATION, sec));
+          setAct(sec < 10 ? 1 : sec < 20 ? 2 : 3);
           setActiveCueIndex(engine.updateVoiceCues(sec));
-          if (sec >= INTRO_DURATION) {
+          if (sec >= ANIMATION_DURATION) {
             clearInterval(t);
             exitIntro(true);
           }
-        }, 180);
+        }, 120);
         return () => {
           clearInterval(t);
-          window.removeEventListener('pointerdown', handleFirstGesture);
-          window.removeEventListener('keydown', handleFirstGesture);
+          window.removeEventListener('pointerdown', handleFirstGesture, true);
+          window.removeEventListener('touchstart', handleFirstGesture, true);
+          window.removeEventListener('click', handleFirstGesture, true);
+          window.removeEventListener('keydown', handleFirstGesture, true);
           engine.dispose();
         };
       }
@@ -345,13 +350,11 @@ export const CinematicIntro3D: React.FC<CinematicIntro3DProps> = ({ onComplete }
         antialias: !isSoftwareGl,
         powerPreference: 'high-performance'
       });
-      renderer.setPixelRatio(isSoftwareGl ? 1 : Math.min(window.devicePixelRatio || 1, 2));
+      renderer.setPixelRatio(isSoftwareGl ? 1 : Math.min(window.devicePixelRatio || 1, 2.5));
       renderer.setSize(w, h);
       renderer.toneMapping = THREE.ACESFilmicToneMapping;
-      renderer.toneMappingExposure = 1.24;
+      renderer.toneMappingExposure = 1.32;
       renderer.outputColorSpace = THREE.SRGBColorSpace;
-      renderer.shadowMap.enabled = !isSoftwareGl;
-      renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
       const canvas = renderer.domElement;
       canvas.style.width = '100%';
@@ -365,55 +368,50 @@ export const CinematicIntro3D: React.FC<CinematicIntro3DProps> = ({ onComplete }
       const maxAniso = renderer.capabilities.getMaxAnisotropy();
 
       scene = new THREE.Scene();
-      const bgColor = new THREE.Color(0x020204);
-      scene.background = bgColor;
-      const fog = new THREE.FogExp2(0x020204, 0.052);
-      scene.fog = fog;
+      scene.background = new THREE.Color(0x020409);
+      scene.fog = new THREE.FogExp2(0x020409, 0.028);
 
-      camera = new THREE.PerspectiveCamera(48, w / h, 0.1, 180);
-      camera.position.set(0, 1.5, 22.0);
+      camera = new THREE.PerspectiveCamera(48, w / h, 0.1, 240);
+      camera.position.set(0, 2.6, 26);
 
       pmremGenerator = new THREE.PMREMGenerator(renderer);
       const roomEnv = new RoomEnvironment();
       envRT = pmremGenerator.fromScene(roomEnv, 0.04);
       scene.environment = envRT.texture;
-      scene.environmentIntensity = 0.7;
+      scene.environmentIntensity = 1.15;
       roomEnv.dispose();
 
-      // Horror Cyber-Bunker Lighting Rig
-      const hemi = new THREE.HemisphereLight(0x281822, 0x030406, 0.6);
+      // Cinematic 3-Point + Reactor Core Lighting Rig
+      const hemi = new THREE.HemisphereLight(0x38bdf8, 0x04070d, 0.85);
       scene.add(hemi);
 
-      const keyLight = new THREE.DirectionalLight(0xff1e38, 2.4);
-      keyLight.position.set(6, 12, 10);
-      if (!isSoftwareGl) {
-        keyLight.castShadow = true;
-        keyLight.shadow.mapSize.set(1024, 1024);
-      }
+      const keyLight = new THREE.DirectionalLight(0x00d69a, 3.2);
+      keyLight.position.set(8, 12, 10);
       scene.add(keyLight);
 
-      const rimLight = new THREE.DirectionalLight(0x00d69a, 1.8);
-      rimLight.position.set(-10, 5, -9);
+      const rimLight = new THREE.DirectionalLight(0x38bdf8, 2.6);
+      rimLight.position.set(-10, 6, -8);
       scene.add(rimLight);
 
-      const monitorGlow = new THREE.PointLight(0xff1e38, 9, 18, 1.5);
-      monitorGlow.position.set(0, 0.9, 2.2);
-      scene.add(monitorGlow);
+      const goldRim = new THREE.DirectionalLight(0xf59e0b, 1.8);
+      goldRim.position.set(0, -6, 9);
+      scene.add(goldRim);
 
-      const alarmStrobe = new THREE.PointLight(0xff2c44, 0, 60, 1.1);
-      alarmStrobe.position.set(0, 9, 4);
-      scene.add(alarmStrobe);
+      const coreLight = new THREE.PointLight(0x00d69a, 18, 38, 1.4);
+      coreLight.position.set(0, 0.8, 0);
+      scene.add(coreLight);
 
-      // 1. Wet Obsidian Floor Grid (polygonOffset prevents z-fighting)
-      const floorTex = createFloorGridTexture(maxAniso);
+      // 1. Reflective 4K Hexagonal Quantum Mirror Floor
+      const floorTex = createHexQuantumFloorTexture(maxAniso);
       texs.push(floorTex);
-      const floorGeo = new THREE.PlaneGeometry(140, 140);
+      const floorGeo = new THREE.PlaneGeometry(180, 180);
       const floorMat = new THREE.MeshStandardMaterial({
         map: floorTex,
-        roughness: 0.22,
-        metalness: 0.78,
-        emissive: 0x160306,
-        emissiveIntensity: 0.4,
+        color: 0x0d1b26,
+        roughness: 0.14,
+        metalness: 0.92,
+        emissive: 0x021218,
+        emissiveIntensity: 0.65,
         polygonOffset: true,
         polygonOffsetFactor: -1,
         polygonOffsetUnits: -1
@@ -422,364 +420,188 @@ export const CinematicIntro3D: React.FC<CinematicIntro3DProps> = ({ onComplete }
       mats.push(floorMat);
       const floorMesh = new THREE.Mesh(floorGeo, floorMat);
       floorMesh.rotation.x = -Math.PI / 2;
-      floorMesh.position.y = -4.5;
-      floorMesh.receiveShadow = !isSoftwareGl;
+      floorMesh.position.y = -4.2;
       scene.add(floorMesh);
 
-      // 2. Towering Cyber-Server Rack Corridor (96 Instanced Monoliths)
-      const rackTex = createServerRackTexture(maxAniso);
-      texs.push(rackTex);
-      const RACK_COUNT = 96;
-      const rackGeo = new THREE.BoxGeometry(1.7, 13.5, 2.1);
-      const rackMat = new THREE.MeshStandardMaterial({
-        map: rackTex,
-        color: 0x1b222c,
-        emissiveMap: rackTex,
-        emissive: 0xffffff,
-        emissiveIntensity: 0.7,
-        metalness: 0.85,
-        roughness: 0.35
-      });
-      geos.push(rackGeo);
-      mats.push(rackMat);
+      // 2. Centerpiece: 7-Layer Precision Quantum Astrolabe & Singularity Core
+      const reactorGroup = new THREE.Group();
+      reactorGroup.position.set(0, 0.8, 0);
+      scene.add(reactorGroup);
 
-      const racks = new THREE.InstancedMesh(rackGeo, rackMat, RACK_COUNT);
-      const rackMeta: { x: number; z: number; baseScaleY: number }[] = [];
-      for (let i = 0; i < RACK_COUNT; i++) {
-        const side = i % 2 === 0 ? -1 : 1;
-        const row = Math.floor(i / 2);
-        const angle = (row / 24) * Math.PI * 1.4 - Math.PI * 0.7;
-        const dist = 10.5 + (row % 3) * 4.2;
-        const x =
-          row < 20
-            ? side * (7.2 + (row % 2) * 3.1)
-            : Math.sin(angle) * dist;
-        const z =
-          row < 20
-            ? 24 - row * 2.5
-            : Math.cos(angle) * dist - 4;
-        const sy = 0.88 + (i % 5) * 0.14;
-        rackMeta.push({ x, z, baseScaleY: sy });
-        _v1.set(x, -4.5 + (13.5 * sy) / 2, z);
-        _e.set(0, row < 20 ? (side > 0 ? -Math.PI / 2 : Math.PI / 2) : -angle, 0);
-        _q.setFromEuler(_e);
-        _s.set(1, sy, 1);
-        _m4.compose(_v1, _q, _s);
-        racks.setMatrixAt(i, _m4);
-      }
-      racks.instanceMatrix.needsUpdate = true;
-      racks.computeBoundingSphere();
-      scene.add(racks);
+      // Layer A: Liquid-Chrome Mirror Sphere Core
+      const innerSphereGeo = new THREE.SphereGeometry(0.95, 48, 48);
+      const innerSphereMat = new THREE.MeshStandardMaterial({
+        color: 0x08131d,
+        metalness: 1.0,
+        roughness: 0.04,
+        emissive: 0x00d69a,
+        emissiveIntensity: 0.55
+      });
+      geos.push(innerSphereGeo);
+      mats.push(innerSphereMat);
+      const innerSphere = new THREE.Mesh(innerSphereGeo, innerSphereMat);
+      reactorGroup.add(innerSphere);
 
-      // 3. Centerpiece Composite 3D Subject: HOODED CYBER-INTRUDER PHANTOM (16+ PBR Parts)
-      const hackerGroup = new THREE.Group();
-      hackerGroup.position.set(0, 0.2, 0);
-      scene.add(hackerGroup);
-
-      const cloakMat = new THREE.MeshStandardMaterial({
-        color: 0x090b0e,
-        roughness: 0.86,
-        metalness: 0.18
-      });
-      const maskArmorMat = new THREE.MeshStandardMaterial({
-        color: 0x1c232d,
-        roughness: 0.18,
-        metalness: 0.92
-      });
-      const cyberChromeMat = new THREE.MeshStandardMaterial({
-        color: 0x8ea0b2,
-        roughness: 0.14,
-        metalness: 0.96
-      });
-      const faceVoidMat = new THREE.MeshStandardMaterial({
-        color: 0x010102,
-        roughness: 0.95,
-        metalness: 0.05
-      });
-      const eyeMat = new THREE.MeshStandardMaterial({
-        color: 0xff0026,
-        emissive: 0xff0026,
-        emissiveIntensity: 3.8,
-        roughness: 0.08,
-        metalness: 0.1
-      });
-      const laserBeamMat = new THREE.MeshBasicMaterial({
-        color: 0xff1133,
+      // Layer B: Glowing Crystalline Plasma Geodesic Shell
+      const plasmaGeo = new THREE.IcosahedronGeometry(1.38, 2);
+      const plasmaMat = new THREE.MeshStandardMaterial({
+        color: 0x00d69a,
+        emissive: 0x00d69a,
+        emissiveIntensity: 2.8,
+        wireframe: true,
         transparent: true,
-        opacity: 0.24,
+        opacity: 0.88
+      });
+      geos.push(plasmaGeo);
+      mats.push(plasmaMat);
+      const plasmaShell = new THREE.Mesh(plasmaGeo, plasmaMat);
+      reactorGroup.add(plasmaShell);
+
+      // Layer C: 5 Precision-Machined Concentric Titanium/Neon Gimbal Rings
+      const ringSpecs = [
+        { radius: 2.15, tube: 0.065, color: 0x00d69a, speedX: 1.1, speedY: 0.8, speedZ: 0.3 },
+        { radius: 2.75, tube: 0.055, color: 0x22d3ee, speedX: -0.8, speedY: 1.25, speedZ: 0.5 },
+        { radius: 3.4, tube: 0.07, color: 0xf59e0b, speedX: 0.65, speedY: -0.95, speedZ: 0.9 },
+        { radius: 4.1, tube: 0.05, color: 0x38bdf8, speedX: -1.05, speedY: -0.6, speedZ: 0.7 },
+        { radius: 4.85, tube: 0.06, color: 0x00d69a, speedX: 0.45, speedY: 0.85, speedZ: -0.65 }
+      ];
+
+      const gimbalRings: {
+        mesh: THREE.Mesh;
+        mat: THREE.MeshStandardMaterial;
+        speedX: number;
+        speedY: number;
+        speedZ: number;
+      }[] = [];
+
+      ringSpecs.forEach((spec) => {
+        const g = new THREE.TorusGeometry(spec.radius, spec.tube, 24, 128);
+        const m = new THREE.MeshStandardMaterial({
+          color: 0xdbeafe,
+          metalness: 0.95,
+          roughness: 0.12,
+          emissive: spec.color,
+          emissiveIntensity: 1.55
+        });
+        geos.push(g);
+        mats.push(m);
+        const mesh = new THREE.Mesh(g, m);
+        reactorGroup.add(mesh);
+        gimbalRings.push({
+          mesh,
+          mat: m,
+          speedX: spec.speedX,
+          speedY: spec.speedY,
+          speedZ: spec.speedZ
+        });
+      });
+
+      // Layer D: 96 Instanced Mirror-Chrome & Neon-Trimmed Monolith Turbine Blades
+      const BLADE_COUNT = 96;
+      const bladeGeo = new THREE.BoxGeometry(0.18, 1.45, 0.42);
+      const bladeMat = new THREE.MeshStandardMaterial({
+        color: 0x94a3b8,
+        metalness: 0.96,
+        roughness: 0.14,
+        emissive: 0x0ea5a4,
+        emissiveIntensity: 0.85
+      });
+      geos.push(bladeGeo);
+      mats.push(bladeMat);
+      const blades = new THREE.InstancedMesh(bladeGeo, bladeMat, BLADE_COUNT);
+      reactorGroup.add(blades);
+
+      // Layer E: 6 Volumetric Energy Pillars framing the Reactor Horizon
+      const pillarGeo = new THREE.CylinderGeometry(0.12, 0.28, 18, 16, 1, true);
+      const pillarMat = new THREE.MeshBasicMaterial({
+        color: 0x00d69a,
+        transparent: true,
+        opacity: 0.16,
         blending: THREE.AdditiveBlending,
         depthWrite: false,
         side: THREE.DoubleSide
       });
-      mats.push(cloakMat, maskArmorMat, cyberChromeMat, faceVoidMat, eyeMat, laserBeamMat);
+      geos.push(pillarGeo);
+      mats.push(pillarMat);
 
-      // Sculpted Hooded Torso & Mantle (LatheGeometry silhouette)
-      const torsoPts = [
-        new THREE.Vector2(2.3, -4.6),
-        new THREE.Vector2(1.9, -2.2),
-        new THREE.Vector2(1.65, -0.5),
-        new THREE.Vector2(1.35, 0.6),
-        new THREE.Vector2(0.85, 0.9)
-      ];
-      const torsoGeo = new THREE.LatheGeometry(torsoPts, 24);
-      geos.push(torsoGeo);
-      const torsoMesh = new THREE.Mesh(torsoGeo, cloakMat);
-      hackerGroup.add(torsoMesh);
-
-      // Cyber Shoulder Pauldrons (beveled armor)
-      const shoulderGeo = new THREE.BoxGeometry(1.35, 0.45, 0.95);
-      geos.push(shoulderGeo);
-      [-1, 1].forEach((side) => {
-        const sh = new THREE.Mesh(shoulderGeo, maskArmorMat);
-        sh.position.set(side * 1.48, 0.35, 0.1);
-        sh.rotation.z = side * -0.34;
-        hackerGroup.add(sh);
-      });
-
-      // Head Assembly (tracks viewer with sinister micro-tilts)
-      const headGroup = new THREE.Group();
-      headGroup.position.set(0, 1.85, 0.2);
-      hackerGroup.add(headGroup);
-
-      // Outer Hood Cowl
-      const hoodGeo = new THREE.SphereGeometry(1.18, 28, 24, 0, Math.PI * 2, 0, Math.PI * 0.72);
-      geos.push(hoodGeo);
-      const hoodMesh = new THREE.Mesh(hoodGeo, cloakMat);
-      hoodMesh.scale.set(1.04, 1.24, 1.18);
-      hoodMesh.rotation.x = 0.26;
-      hoodMesh.position.set(0, 0.16, -0.15);
-      headGroup.add(hoodMesh);
-
-      // Hood Peak Rim
-      const hoodRimGeo = new THREE.TorusGeometry(0.95, 0.14, 12, 32, Math.PI * 1.35);
-      geos.push(hoodRimGeo);
-      const hoodRim = new THREE.Mesh(hoodRimGeo, cloakMat);
-      hoodRim.rotation.z = -Math.PI * 0.175;
-      hoodRim.rotation.x = -0.25;
-      hoodRim.position.set(0, 0.08, 0.66);
-      headGroup.add(hoodRim);
-
-      // Pitch-black shadow void under hood
-      const voidGeo = new THREE.SphereGeometry(0.82, 20, 18);
-      geos.push(voidGeo);
-      const voidMesh = new THREE.Mesh(voidGeo, faceVoidMat);
-      voidMesh.scale.set(0.9, 1.08, 0.88);
-      voidMesh.position.set(0, 0.05, 0.28);
-      headGroup.add(voidMesh);
-
-      // Sculpted Metallic Cyber-Skull Mask (ExtrudeGeometry faceplate)
-      const maskShape = new THREE.Shape();
-      maskShape.moveTo(-0.56, 0.52);
-      maskShape.lineTo(0, 0.68);
-      maskShape.lineTo(0.56, 0.52);
-      maskShape.lineTo(0.66, 0.05);
-      maskShape.lineTo(0.46, -0.45);
-      maskShape.lineTo(0.24, -0.78);
-      maskShape.lineTo(-0.24, -0.78);
-      maskShape.lineTo(-0.46, -0.45);
-      maskShape.lineTo(-0.66, 0.05);
-      maskShape.closePath();
-
-      const maskGeo = new THREE.ExtrudeGeometry(maskShape, {
-        depth: 0.28,
-        bevelEnabled: true,
-        bevelThickness: 0.07,
-        bevelSize: 0.06,
-        bevelSegments: 3
-      });
-      geos.push(maskGeo);
-      const maskMesh = new THREE.Mesh(maskGeo, maskArmorMat);
-      maskMesh.position.set(0, 0.02, 0.54);
-      headGroup.add(maskMesh);
-
-      // Sinister Teeth / Respirator Vent Bars on Mask Jaw
-      const ventGeo = new THREE.BoxGeometry(0.05, 0.24, 0.09);
-      geos.push(ventGeo);
-      for (let v = -3; v <= 3; v++) {
-        const bar = new THREE.Mesh(ventGeo, cyberChromeMat);
-        bar.position.set(v * 0.08, -0.5, 0.9);
-        headGroup.add(bar);
+      for (let p = 0; p < 6; p++) {
+        const angle = (p / 6) * Math.PI * 2;
+        const pillar = new THREE.Mesh(pillarGeo, pillarMat);
+        pillar.position.set(Math.sin(angle) * 11, 3.8, Math.cos(angle) * 11);
+        scene.add(pillar);
       }
 
-      // Piercing Crimson Optical Scanner Eyes + Volumetric Laser Cones
-      const eyeGeo = new THREE.BoxGeometry(0.22, 0.075, 0.14);
-      const beamGeo = new THREE.ConeGeometry(0.45, 11, 20, 1, true);
-      beamGeo.translate(0, -5.5, 0);
-      beamGeo.rotateX(Math.PI / 2);
-      geos.push(eyeGeo, beamGeo);
-
-      const leftEye = new THREE.Mesh(eyeGeo, eyeMat);
-      leftEye.position.set(-0.24, 0.15, 0.88);
-      leftEye.rotation.z = -0.18;
-
-      const rightEye = new THREE.Mesh(eyeGeo, eyeMat);
-      rightEye.position.set(0.24, 0.15, 0.88);
-      rightEye.rotation.z = 0.18;
-
-      const leftBeam = new THREE.Mesh(beamGeo, laserBeamMat);
-      leftBeam.position.copy(leftEye.position);
-      const rightBeam = new THREE.Mesh(beamGeo, laserBeamMat);
-      rightBeam.position.copy(rightEye.position);
-
-      headGroup.add(leftEye, rightEye, leftBeam, rightBeam);
-
-      // Articulated Cyber-Hands hovering over holographic keyboards
-      const armGeo = new THREE.CylinderGeometry(0.14, 0.18, 1.65, 12);
-      const handGeo = new THREE.BoxGeometry(0.32, 0.12, 0.42);
-      const fingerGeo = new THREE.BoxGeometry(0.04, 0.05, 0.22);
-      geos.push(armGeo, handGeo, fingerGeo);
-
-      const hands: THREE.Group[] = [];
-      [-1, 1].forEach((side) => {
-        const arm = new THREE.Mesh(armGeo, cloakMat);
-        arm.position.set(side * 1.35, -0.55, 0.9);
-        arm.rotation.x = 1.05;
-        arm.rotation.z = side * 0.28;
-        hackerGroup.add(arm);
-
-        const handGrp = new THREE.Group();
-        handGrp.position.set(side * 0.92, -1.05, 1.85);
-        const palm = new THREE.Mesh(handGeo, maskArmorMat);
-        handGrp.add(palm);
-        for (let f = -2; f <= 2; f++) {
-          const finger = new THREE.Mesh(fingerGeo, cyberChromeMat);
-          finger.position.set(f * 0.06, -0.02, 0.26);
-          finger.rotation.x = 0.35;
-          handGrp.add(finger);
-        }
-        hackerGroup.add(handGrp);
-        hands.push(handGrp);
-      });
-
-      // 4. Dual Live-Updating 3D Terminal Textures & 6 Curved Holographic Displays
-      const termCanvasA = document.createElement('canvas');
-      termCanvasA.width = 512;
-      termCanvasA.height = 320;
-      const termCtxA = termCanvasA.getContext('2d')!;
-      drawTerminalCanvas(termCtxA, 512, 320, 0, false, false, 0);
-      const termTexA = new THREE.CanvasTexture(termCanvasA);
-      termTexA.colorSpace = THREE.SRGBColorSpace;
-      termTexA.anisotropy = maxAniso;
-
-      const termCanvasB = document.createElement('canvas');
-      termCanvasB.width = 512;
-      termCanvasB.height = 320;
-      const termCtxB = termCanvasB.getContext('2d')!;
-      drawTerminalCanvas(termCtxB, 512, 320, 3, false, false, 1);
-      const termTexB = new THREE.CanvasTexture(termCanvasB);
-      termTexB.colorSpace = THREE.SRGBColorSpace;
-      termTexB.anisotropy = maxAniso;
-      texs.push(termTexA, termTexB);
-
-      const screenMatA = new THREE.MeshStandardMaterial({
-        map: termTexA,
-        emissiveMap: termTexA,
-        emissive: 0xffffff,
-        emissiveIntensity: 1.05,
-        roughness: 0.2,
-        metalness: 0.1,
-        side: THREE.DoubleSide
-      });
-      const screenMatB = new THREE.MeshStandardMaterial({
-        map: termTexB,
-        emissiveMap: termTexB,
-        emissive: 0xffffff,
-        emissiveIntensity: 1.05,
-        roughness: 0.2,
-        metalness: 0.1,
-        side: THREE.DoubleSide
-      });
-      mats.push(screenMatA, screenMatB);
-
-      const screenGeo = new THREE.PlaneGeometry(3.2, 2.0);
-      geos.push(screenGeo);
-
-      const holoScreens: { mesh: THREE.Mesh; baseAngle: number; baseY: number; radius: number }[] = [];
-      for (let i = 0; i < 6; i++) {
-        const angle = -Math.PI * 0.52 + (i / 5) * Math.PI * 1.04;
-        const radius = i % 2 === 0 ? 4.3 : 5.4;
-        const y = i % 2 === 0 ? -0.35 : 2.35;
-        const scr = new THREE.Mesh(screenGeo, i % 2 === 0 ? screenMatA : screenMatB);
-        scr.position.set(Math.sin(angle) * radius, y, Math.cos(angle) * radius - 0.5);
-        scr.lookAt(0, y, 0.4);
-        scene.add(scr);
-        holoScreens.push({ mesh: scr, baseAngle: angle, baseY: y, radius });
-      }
-
-      // 5. Snaking Fiber-Optic Conduit Cables (TubeGeometry) across the wet floor
-      const cableMat = new THREE.MeshStandardMaterial({
-        color: 0xff1e38,
-        emissive: 0xff1e38,
-        emissiveIntensity: 1.4,
-        roughness: 0.3,
-        metalness: 0.7
-      });
-      mats.push(cableMat);
-
-      for (let c = 0; c < 10; c++) {
-        const a = (c / 10) * Math.PI * 2;
-        const curve = new THREE.CatmullRomCurve3([
-          new THREE.Vector3(Math.sin(a) * 1.2, -4.38, Math.cos(a) * 1.2),
-          new THREE.Vector3(Math.sin(a + 0.22) * 5.2, -4.42, Math.cos(a + 0.22) * 5.2),
-          new THREE.Vector3(Math.sin(a - 0.18) * 10.5, -4.38, Math.cos(a - 0.18) * 10.5),
-          new THREE.Vector3(Math.sin(a) * 15.0, -3.5, Math.cos(a) * 15.0)
-        ]);
-        const tubeGeo = new THREE.TubeGeometry(curve, 24, 0.055, 8, false);
-        geos.push(tubeGeo);
-        scene.add(new THREE.Mesh(tubeGeo, cableMat));
-      }
-
-      // 6. Rotating Firewall Rings & Threat Orbit Core
-      const ringGeo1 = new THREE.TorusGeometry(3.8, 0.05, 12, 80);
-      const ringGeo2 = new THREE.TorusGeometry(4.7, 0.04, 12, 96);
-      const ringMat = new THREE.MeshStandardMaterial({
-        color: 0xff1e38,
-        emissive: 0xff1e38,
-        emissiveIntensity: 1.8,
-        metalness: 0.8,
-        roughness: 0.2
-      });
-      geos.push(ringGeo1, ringGeo2);
-      mats.push(ringMat);
-
-      const firewallRing1 = new THREE.Mesh(ringGeo1, ringMat);
-      const firewallRing2 = new THREE.Mesh(ringGeo2, ringMat);
-      firewallRing1.position.set(0, 0.5, 0);
-      firewallRing2.position.set(0, 0.5, 0);
-      scene.add(firewallRing1, firewallRing2);
-
-      // 7. 1,500 Falling 3D Binary / Matrix Breach Rain Particles
-      const RAIN_COUNT = 1500;
-      const rainPos = new Float32Array(RAIN_COUNT * 3);
-      const rainData: { x: number; z: number; speed: number }[] = [];
-      for (let i = 0; i < RAIN_COUNT; i++) {
-        const x = (Math.random() - 0.5) * 34;
-        const z = (Math.random() - 0.5) * 44;
-        const y = -4.5 + Math.random() * 19;
-        rainData.push({ x, z, speed: 3.5 + Math.random() * 5.8 });
-        rainPos[i * 3] = x;
-        rainPos[i * 3 + 1] = y;
-        rainPos[i * 3 + 2] = z;
-      }
-      const rainGeo = new THREE.BufferGeometry();
-      const rainAttr = new THREE.BufferAttribute(rainPos, 3);
-      rainGeo.setAttribute('position', rainAttr);
-      const spriteTex = createHackerSpriteTexture();
-      geos.push(rainGeo);
-      texs.push(spriteTex);
-
-      const rainMat = new THREE.PointsMaterial({
-        map: spriteTex,
-        color: 0xff1e38,
-        size: 0.28,
+      // Layer F: Dual Expanding Electromagnetic Plasma Shockwave Rings
+      const shockGeo = new THREE.TorusGeometry(1.0, 0.065, 12, 96);
+      const shockMat1 = new THREE.MeshBasicMaterial({
+        color: 0x00d69a,
         transparent: true,
-        opacity: 0.85,
+        opacity: 0,
         blending: THREE.AdditiveBlending,
         depthWrite: false
       });
-      mats.push(rainMat);
-      const rainPoints = new THREE.Points(rainGeo, rainMat);
-      scene.add(rainPoints);
+      const shockMat2 = new THREE.MeshBasicMaterial({
+        color: 0x22d3ee,
+        transparent: true,
+        opacity: 0,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false
+      });
+      geos.push(shockGeo);
+      mats.push(shockMat1, shockMat2);
+
+      const shockRing1 = new THREE.Mesh(shockGeo, shockMat1);
+      shockRing1.rotation.x = Math.PI / 2;
+      shockRing1.position.set(0, -3.9, 0);
+
+      const shockRing2 = new THREE.Mesh(shockGeo, shockMat2);
+      shockRing2.position.set(0, 0.8, 0);
+
+      scene.add(shockRing1, shockRing2);
+
+      // 3. 3,200-Star Multi-Spectrum Galaxy & Hyperspace Vortex
+      const STAR_COUNT = 3200;
+      const starPos = new Float32Array(STAR_COUNT * 3);
+      const starCol = new Float32Array(STAR_COUNT * 3);
+      const starMeta: { angle: number; radius: number; y: number; speed: number }[] = [];
+
+      const palette = [0x00d69a, 0x22d3ee, 0x38bdf8, 0xf59e0b, 0xf8fafc];
+      for (let i = 0; i < STAR_COUNT; i++) {
+        const arm = i % 3;
+        const radius = 3.5 + Math.pow(Math.random(), 0.72) * 32;
+        const angle = arm * ((Math.PI * 2) / 3) + radius * 0.24 + (Math.random() - 0.5) * 0.9;
+        const y = (Math.random() - 0.5) * (10 + radius * 0.28);
+        starMeta.push({ angle, radius, y, speed: 0.14 + Math.random() * 0.35 });
+
+        starPos[i * 3] = Math.cos(angle) * radius;
+        starPos[i * 3 + 1] = y + 0.8;
+        starPos[i * 3 + 2] = Math.sin(angle) * radius;
+
+        _c1.setHex(palette[i % palette.length]);
+        starCol[i * 3] = _c1.r;
+        starCol[i * 3 + 1] = _c1.g;
+        starCol[i * 3 + 2] = _c1.b;
+      }
+
+      const starGeo = new THREE.BufferGeometry();
+      const starPosAttr = new THREE.BufferAttribute(starPos, 3);
+      starGeo.setAttribute('position', starPosAttr);
+      starGeo.setAttribute('color', new THREE.BufferAttribute(starCol, 3));
+      const starTex = createStarSpriteTexture();
+      geos.push(starGeo);
+      texs.push(starTex);
+
+      const starMat = new THREE.PointsMaterial({
+        map: starTex,
+        size: 0.36,
+        vertexColors: true,
+        transparent: true,
+        opacity: 0.92,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false
+      });
+      mats.push(starMat);
+      scene.add(new THREE.Points(starGeo, starMat));
 
       if (!isSoftwareGl) {
         renderer.compile(scene, camera);
@@ -812,202 +634,207 @@ export const CinematicIntro3D: React.FC<CinematicIntro3DProps> = ({ onComplete }
               frameId = window.setTimeout(poll, 5);
             } else {
               if (sync) gl.deleteSync(sync);
-              frameId = window.setTimeout(cb, 75);
+              frameId = window.setTimeout(cb, 70);
             }
           };
           frameId = window.setTimeout(poll, 5);
         } else {
-          frameId = window.setTimeout(cb, 75);
+          frameId = window.setTimeout(cb, 70);
         }
       };
 
       const startPerf = performance.now();
       let lastHudUpdate = 0;
-      let lastTermRedraw = 0;
-      let termTick = 0;
-      let lastBlackoutState = false;
+      let lastFlashState = false;
 
-      // Key terrifying breach jumpscare & alarm moments across 2 minutes
-      const BREACH_TIMES = [8.5, 22.0, 35.5, 48.0, 61.5, 78.0, 96.0];
+      // Crisp 30-second shockwave pulse beats
+      const PULSE_TIMES = [3.5, 9.5, 15.0, 20.5, 25.0];
 
       const tick = () => {
         if (disposed || !renderer || !scene || !camera) return;
 
         const nowMs = performance.now();
-        const t = Math.min(INTRO_DURATION, (nowMs - startPerf) / 1000);
+        const t = Math.min(ANIMATION_DURATION, (nowMs - startPerf) / 1000);
         elapsedRef.current = t;
 
-        const currentAct: 1 | 2 | 3 | 4 =
-          t < 30 ? 1 : t < 60 ? 2 : t < 90 ? 3 : 4;
-
+        const currentAct: 1 | 2 | 3 = t < 10 ? 1 : t < 20 ? 2 : 3;
         if (currentAct !== lastAct) {
           lastAct = currentAct;
           setAct(currentAct);
           engine.shiftActTone(currentAct);
         }
 
-        // Detect breach lunge & power blackout strobe
-        let breachPower = 0;
-        let inBlackout = false;
-        for (let bi = 0; bi < BREACH_TIMES.length; bi++) {
-          const bt = BREACH_TIMES[bi];
-          if (t >= bt && !firedBreaches.has(bi)) {
-            firedBreaches.add(bi);
-            engine.triggerBreachGlitchAndAlarm();
+        let pulsePower = 0;
+        let shockProgress = -1;
+        let inFlash = false;
+
+        for (let pi = 0; pi < PULSE_TIMES.length; pi++) {
+          const pt = PULSE_TIMES[pi];
+          if (t >= pt && !firedPulses.has(pi)) {
+            firedPulses.add(pi);
+            engine.triggerQuantumPulse();
           }
-          const dtB = t - bt;
-          if (dtB >= 0 && dtB < 1.25) {
-            if (dtB < 0.24) {
-              inBlackout = true; // Lights cut out except glowing red eyes!
-            } else {
-              breachPower = Math.max(breachPower, 1 - (dtB - 0.24) / 1.01);
-            }
+          const dtP = t - pt;
+          if (dtP >= 0 && dtP < 1.6) {
+            shockProgress = dtP / 1.6;
+            if (dtP < 0.16) inFlash = true;
+            pulsePower = Math.max(pulsePower, 1 - dtP / 1.6);
           }
         }
 
-        if (inBlackout !== lastBlackoutState) {
-          lastBlackoutState = inBlackout;
-          setBlackoutFlash(inBlackout);
+        if (inFlash !== lastFlashState) {
+          lastFlashState = inFlash;
+          setSurgeFlash(inFlash);
         }
 
-        if (nowMs - lastHudUpdate > 160) {
+        if (nowMs - lastHudUpdate > 120) {
           lastHudUpdate = nowMs;
           setElapsed(t);
           const cueIdx = engine.updateVoiceCues(t);
           setActiveCueIndex(cueIdx);
         }
 
-        // Color Evolution: Acts 1 & 2 = Terrifying Crimson Breach -> Acts 3 & 4 = Deephat Emerald Lock
-        const containmentBlend = THREE.MathUtils.clamp((t - 58) / 14, 0, 1);
-        _c1.setHex(0xff1e38);
-        _c2.setHex(0x00d69a);
-        _c1.lerp(_c2, containmentBlend);
+        // Dynamic Spectrum Blend: Emerald (#00D69A) -> Cyan (#22D3EE) -> Radiant Gold (#F59E0B)
+        const goldBlend = THREE.MathUtils.clamp((t - 20) / 6, 0, 1);
+        _c1.setHex(0x00d69a);
+        _c2.setHex(0x22d3ee);
+        _c3.setHex(0xf59e0b);
+        _c1.lerp(_c2, Math.sin(t * 0.45) * 0.5 + 0.5);
+        _c1.lerp(_c3, goldBlend * 0.65);
 
-        // Redraw live 3D holographic hacker screens every ~175ms
-        if (nowMs - lastTermRedraw > 175) {
-          lastTermRedraw = nowMs;
-          termTick++;
-          const isContainment = containmentBlend > 0.55;
-          drawTerminalCanvas(termCtxA, 512, 320, termTick, isContainment, breachPower > 0.4, 0);
-          drawTerminalCanvas(termCtxB, 512, 320, termTick + 2, isContainment, breachPower > 0.4, 1);
-          termTexA.needsUpdate = true;
-          termTexB.needsUpdate = true;
-        }
+        coreLight.color.copy(_c1);
+        coreLight.intensity = 18 + pulsePower * 22 + goldBlend * 12;
+        keyLight.color.copy(_c1);
+        keyLight.intensity = 3.2 + pulsePower * 2.2;
+        plasmaMat.color.copy(_c1);
+        plasmaMat.emissive.copy(_c1);
+        plasmaMat.emissiveIntensity = 2.6 + pulsePower * 3.0;
+        innerSphereMat.emissive.copy(_c1);
+        innerSphereMat.emissiveIntensity = 0.55 + pulsePower * 1.4;
+        pillarMat.color.copy(_c1);
+        pillarMat.opacity = 0.14 + pulsePower * 0.24;
 
-        // Lighting & Power-Blackout Terror Flicker
-        if (inBlackout) {
-          hemi.intensity = 0.02;
-          keyLight.intensity = 0.0;
-          rimLight.intensity = 0.05;
-          monitorGlow.intensity = 0.2;
-          alarmStrobe.intensity = 0;
-          eyeMat.emissiveIntensity = 7.5; // Eyes burn violently in total pitch darkness!
-        } else {
-          hemi.intensity = 0.6;
-          keyLight.color.copy(_c1);
-          keyLight.intensity = 2.4 + breachPower * 2.5;
-          rimLight.intensity = 1.8;
-          monitorGlow.color.copy(_c1);
-          monitorGlow.intensity = 9 + Math.sin(t * 9) * 2.2 + breachPower * 8;
-          alarmStrobe.color.copy(_c1);
-          alarmStrobe.intensity = breachPower > 0.05 ? breachPower * 22 : Math.sin(t * 7) > 0.92 ? 10 : 0;
-          eyeMat.emissive.copy(_c1);
-          eyeMat.emissiveIntensity = 3.8 + breachPower * 3.5;
-        }
+        // Inner Sphere & Plasma Core Rotation
+        const spinBoost = 1 + pulsePower * 2.0 + (currentAct === 3 ? 1.8 : 0);
+        plasmaShell.rotation.x = t * 0.55 * spinBoost;
+        plasmaShell.rotation.y = t * 0.85 * spinBoost;
+        const coreScale = 1 + Math.sin(t * 5) * 0.06 + pulsePower * 0.26;
+        plasmaShell.scale.setScalar(coreScale);
+        innerSphere.scale.setScalar(1 + pulsePower * 0.18);
 
-        cableMat.color.copy(_c1);
-        cableMat.emissive.copy(_c1);
-        cableMat.emissiveIntensity = 1.2 + Math.sin(t * 6) * 0.5 + breachPower * 1.4;
-        ringMat.color.copy(_c1);
-        ringMat.emissive.copy(_c1);
-        rainMat.color.copy(_c1);
-        laserBeamMat.color.copy(_c1);
-        laserBeamMat.opacity = inBlackout ? 0.55 : 0.22 + breachPower * 0.32;
-
-        // Animate Hacker Phantom & Sinister Head Tracking
-        hackerGroup.position.y = 0.2 + Math.sin(t * 1.5) * 0.16;
-        headGroup.lookAt(camera.position.x * 0.45, camera.position.y - 1.2, camera.position.z);
-        headGroup.rotation.z = Math.sin(t * 1.9) * 0.09 + (breachPower > 0.2 ? (Math.random() - 0.5) * 0.16 : 0);
-
-        // Cyber hands furiously typing / projecting streams
-        hands.forEach((hand, idx) => {
-          hand.position.y = -1.05 + Math.sin(t * 16 + idx * 2.1) * 0.06;
-          hand.rotation.x = Math.sin(t * 12 + idx) * 0.12;
+        // 5-Axis Gimbal Rings -> Snap into Symmetric Alignment during Act III Climax!
+        const lockBlend = THREE.MathUtils.clamp((t - 20.5) / 3.5, 0, 1);
+        gimbalRings.forEach((gr, idx) => {
+          if (lockBlend > 0.01) {
+            const targetRotX = idx % 2 === 0 ? 0.15 : -0.15;
+            const targetRotY = t * (0.45 + idx * 0.12);
+            const targetRotZ = 0;
+            gr.mesh.rotation.x = THREE.MathUtils.lerp(gr.mesh.rotation.x, targetRotX, 0.08 + lockBlend * 0.12);
+            gr.mesh.rotation.y = THREE.MathUtils.lerp(gr.mesh.rotation.y, targetRotY, 0.1);
+            gr.mesh.rotation.z = THREE.MathUtils.lerp(gr.mesh.rotation.z, targetRotZ, 0.08 + lockBlend * 0.12);
+          } else {
+            gr.mesh.rotation.x = t * gr.speedX;
+            gr.mesh.rotation.y = t * gr.speedY;
+            gr.mesh.rotation.z = t * gr.speedZ;
+          }
+          gr.mat.emissiveIntensity = 1.4 + pulsePower * 1.8 + lockBlend * 0.9;
         });
 
-        // Orbiting Holographic Screens
-        holoScreens.forEach((hs, idx) => {
-          const driftAngle = hs.baseAngle + Math.sin(t * 0.45 + idx) * 0.06;
-          hs.mesh.position.x = Math.sin(driftAngle) * hs.radius;
-          hs.mesh.position.z = Math.cos(driftAngle) * hs.radius - 0.5;
-          hs.mesh.position.y = hs.baseY + Math.sin(t * 1.3 + idx * 0.9) * 0.14;
-          hs.mesh.lookAt(0, hs.mesh.position.y, 0.5);
-        });
-
-        // Firewall Rings
-        firewallRing1.rotation.x = Math.PI * 0.36 + t * 0.45;
-        firewallRing1.rotation.y = t * 0.65;
-        firewallRing2.rotation.x = -Math.PI * 0.28 + t * 0.35;
-        firewallRing2.rotation.z = -t * 0.55;
-
-        // Falling 3D Binary Rain
-        const rArr = rainAttr.array as Float32Array;
-        const speedMult = 1 + breachPower * 2.1;
-        for (let i = 0; i < RAIN_COUNT; i++) {
-          let y = rArr[i * 3 + 1] - rainData[i].speed * 0.016 * speedMult;
-          if (y < -4.5) y = 14.5;
-          rArr[i * 3 + 1] = y;
+        // 96 Instanced Turbine Blades: Unfurling Mechanical Iris Halo
+        bladeMat.emissive.copy(_c1);
+        const irisRadius = 5.4 + Math.sin(t * 1.4) * 0.55 + pulsePower * 1.6 + lockBlend * 1.8;
+        for (let i = 0; i < BLADE_COUNT; i++) {
+          const frac = i / BLADE_COUNT;
+          const a = frac * Math.PI * 2 + t * 0.48;
+          const waveY = Math.sin(frac * Math.PI * 6 + t * 2.8) * (1.2 + pulsePower * 0.9);
+          const r = irisRadius + (i % 2 === 0 ? 0.45 : -0.45);
+          _v1.set(Math.cos(a) * r, waveY, Math.sin(a) * r);
+          _e.set(Math.sin(t + i * 0.2) * 0.6, -a, Math.PI * 0.18 + pulsePower * 0.5);
+          _q.setFromEuler(_e);
+          const sc = 0.85 + pulsePower * 0.45;
+          _s.set(sc, sc * (1 + (i % 3) * 0.2), sc);
+          _m4.compose(_v1, _q, _s);
+          blades.setMatrixAt(i, _m4);
         }
-        rainAttr.needsUpdate = true;
+        blades.instanceMatrix.needsUpdate = true;
 
-        // Floor scroll illusion
-        floorTex.offset.y = -(t * 0.22) % 1;
+        // Dual Electromagnetic Shockwaves
+        if (shockProgress >= 0) {
+          const s1 = 1 + shockProgress * 22;
+          shockRing1.scale.set(s1, s1, 1);
+          shockMat1.color.copy(_c1);
+          shockMat1.opacity = (1 - shockProgress) * 0.88;
 
-        // Violent glitch camera shake during breach impacts
-        const shake = breachPower > 0.1 ? breachPower * 0.34 : 0;
-        const sx = (Math.random() - 0.5) * shake;
-        const sy = (Math.random() - 0.5) * shake;
-
-        // 2-Minute (120s) 4-Act Camera Choreography
-        if (t < 30) {
-          // Act 1 (0-30s): Creeping through dark server corridor toward hooded hacker
-          const p = t / 30;
-          const dist = THREE.MathUtils.lerp(22.5, 9.2, p);
-          const sway = Math.sin(p * Math.PI * 2.2) * 2.8;
-          _camPos.set(sway + sx, 1.4 + Math.sin(p * Math.PI) * 0.8 + sy, dist);
-          _lookTarget.set(0, 1.45, 0.3);
-        } else if (t < 60) {
-          // Act 2 (30-60s): Aggressive breach orbit & close-up terror lunges at skull mask
-          const p = (t - 30) / 30;
-          const angle = Math.sin(p * Math.PI * 3.0) * 1.15;
-          const dist = 7.8 - breachPower * 2.9 + Math.sin(p * Math.PI * 4) * 1.2;
-          _camPos.set(
-            Math.sin(angle) * dist + sx,
-            1.6 + Math.sin(p * Math.PI * 2.5) * 1.1 + sy,
-            Math.cos(angle) * dist
-          );
-          _lookTarget.set(0, 1.65, 0.4);
-        } else if (t < 90) {
-          // Act 3 (60-90s): Deephat containment helical sweep showing holographic screens & emerald grid
-          const p = (t - 60) / 30;
-          const angle = Math.PI * 0.4 + p * Math.PI * 1.5;
-          const dist = THREE.MathUtils.lerp(10.8, 7.6, p);
-          _camPos.set(
-            Math.sin(angle) * dist + sx,
-            THREE.MathUtils.lerp(1.2, 3.4, p) + sy,
-            Math.cos(angle) * dist
-          );
-          _lookTarget.set(0, 1.1, 0.2);
+          const s2 = 1 + shockProgress * 15;
+          shockRing2.scale.setScalar(s2);
+          shockRing2.rotation.x = t * 1.5;
+          shockRing2.rotation.y = t * 1.1;
+          shockMat2.opacity = (1 - shockProgress) * 0.65;
         } else {
-          // Act 4 (90-120s): Final DeepSeek command portal warp acceleration
-          const p = (t - 90) / 30;
+          shockMat1.opacity = 0;
+          shockMat2.opacity = 0;
+        }
+
+        // 3,200-Star Galaxy Swirl & Act III Hyperspace Warp
+        const sArr = starPosAttr.array as Float32Array;
+        const warpSpeed = currentAct === 3 ? 1.8 + ((t - 20) / 10) * 3.5 : 1.0 + pulsePower * 0.9;
+        for (let i = 0; i < STAR_COUNT; i++) {
+          const sm = starMeta[i];
+          const a = sm.angle + t * sm.speed * 0.35 * warpSpeed;
+          sArr[i * 3] = Math.cos(a) * sm.radius;
+          sArr[i * 3 + 1] = sm.y + 0.8 + Math.sin(t * 0.8 + i * 0.01) * 0.35;
+          sArr[i * 3 + 2] = Math.sin(a) * sm.radius;
+        }
+        starPosAttr.needsUpdate = true;
+
+        floorTex.offset.y = -(t * (currentAct === 3 ? 0.55 : 0.22)) % 1;
+
+        // Smooth FOV Pulse
+        const targetFov =
+          currentAct === 3
+            ? 48 + ((t - 20) / 10) * 16 + pulsePower * 5
+            : 48 + pulsePower * 7;
+        if (Math.abs(camera.fov - targetFov) > 0.12) {
+          camera.fov = THREE.MathUtils.lerp(camera.fov, targetFov, 0.16);
+          camera.updateProjectionMatrix();
+        }
+
+        // 30-Second Tight 3-Act Camera Choreography
+        if (t < 10) {
+          // Act I (0-10s): Majestic sweeping approach through nebula toward Quantum Core
+          const p = t / 10;
+          const ease = 1 - Math.pow(1 - p, 2);
+          const angle = -0.75 + p * 0.95;
+          const dist = THREE.MathUtils.lerp(24.5, 11.2, ease);
+          _camPos.set(
+            Math.sin(angle) * dist,
+            THREE.MathUtils.lerp(4.4, 2.0, ease),
+            Math.cos(angle) * dist
+          );
+          _lookTarget.set(0, 0.8, 0);
+        } else if (t < 20) {
+          // Act II (10-20s): Dynamic 360-degree high-energy orbital swoop around gimbal rings
+          const p = (t - 10) / 10;
+          const angle = 0.2 + p * Math.PI * 1.85;
+          const dist = 10.6 - pulsePower * 1.8 + Math.sin(p * Math.PI * 2) * 1.4;
+          _camPos.set(
+            Math.sin(angle) * dist,
+            1.6 + Math.sin(p * Math.PI * 2.5) * 2.2,
+            Math.cos(angle) * dist
+          );
+          _lookTarget.set(0, 0.85, 0);
+        } else {
+          // Act III (20-30s): Lock-on symmetry + Hyperspace Warp Launch straight through the core
+          const p = (t - 20) / 10;
           const ease = p * p * (3 - 2 * p);
+          const orbitAngle = THREE.MathUtils.lerp(Math.PI * 2.05, Math.PI * 2.0, ease);
+          const dist = THREE.MathUtils.lerp(11.4, 0.4, ease);
           _camPos.set(
-            THREE.MathUtils.lerp(1.8, 0, ease) + sx,
-            THREE.MathUtils.lerp(2.6, 1.55, ease) + sy,
-            THREE.MathUtils.lerp(9.2, 1.35, ease)
+            Math.sin(orbitAngle) * dist,
+            THREE.MathUtils.lerp(2.2, 0.8, ease),
+            Math.cos(orbitAngle) * dist
           );
-          _lookTarget.set(0, 1.55, -2.5);
+          _lookTarget.set(0, 0.8, -8);
         }
 
         camera.position.lerp(_camPos, 0.16);
@@ -1015,7 +842,7 @@ export const CinematicIntro3D: React.FC<CinematicIntro3DProps> = ({ onComplete }
 
         renderer.render(scene, camera);
 
-        if (t >= INTRO_DURATION) {
+        if (t >= ANIMATION_DURATION) {
           exitIntro(true);
           return;
         }
@@ -1037,8 +864,10 @@ export const CinematicIntro3D: React.FC<CinematicIntro3DProps> = ({ onComplete }
         disposed = true;
         cancelAnimationFrame(frameId);
         window.clearTimeout(frameId);
-        window.removeEventListener('pointerdown', handleFirstGesture);
-        window.removeEventListener('keydown', handleFirstGesture);
+        window.removeEventListener('pointerdown', handleFirstGesture, true);
+        window.removeEventListener('touchstart', handleFirstGesture, true);
+        window.removeEventListener('click', handleFirstGesture, true);
+        window.removeEventListener('keydown', handleFirstGesture, true);
         if (resizeObserver) resizeObserver.disconnect();
         geos.forEach((g) => g.dispose());
         mats.forEach((m) => m.dispose());
@@ -1051,95 +880,230 @@ export const CinematicIntro3D: React.FC<CinematicIntro3DProps> = ({ onComplete }
     } catch {
       exitIntro(false);
     }
-  }, []);
+  }, [phase]);
 
-  const remaining = Math.max(0, Math.ceil(INTRO_DURATION - elapsed));
-  const mins = String(Math.floor(remaining / 60)).padStart(2, '0');
-  const secs = String(remaining % 60).padStart(2, '0');
-  const progressPct = Math.min(100, (elapsed / INTRO_DURATION) * 100);
+  const forceEnableAnimSound = async () => {
+    const engine = audioRef.current;
+    if (!engine) return;
+    engine.setMuted(false);
+    if (!audioActive) {
+      const ok = await engine.start();
+      if (ok) {
+        setAudioActive(true);
+        const idx = engine.updateVoiceCues(Math.max(0.85, elapsedRef.current));
+        setActiveCueIndex(idx);
+      }
+    }
+  };
+
+  // =========================================================================
+  // RENDER STAGE 1: FULL-SCREEN 4K UHD VIDEO WITH SOUND
+  // =========================================================================
+  if (phase === 'video' || phase === 'transition') {
+    const vidPct = videoDuration > 0 ? Math.min(100, (videoTime / videoDuration) * 100) : 0;
+
+    return (
+      <div
+        onClick={() => {
+          handleEnableVideoSound();
+        }}
+        className={`fixed inset-0 z-50 bg-black text-white overflow-hidden select-none transition-opacity duration-500 ${
+          fadingOut ? 'opacity-0 pointer-events-none' : 'opacity-100'
+        }`}
+      >
+        <video
+          ref={videoRef}
+          src={INTRO_VIDEO_SRC}
+          playsInline
+          autoPlay
+          preload="auto"
+          onLoadedMetadata={(e) => {
+            const dur = e.currentTarget.duration;
+            if (Number.isFinite(dur)) setVideoDuration(dur);
+          }}
+          onTimeUpdate={(e) => {
+            setVideoTime(e.currentTarget.currentTime);
+          }}
+          onEnded={transitionToAnimation}
+          onError={transitionToAnimation}
+          className="w-full h-full object-contain landscape:object-cover"
+          style={{
+            filter: 'contrast(1.08) saturate(1.1) brightness(1.03)'
+          }}
+        />
+
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0"
+          style={{
+            background:
+              'radial-gradient(circle at 50% 50%, transparent 60%, rgba(0, 0, 0, 0.62) 100%)'
+          }}
+        />
+
+        {phase === 'transition' && (
+          <div className="pointer-events-none absolute inset-0 z-40 bg-[#00D69A]/20 animate-pulse flex items-center justify-center">
+            <div className="px-6 py-3 rounded-xl bg-[#07090B]/95 border border-[#00D69A] font-mono text-xs sm:text-sm tracking-[0.28em] text-[#00D69A] uppercase shadow-2xl">
+              LAUNCHING 4K QUANTUM SEQUENCE // 00:30
+            </div>
+          </div>
+        )}
+
+        <div className="hidden">
+          <div className="px-3.5 py-2 rounded-lg bg-[#07090B]/88 border border-[#233040] flex items-center gap-2.5 pointer-events-none">
+            <span className="w-2 h-2 rounded-full bg-[#00D69A] animate-pulse" />
+            <span className="font-mono text-[11px] font-semibold tracking-wider text-white">
+              4K UHD STREAM // INCOMING TRANSMISSION
+            </span>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={handleEnableVideoSound}
+              className="px-3 py-2 rounded-lg border text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer bg-[#07090B]/88 border-[#00D69A]/60 text-[#00D69A]"
+            >
+              <Volume2 className="w-3.5 h-3.5" />
+              <span>Sound On</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                transitionToAnimation();
+              }}
+              className="px-3 py-2 rounded-lg bg-[#07090B]/88 hover:bg-[#151C24] border border-[#233040] text-[#E2E8F0] font-semibold text-xs flex items-center gap-1.5 transition-colors cursor-pointer"
+            >
+              <Sparkles className="w-3.5 h-3.5 text-[#00D69A]" />
+              <span className="hidden sm:inline">Next: 30s 3D Sequence</span>
+              <span className="sm:hidden">3D Intro</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                exitIntro(false);
+              }}
+              className="px-3.5 py-2 rounded-lg bg-[#00D69A] hover:bg-[#0EA5A4] text-[#07090B] font-bold text-xs flex items-center gap-1.5 transition-colors cursor-pointer"
+            >
+              <span>Enter Platform</span>
+              <FastForward className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        </div>
+
+        {(videoMutedPrompt || videoNeedsPlayClick) && (
+          <div className="hidden">
+            <button
+              type="button"
+              onClick={handleEnableVideoSound}
+              className="px-6 py-3.5 rounded-xl bg-[#07090B]/94 border-2 border-[#00D69A] text-white font-bold text-xs sm:text-sm tracking-wider uppercase flex items-center gap-3 shadow-[0_0_32px_rgba(0,214,154,0.35)] hover:bg-[#0D1116] transition-transform active:scale-95 cursor-pointer animate-pulse"
+            >
+              {videoNeedsPlayClick ? (
+                <Play className="w-4 h-4 text-[#00D69A] fill-[#00D69A]" />
+              ) : (
+                <Volume2 className="w-4 h-4 text-[#00D69A]" />
+              )}
+              <span>
+                {videoNeedsPlayClick
+                  ? 'Tap to Launch Full 4K Video + Sound'
+                  : 'Tap Anywhere to Enable Full Sound'}
+              </span>
+            </button>
+          </div>
+        )}
+
+        <div className="pointer-events-none absolute bottom-4 left-4 right-4 sm:left-6 sm:right-6 z-20">
+          <div className="flex items-center justify-between font-mono text-[10px] text-[#B8C5D2] mb-1.5">
+            <span>STAGE 01 / 02 · FULL 4K TRANSMISSION</span>
+            <span className="tabular-nums">
+              {formatTime(videoTime)} / {formatTime(videoDuration)}
+            </span>
+          </div>
+          <div className="w-full h-1 rounded-full bg-[#11161D]/90 overflow-hidden">
+            <div
+              className="h-full bg-[#00D69A] transition-all duration-150"
+              style={{ width: `${vidPct}%` }}
+            />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // =========================================================================
+  // RENDER STAGE 2: 30-SECOND ULTRA-HD 4K QUANTUM ASTROLABE 3D ANIMATION
+  // =========================================================================
+  const remaining = Math.max(0, Math.ceil(ANIMATION_DURATION - elapsed));
+  const secs = String(remaining).padStart(2, '0');
+  const progressPct = Math.min(100, (elapsed / ANIMATION_DURATION) * 100);
 
   const activeCue = INTRO_VOICE_CUES[activeCueIndex] || INTRO_VOICE_CUES[0];
   const nextCueAt =
     activeCueIndex < INTRO_VOICE_CUES.length - 1
       ? INTRO_VOICE_CUES[activeCueIndex + 1].atSeconds
-      : INTRO_DURATION;
-  const cueWindow = Math.max(2.5, nextCueAt - activeCue.atSeconds - 1.2);
+      : ANIMATION_DURATION;
+  const cueWindow = Math.max(1.8, nextCueAt - activeCue.atSeconds - 0.5);
   const cueElapsed = Math.max(0, elapsed - activeCue.atSeconds);
   const revealChars = Math.min(
     activeCue.text.length,
-    Math.max(12, Math.floor((cueElapsed / cueWindow) * activeCue.text.length * 1.45))
+    Math.max(10, Math.floor((cueElapsed / cueWindow) * activeCue.text.length * 1.45))
   );
   const typedSubtitle = activeCue.text.slice(0, revealChars);
 
   const actTitle =
     act === 1
-      ? 'BREACH ACTIVE // DARK CORRIDOR INFILTRATION'
+      ? 'STAGE 02 · ACT I // QUANTUM CORE IGNITION'
       : act === 2
-      ? 'KERNEL OVERRIDE // ROOT ESCALATION'
-      : act === 3
-      ? 'DEEPHAT BRIEFING // PLATFORM ARCHITECTURE'
-      : 'PORTAL ARMED // INITIALIZING DEEPSEEK';
+      ? 'STAGE 02 · ACT II // HYPER-GYRO ACCELERATION'
+      : 'STAGE 02 · ACT III // SOVEREIGN 4K LOCKUP';
 
   return (
     <div
-      className={`fixed inset-0 z-50 bg-[#020204] text-[#F4F7F6] overflow-hidden select-none transition-opacity duration-500 ${
+      className={`fixed inset-0 z-50 bg-[#020409] text-white overflow-hidden select-none transition-opacity duration-500 ${
         fadingOut ? 'opacity-0 pointer-events-none' : 'opacity-100'
       }`}
     >
       {/* Dedicated WebGL Mount Container */}
       <div ref={mountRef} className="absolute inset-0" />
 
-      {/* Crimson / Obsidian Vignette Scrim (zero backdrop-filter over WebGL) */}
+      {/* Subtle Cosmic Vignette & Supernova Surge Glow (zero backdrop-filter over WebGL) */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-0 transition-opacity duration-100"
+        className="pointer-events-none absolute inset-0 transition-opacity duration-150"
         style={{
-          background: blackoutFlash
-            ? 'radial-gradient(circle at 50% 42%, rgba(255, 0, 34, 0.08) 12%, rgba(0, 0, 0, 0.94) 75%)'
-            : act <= 2
-            ? 'radial-gradient(circle at 50% 44%, transparent 28%, rgba(16, 2, 5, 0.8) 100%)'
-            : 'radial-gradient(circle at 50% 44%, transparent 32%, rgba(2, 8, 10, 0.76) 100%)'
+          background: surgeFlash
+            ? 'radial-gradient(circle at 50% 48%, rgba(0, 214, 154, 0.22) 0%, rgba(34, 211, 238, 0.1) 36%, rgba(2, 4, 9, 0.72) 100%)'
+            : 'radial-gradient(circle at 50% 48%, transparent 34%, rgba(2, 4, 9, 0.72) 100%)'
         }}
       />
 
-      {/* Minimal Top HUD Strip with Timer, Sound Control & Enter Platform */}
-      <div className="absolute top-3 left-3 right-3 sm:top-5 sm:left-6 sm:right-6 z-20 flex flex-wrap items-center justify-between gap-2">
-        <div className="px-3.5 py-2 rounded-lg bg-[#07090B]/92 border border-[#1E2936] flex items-center gap-2.5 pointer-events-none">
-          <ShieldAlert
-            className={`w-4 h-4 shrink-0 ${
-              act <= 2 ? 'text-[#FF1E38]' : 'text-[#00D69A]'
-            }`}
-          />
-          <span
-            className={`font-mono text-[11px] font-semibold tracking-wider ${
-              act <= 2 ? 'text-[#FF8F9C]' : 'text-[#00D69A]'
-            }`}
-          >
+      {/* Minimal Top HUD Strip */}
+      <div className="hidden">
+        <div className="px-3.5 py-2 rounded-lg bg-[#07090B]/92 border border-[#233040] flex items-center gap-2.5 pointer-events-none">
+          <Cpu className="w-4 h-4 shrink-0 text-[#00D69A]" />
+          <span className="font-mono text-[11px] font-semibold tracking-wider text-[#00D69A]">
             {actTitle}
           </span>
         </div>
 
         <div className="flex items-center gap-2">
-          <div className="px-3 py-2 rounded-lg bg-[#07090B]/92 border border-[#1E2936] font-mono text-xs text-[#F4F7F6] tabular-nums">
-            {mins}:{secs} <span className="text-[#8F9CA8] text-[10px]">/ 02:00</span>
+          <div className="px-3 py-2 rounded-lg bg-[#07090B]/92 border border-[#233040] font-mono text-xs text-white tabular-nums">
+            00:{secs} <span className="text-[#9AA7B4] text-[10px]">/ 00:30</span>
           </div>
 
-          <button
-            type="button"
-            onClick={toggleMute}
-            className={`px-3 py-2 rounded-lg border text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer ${
-              !audioActive
-                ? 'bg-[#FF1E38]/25 border-[#FF1E38] text-[#FFD6DC] hover:bg-[#FF1E38]/35'
-                : muted
-                ? 'bg-[#07090B]/92 border-[#1E2936] text-[#8F9CA8] hover:text-[#F4F7F6]'
-                : 'bg-[#07090B]/92 border-[#00D69A]/60 text-[#00D69A]'
-            }`}
-          >
-            {muted ? <VolumeX className="w-3.5 h-3.5" /> : <Volume2 className="w-3.5 h-3.5" />}
-            <span className="hidden sm:inline">
-              {!audioActive ? 'Enable Sound & Voice' : muted ? 'Unmute' : 'Sound On'}
-            </span>
-          </button>
+          {!audioActive && (
+            <button
+              type="button"
+              onClick={forceEnableAnimSound}
+              className="px-3 py-2 rounded-lg border text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer bg-[#00D69A]/20 border-[#00D69A] text-white hover:bg-[#00D69A]/30"
+            >
+              <Volume2 className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">Enable Sound &amp; Voice</span>
+            </button>
+          )}
 
           <button
             type="button"
@@ -1152,58 +1116,45 @@ export const CinematicIntro3D: React.FC<CinematicIntro3DProps> = ({ onComplete }
         </div>
       </div>
 
-      {/* Act IV Climax Title Lockup */}
-      {elapsed >= 104 && (
+      {/* Act III Climax 4K Brand Lockup */}
+      {elapsed >= 21.5 && (
         <div className="pointer-events-none absolute inset-x-0 top-[18%] z-20 flex flex-col items-center text-center px-4">
-          <span className="font-mono text-xs tracking-[0.38em] text-[#00D69A] uppercase mb-2">
-            Sovereign Deephat Infrastructure
+          <span className="font-mono text-xs tracking-[0.38em] text-[#22D3EE] uppercase mb-2 font-bold">
+            Ultra-HD 4K Sovereign Infrastructure
           </span>
-          <h1 className="text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-[0.16em] text-[#F4F7F6]">
+          <h1 className="text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-[0.18em] text-white drop-shadow-[0_0_28px_rgba(0,214,154,0.45)]">
             DEEPSEEK
           </h1>
-          <p className="mt-3 text-xs sm:text-sm text-[#D1D9E0] max-w-lg">
-            Containment complete. Launching live global cyber-defense &amp; software command grid
+          <p className="mt-3 text-xs sm:text-sm text-[#E2E8F0] max-w-lg font-medium">
+            Quantum core synchronized. Launching global cyber-defense &amp; enterprise command grid
           </p>
         </div>
       )}
 
-      {/* Live On-Screen Voice Transcript Display (shows exactly what the voice is speaking) */}
+      {/* Live On-Screen Voice Transcript Display */}
       <div className="pointer-events-none absolute bottom-5 left-1/2 -translate-x-1/2 w-[min(820px,94vw)] z-20">
-        <div
-          className={`px-5 py-3.5 rounded-xl bg-[#050709]/95 border transition-colors ${
-            act <= 2 ? 'border-[#FF1E38]/55' : 'border-[#00D69A]/55'
-          } shadow-2xl`}
-        >
+        <div className="px-5 py-3.5 rounded-xl bg-[#05080C]/95 border border-[#00D69A]/50 shadow-2xl">
           <div className="flex items-center justify-between gap-3 mb-1.5">
             <div className="flex items-center gap-2">
-              <Terminal
-                className={`w-3.5 h-3.5 ${act <= 2 ? 'text-[#FF1E38]' : 'text-[#00D69A]'}`}
-              />
-              <span
-                className={`font-mono text-[10px] font-bold uppercase tracking-[0.2em] ${
-                  act <= 2 ? 'text-[#FF6E7F]' : 'text-[#00D69A]'
-                }`}
-              >
-                VOICE TRANSCRIPT // {activeCue.label}
+              <Terminal className="w-3.5 h-3.5 text-[#00D69A]" />
+              <span className="font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-[#00D69A]">
+                VOICE BRIEFING // {activeCue.label}
               </span>
             </div>
-            <span className="font-mono text-[10px] text-[#8F9CA8] tabular-nums">
+            <span className="font-mono text-[10px] text-[#9AA7B4] tabular-nums">
               {Math.round(progressPct)}%
             </span>
           </div>
 
-          <p className="text-xs sm:text-sm font-medium text-[#F4F7F6] leading-relaxed font-mono">
+          <p className="text-xs sm:text-sm font-medium text-white leading-relaxed font-mono">
             &ldquo;{typedSubtitle}
             {revealChars < activeCue.text.length ? '_' : ''}&rdquo;
           </p>
 
           <div className="mt-2.5 w-full h-1 rounded-full bg-[#11161D] overflow-hidden">
             <div
-              className="h-full transition-all duration-200"
-              style={{
-                width: `${progressPct}%`,
-                backgroundColor: act <= 2 ? '#FF1E38' : '#00D69A'
-              }}
+              className="h-full bg-gradient-to-r from-[#00D69A] via-[#22D3EE] to-[#F59E0B] transition-all duration-150"
+              style={{ width: `${progressPct}%` }}
             />
           </div>
         </div>

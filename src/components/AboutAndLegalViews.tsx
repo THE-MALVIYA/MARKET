@@ -8,31 +8,31 @@ export const AboutView: React.FC = () => {
 
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-12">
-      <div className="p-8 sm:p-10 rounded-2xl bg-[#11161D] border border-[#1E2936] space-y-5">
+      <div className="dsk-surface p-8 sm:p-10 rounded-2xl space-y-5">
         <span className="text-[11px] font-mono uppercase tracking-[0.18em] text-[#00D69A] font-semibold block">
           About DEEPSEEK
         </span>
-        <h1 className="text-3xl sm:text-4xl font-extrabold text-[#F4F7F6] max-w-3xl leading-tight">
+        <h1 className="text-3xl sm:text-4xl font-extrabold text-white max-w-3xl leading-tight">
           Enterprise Deephat &amp; Infrastructure Software Distribution
         </h1>
-        <p className="text-sm sm:text-base text-[#8F9CA8] max-w-3xl leading-relaxed">
+        <p className="text-sm sm:text-base text-[#CBD5E1] max-w-3xl leading-relaxed">
           DEEPSEEK operates as an independent international technology marketplace dedicated to defensive security software, distributed observability engines, cryptographic verification platforms, and infrastructure acceleration suites.
         </p>
-        <p className="text-xs text-[#8F9CA8]/90 max-w-3xl leading-relaxed">
+        <p className="text-xs text-[#9FB0C2] max-w-3xl leading-relaxed">
           Note: DEEPSEEK is an independent software marketplace operating in Deephat and infrastructure tooling and is not affiliated with DeepSeek AI.
         </p>
 
         <div className="pt-2 flex flex-wrap gap-3">
           <button
             onClick={() => setActiveTab('products')}
-            className="px-5 py-2.5 rounded-lg bg-[#00D69A] hover:bg-[#0EA5A4] text-[#07090B] font-semibold text-xs flex items-center gap-2 cursor-pointer"
+            className="dsk-btn-3d px-5 py-2.5 rounded-lg text-xs flex items-center gap-2 cursor-pointer"
           >
             <span>Explore {products.length} Software Suites</span>
             <ArrowRight className="w-4 h-4" />
           </button>
           <button
             onClick={() => setActiveTab('support')}
-            className="px-5 py-2.5 rounded-lg bg-[#0D1116] hover:bg-[#151C24] border border-[#1E2936] text-[#F4F7F6] font-semibold text-xs cursor-pointer"
+            className="dsk-btn-secondary-3d px-5 py-2.5 rounded-lg text-xs cursor-pointer"
           >
             Contact Support
           </button>
@@ -40,28 +40,28 @@ export const AboutView: React.FC = () => {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="p-6 rounded-xl bg-[#11161D] border border-[#1E2936] space-y-2.5">
+        <div className="dsk-panel-3d p-6 rounded-xl space-y-2.5">
           <ShieldCheck className="w-5 h-5 text-[#00D69A]" />
-          <h3 className="text-sm font-bold text-[#F4F7F6]">Authorized Security Posture</h3>
-          <p className="text-xs text-[#8F9CA8] leading-relaxed">
+          <h3 className="text-sm font-bold text-white">Authorized Security Posture</h3>
+          <p className="text-xs text-[#CBD5E1] leading-relaxed">
             Catalog tooling focuses on infrastructure observability, vulnerability posture validation, cryptographic key hygiene, and authorized defensive assessments.
           </p>
         </div>
 
-        <div className="p-6 rounded-xl bg-[#11161D] border border-[#1E2936] space-y-2.5">
-          <Cpu className="w-5 h-5 text-[#0EA5A4]" />
-          <h3 className="text-sm font-bold text-[#F4F7F6]">Transparent Technical Specs</h3>
-          <p className="text-xs text-[#8F9CA8] leading-relaxed">
+        <div className="dsk-panel-3d p-6 rounded-xl space-y-2.5">
+          <Cpu className="w-5 h-5 text-[#38BDF8]" />
+          <h3 className="text-sm font-bold text-white">Transparent Technical Specs</h3>
+          <p className="text-xs text-[#CBD5E1] leading-relaxed">
             Every product detail view lists architecture targets, operating system requirements, version history, and verification CLI workflows prior to checkout.
           </p>
         </div>
 
-        <div className="p-6 rounded-xl bg-[#11161D] border border-[#1E2936] space-y-2.5">
+        <div className="dsk-panel-3d p-6 rounded-xl space-y-2.5">
           <Layers className="w-5 h-5 text-[#00D69A]" />
-          <h3 className="text-sm font-bold text-[#F4F7F6]">
+          <h3 className="text-sm font-bold text-white">
             {Math.max(0, categories.length - 1)} Active Categories
           </h3>
-          <p className="text-xs text-[#8F9CA8] leading-relaxed">
+          <p className="text-xs text-[#CBD5E1] leading-relaxed">
             Organized across telemetry, stream processing, zero-trust gateways, cryptography, vulnerability scanning, and database storage engines.
           </p>
         </div>
@@ -76,14 +76,14 @@ export const CategoriesDirectoryView: React.FC = () => {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">
-      <div className="pb-5 border-b border-[#1E2936]">
+      <div className="pb-5 border-b border-[#253445]">
         <span className="text-[11px] font-mono uppercase tracking-[0.18em] text-[#00D69A] font-semibold block mb-1">
           Catalog Taxonomy
         </span>
-        <h1 className="text-2xl sm:text-3xl font-bold text-[#F4F7F6]">
+        <h1 className="text-2xl sm:text-3xl font-bold text-white">
           Technology &amp; Security Categories
         </h1>
-        <p className="text-xs sm:text-sm text-[#8F9CA8] mt-1">
+        <p className="text-xs sm:text-sm text-[#CBD5E1] mt-1">
           Browse all software domains currently stocked in the DEEPSEEK repository.
         </p>
       </div>
@@ -98,22 +98,22 @@ export const CategoriesDirectoryView: React.FC = () => {
                 setSelectedCategory(cat);
                 setActiveTab('products');
               }}
-              className="p-6 rounded-xl bg-[#11161D] hover:bg-[#151C24] border border-[#1E2936] hover:border-[#00D69A]/50 transition-colors cursor-pointer flex flex-col justify-between gap-4"
+              className="dsk-card-3d dsk-surface p-6 rounded-xl hover:border-[#00D69A]/60 cursor-pointer flex flex-col justify-between gap-4"
             >
               <div>
                 <div className="flex items-center justify-between gap-2 mb-2">
                   <span className="text-[11px] font-mono text-[#00D69A]">
                     {matching.length} {matching.length === 1 ? 'SUITE' : 'SUITES'}
                   </span>
-                  <ArrowRight className="w-4 h-4 text-[#8F9CA8]" />
+                  <ArrowRight className="w-4 h-4 text-[#CBD5E1]" />
                 </div>
-                <h3 className="text-base font-bold text-[#F4F7F6]">{cat}</h3>
+                <h3 className="text-base font-bold text-white">{cat}</h3>
               </div>
 
-              <div className="space-y-1.5 pt-3 border-t border-[#1E2936]">
+              <div className="space-y-1.5 pt-3 border-t border-[#253445]">
                 {matching.slice(0, 3).map((item) => (
-                  <div key={item.id} className="flex items-center justify-between text-xs text-[#8F9CA8]">
-                    <span className="truncate pr-2 text-[#D1D9E0]">{item.name}</span>
+                  <div key={item.id} className="flex items-center justify-between text-xs text-[#CBD5E1]">
+                    <span className="truncate pr-2 text-[#E2E8F0]">{item.name}</span>
                     <span className="font-mono text-[#00D69A] shrink-0 tabular-nums">
                       {item.price.toLocaleString()} USDT
                     </span>
@@ -233,7 +233,7 @@ export const LegalView: React.FC = () => {
     <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
       <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
         <aside className="md:col-span-4 space-y-1.5">
-          <div className="text-[11px] font-mono uppercase tracking-wider text-[#8F9CA8] px-3 pb-2">
+          <div className="text-[11px] font-mono uppercase tracking-wider text-[#CBD5E1] px-3 pb-2">
             Policies &amp; Governance
           </div>
           {(
@@ -251,7 +251,7 @@ export const LegalView: React.FC = () => {
               className={`w-full text-left px-3.5 py-2.5 rounded-lg text-xs font-medium flex items-center gap-2 transition-colors cursor-pointer ${
                 activeLegalDoc === item.id
                   ? 'bg-[#00D69A]/15 text-[#00D69A] font-semibold border border-[#00D69A]/40'
-                  : 'bg-[#11161D] text-[#8F9CA8] hover:text-[#F4F7F6] border border-[#1E2936]'
+                  : 'dsk-btn-secondary-3d text-[#CBD5E1]'
               }`}
             >
               <FileText className="w-3.5 h-3.5 shrink-0" />
@@ -260,23 +260,23 @@ export const LegalView: React.FC = () => {
           ))}
         </aside>
 
-        <div className="md:col-span-8 p-6 sm:p-8 rounded-2xl bg-[#11161D] border border-[#1E2936] space-y-6">
-          <div className="pb-4 border-b border-[#1E2936] flex items-center justify-between gap-4">
-            <h1 className="text-2xl font-bold text-[#F4F7F6]">{current.title}</h1>
-            <span className="text-[11px] font-mono text-[#8F9CA8]">Effective {current.updated}</span>
+        <div className="dsk-surface md:col-span-8 p-6 sm:p-8 rounded-2xl space-y-6">
+          <div className="pb-4 border-b border-[#253445] flex items-center justify-between gap-4">
+            <h1 className="text-2xl font-bold text-white">{current.title}</h1>
+            <span className="text-[11px] font-mono text-[#CBD5E1]">Effective {current.updated}</span>
           </div>
 
           <div className="space-y-6">
             {current.sections.map((sec) => (
               <div key={sec.heading} className="space-y-1.5">
                 <h2 className="text-sm font-bold text-[#00D69A]">{sec.heading}</h2>
-                <p className="text-xs sm:text-sm text-[#8F9CA8] leading-relaxed">{sec.body}</p>
+                <p className="text-xs sm:text-sm text-[#CBD5E1] leading-relaxed">{sec.body}</p>
               </div>
             ))}
           </div>
 
-          <div className="pt-4 border-t border-[#1E2936] flex items-center gap-2 text-xs text-[#8F9CA8]">
-            <Mail className="w-4 h-4 text-[#0EA5A4]" />
+          <div className="pt-4 border-t border-[#253445] flex items-center gap-2 text-xs text-[#CBD5E1]">
+            <Mail className="w-4 h-4 text-[#38BDF8]" />
             <span>Questions? Reach us at {siteSettings?.supportEmail || 'support@deepseek-infra.io'}</span>
           </div>
         </div>

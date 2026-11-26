@@ -2,23 +2,17 @@
   "users": [
     {
       "id": "user-admin-01",
-      "username": "root_overseer",
-      "email": "admin@cyberplaces.io",
-      "passwordHash": "f2a675a044ebca7301e0a2ab8fc306901b503de76605a7771e4e81e207bfc6d6",
+      "username": "deepseek_admin",
+      "email": "admin@deepseek-infra.io",
+      "passwordHash": "scrypt:2fa90821cfb47ef97fd3add2ad30a7d7:8f8924a3ee4bff1a84296dbbe39488dae75013542c1fc812c9c6badff2be391cca8cd126aba658b1ea1e37654197238db760599a047be2347d232aed5b111efb",
       "role": "admin",
-      "avatar": "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=200&q=80",
-      "reputation": 99.9,
-      "createdAt": "2026-01-01T00:00:00.000Z"
-    },
-    {
-      "id": "user-agent-01",
-      "username": "cipher_agent",
-      "email": "agent@cyberplaces.io",
-      "passwordHash": "096c8dc50af6fe83f9bcf7a1fba4dc34dd0a8d0f6f04b0986035d52d0ff91e47",
-      "role": "user",
-      "avatar": "https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?auto=format&fit=crop&w=200&q=80",
-      "reputation": 98.4,
-      "createdAt": "2026-01-05T00:00:00.000Z"
+      "organization": "DEEPSEEK Operations",
+      "reputation": 100,
+      "createdAt": "2026-11-26T13:45:57.095Z",
+      "lastLoginAt": "2026-11-26T13:45:57.096Z",
+      "lastIp": "127.0.0.1",
+      "lastDevice": "Desktop · API Client",
+      "lastLocation": "Global Web"
     }
   ],
   "products": [
@@ -476,12 +470,23 @@
   "orders": [],
   "activityLogs": [
     {
-      "id": "log-01",
+      "id": "log-8e92054f",
+      "action": "ADMIN_LOGIN",
+      "category": "AUTH",
+      "details": "Administrator console session unlocked",
+      "actor": "admin@deepseek-infra.io",
+      "targetId": "user-admin-01",
+      "ip": "127.0.0.1",
+      "device": "Desktop · API Client",
+      "timestamp": "2026-11-26T13:45:57.096Z"
+    },
+    {
+      "id": "log-boot",
       "action": "SYSTEM_BOOT",
       "category": "ADMIN",
-      "details": "CyberPlaces platform initialized. Catalog cleared.",
+      "details": "DEEPSEEK live marketplace engine initialized.",
       "actor": "system",
-      "timestamp": "2026-10-15T17:23:21.290Z"
+      "timestamp": "2026-11-26T13:42:26.594Z"
     }
   ],
   "licenses": [],
@@ -507,10 +512,10 @@
     "announcementText": "Independent Deephat & Developer Infrastructure Marketplace · USDT (TRC-20) On-Chain Settlement",
     "announcementActive": true,
     "trc20ReceivingAddress": "TL9sU4A1ydN9AT2LTaC7P94K4y4BdAgDFx",
-    "trc20Network": "TRC20",
+    "trc20Network": "Tron TRC-20",
     "requiredConfirmations": 19,
     "orderExpiryMinutes": 60,
     "dispatchChannel": "@getfilex_bot"
   },
-  "adminPasscodeHash": null
+  "adminPasscodeHash": "scrypt:a51ca6729c934fc7fda3faaa927995e6:e20b7657318d90893df5a47673336dcff593551c34483e82842452ea50d6e4522d02afd78bef18c1628d769220273c085036e23823ad9e79c0a630067f8895f0"
 }

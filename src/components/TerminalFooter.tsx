@@ -10,26 +10,26 @@ export const TerminalFooter: React.FC<TerminalFooterProps> = ({ onReplayIntro })
   const { setActiveTab, openLegalDoc, siteSettings } = useMarket();
 
   return (
-    <footer className="mt-20 border-t border-[#1E2936] bg-[#0D1116] relative z-20">
+    <footer className="mt-20 border-t border-[#2A394C] bg-[#080C12]/96 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] relative z-20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 md:grid-cols-12 gap-8 mb-10">
           {/* Brand Summary */}
           <div className="md:col-span-4 space-y-4">
             <DeepSeekLogo />
-            <p className="text-xs text-[#8F9CA8] leading-relaxed max-w-sm">
+            <p className="text-xs text-[#CBD5E1] leading-relaxed max-w-sm">
               Independent enterprise marketplace for Deephat software, distributed telemetry platforms, cryptographic key management, and developer infrastructure.
             </p>
-            <p className="text-[11px] text-[#8F9CA8]/80 leading-relaxed max-w-sm">
+            <p className="text-[11px] text-[#9FB0C2] leading-relaxed max-w-sm">
               DEEPSEEK is an independent software marketplace and is not affiliated with DeepSeek AI.
             </p>
           </div>
 
           {/* Marketplace */}
           <div className="md:col-span-2 space-y-2.5 text-xs">
-            <h4 className="text-[#F4F7F6] font-semibold uppercase tracking-wider text-[11px] mb-3">
+            <h4 className="text-white font-semibold uppercase tracking-wider text-[11px] mb-3">
               Marketplace
             </h4>
-            <ul className="space-y-2 text-[#8F9CA8]">
+            <ul className="space-y-2 text-[#CBD5E1]">
               <li>
                 <button onClick={() => setActiveTab('products')} className="hover:text-[#00D69A] cursor-pointer">
                   Products Catalog
@@ -55,10 +55,10 @@ export const TerminalFooter: React.FC<TerminalFooterProps> = ({ onReplayIntro })
 
           {/* Knowledge & Support */}
           <div className="md:col-span-3 space-y-2.5 text-xs">
-            <h4 className="text-[#F4F7F6] font-semibold uppercase tracking-wider text-[11px] mb-3">
+            <h4 className="text-white font-semibold uppercase tracking-wider text-[11px] mb-3">
               Engineering &amp; Company
             </h4>
-            <ul className="space-y-2 text-[#8F9CA8]">
+            <ul className="space-y-2 text-[#CBD5E1]">
               <li>
                 <button onClick={() => setActiveTab('about')} className="hover:text-[#00D69A] cursor-pointer">
                   About DEEPSEEK
@@ -89,10 +89,10 @@ export const TerminalFooter: React.FC<TerminalFooterProps> = ({ onReplayIntro })
 
           {/* Legal & Billing Policies */}
           <div className="md:col-span-3 space-y-2.5 text-xs">
-            <h4 className="text-[#F4F7F6] font-semibold uppercase tracking-wider text-[11px] mb-3">
+            <h4 className="text-white font-semibold uppercase tracking-wider text-[11px] mb-3">
               Legal &amp; Settlement
             </h4>
-            <ul className="space-y-2 text-[#8F9CA8]">
+            <ul className="space-y-2 text-[#CBD5E1]">
               <li>
                 <button onClick={() => openLegalDoc('terms')} className="hover:text-[#00D69A] cursor-pointer">
                   Terms &amp; Conditions
@@ -122,14 +122,14 @@ export const TerminalFooter: React.FC<TerminalFooterProps> = ({ onReplayIntro })
           </div>
         </div>
 
-        <div className="pt-6 border-t border-[#1E2936] flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-[#8F9CA8]">
+        <div className="pt-6 border-t border-[#253445] flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-[#CBD5E1]">
           <span>&copy; 2017 DEEPSEEK Marketplace. All rights reserved.</span>
           <div className="flex items-center gap-4">
             {onReplayIntro && (
               <button
                 type="button"
                 onClick={onReplayIntro}
-                className="text-xs text-[#00D69A] hover:text-[#0EA5A4] font-medium cursor-pointer"
+                className="text-xs text-[#00D69A] hover:text-[#38BDF8] font-medium cursor-pointer"
               >
                 Replay 3D Intro
               </button>

@@ -63,8 +63,8 @@ export const Home: React.FC = () => {
                 <div className="dsk-icon-3d w-9 h-9 rounded-lg flex items-center justify-center text-[#00D69A]">
                   <Icon className="w-4 h-4" />
                 </div>
-                <h3 className="text-xs font-bold text-[#F4F7F6] tracking-wide">{cap.title}</h3>
-                <p className="text-[11px] text-[#8F9CA8] leading-relaxed">{cap.desc}</p>
+                <h3 className="text-xs font-bold text-white tracking-wide">{cap.title}</h3>
+                <p className="text-[11.5px] text-[#B8C5D2] leading-relaxed">{cap.desc}</p>
               </div>
             );
           })}
@@ -73,19 +73,19 @@ export const Home: React.FC = () => {
 
       {/* Featured Products */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3 mb-7 pb-4 border-b border-[#1E2936]">
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3 mb-7 pb-4 border-b border-[#253445]">
           <div>
-            <span className="text-[11px] font-mono uppercase tracking-[0.18em] text-[#00D69A] font-semibold block mb-1">
+            <span className="text-[11px] font-mono uppercase tracking-[0.18em] text-[#00D69A] font-bold block mb-1">
               Curated Infrastructure Catalog
             </span>
-            <h2 className="text-2xl sm:text-3xl font-bold text-[#F4F7F6]">
+            <h2 className="text-2xl sm:text-3xl font-bold text-white">
               Featured Security &amp; Infrastructure Suites
             </h2>
           </div>
 
           <button
             onClick={() => setActiveTab('products')}
-            className="text-xs font-semibold text-[#00D69A] hover:text-[#0EA5A4] flex items-center gap-1.5 transition-colors cursor-pointer whitespace-nowrap"
+            className="text-xs font-semibold text-[#00D69A] hover:text-[#38BDF8] flex items-center gap-1.5 transition-colors cursor-pointer whitespace-nowrap"
           >
             <span>Explore All ({products.length}) Products</span>
             <ArrowRight className="w-3.5 h-3.5" />
@@ -95,7 +95,7 @@ export const Home: React.FC = () => {
         {isLoadingProducts ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {[1, 2, 3].map((idx) => (
-              <div key={idx} className="h-[420px] rounded-xl border border-[#1E2936] cp-skeleton" />
+              <div key={idx} className="h-[420px] rounded-xl border border-[#253445] cp-skeleton" />
             ))}
           </div>
         ) : (
@@ -110,19 +110,19 @@ export const Home: React.FC = () => {
       {/* Dynamic Categories Grid (Strictly real catalog domains) */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="dsk-surface p-6 sm:p-8 rounded-2xl">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6 pb-4 border-b border-[#1E2936]">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6 pb-4 border-b border-[#253445]">
             <div>
-              <h2 className="text-xl font-bold text-[#F4F7F6] flex items-center gap-2">
+              <h2 className="text-xl font-bold text-white flex items-center gap-2">
                 <Layers className="w-5 h-5 text-[#00D69A]" />
                 <span>Browse by Technology Domain</span>
               </h2>
-              <p className="text-xs text-[#8F9CA8] mt-1">
+              <p className="text-xs text-[#CBD5E1] mt-1">
                 Every category reflects active software packages currently published in the DEEPSEEK catalog.
               </p>
             </div>
             <button
               onClick={() => setActiveTab('categories')}
-              className="text-xs font-semibold text-[#0EA5A4] hover:text-[#00D69A] cursor-pointer whitespace-nowrap"
+              className="text-xs font-semibold text-[#00D69A] hover:text-[#38BDF8] cursor-pointer whitespace-nowrap"
             >
               View Directory &rarr;
             </button>
@@ -141,14 +141,14 @@ export const Home: React.FC = () => {
                   className="dsk-panel-3d p-4 rounded-xl text-left group cursor-pointer flex items-center justify-between gap-2"
                 >
                   <div className="min-w-0">
-                    <div className="text-xs font-semibold text-[#F4F7F6] group-hover:text-[#00D69A] transition-colors line-clamp-1">
+                    <div className="text-xs font-semibold text-white group-hover:text-[#00D69A] transition-colors line-clamp-1">
                       {cat}
                     </div>
-                    <div className="text-[11px] font-mono text-[#8F9CA8] mt-1 tabular-nums">
+                    <div className="text-[11px] font-mono text-[#CBD5E1] mt-1 tabular-nums">
                       {count} {count === 1 ? 'Product' : 'Products'}
                     </div>
                   </div>
-                  <ArrowRight className="w-3.5 h-3.5 text-[#8F9CA8] group-hover:text-[#00D69A] shrink-0" />
+                  <ArrowRight className="w-3.5 h-3.5 text-[#CBD5E1] group-hover:text-[#00D69A] shrink-0" />
                 </button>
               );
             })}
@@ -160,25 +160,25 @@ export const Home: React.FC = () => {
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="dsk-surface rounded-2xl p-8 sm:p-10 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
           <div className="lg:col-span-7 space-y-4">
-            <span className="text-[11px] font-mono uppercase tracking-[0.18em] text-[#0EA5A4] font-semibold block">
+            <span className="text-[11px] font-mono uppercase tracking-[0.18em] text-[#00D69A] font-bold block">
               Engineering Philosophy
             </span>
-            <h2 className="text-2xl sm:text-3xl font-bold text-[#F4F7F6] leading-tight">
+            <h2 className="text-2xl sm:text-3xl font-bold text-white leading-tight">
               Precision Distribution for Enterprise Security Teams
             </h2>
-            <p className="text-sm text-[#8F9CA8] leading-relaxed">
+            <p className="text-sm text-[#CBD5E1] leading-relaxed">
               DEEPSEEK is an independent Deephat and developer infrastructure marketplace built around transparent specifications, verifiable package manifests, and auditable blockchain settlement. From distributed eBPF telemetry and zero-trust gateways to database flash acceleration, every tool is documented for serious production evaluation.
             </p>
             <div className="flex flex-wrap gap-3 pt-2">
               <button
                 onClick={() => setActiveTab('research')}
-                className="px-4 py-2.5 rounded-lg bg-[#0D1116] hover:bg-[#151C24] border border-[#1E2936] hover:border-[#00D69A]/50 text-xs font-semibold text-[#F4F7F6] cursor-pointer"
+                className="dsk-btn-secondary-3d px-4 py-2.5 rounded-lg text-xs font-semibold cursor-pointer"
               >
                 Read Research Library
               </button>
               <button
                 onClick={() => setActiveTab('docs')}
-                className="px-4 py-2.5 rounded-lg bg-[#0D1116] hover:bg-[#151C24] border border-[#1E2936] hover:border-[#0EA5A4]/50 text-xs font-semibold text-[#00D69A] cursor-pointer"
+                className="dsk-btn-secondary-3d px-4 py-2.5 rounded-lg text-xs font-semibold text-[#00D69A] cursor-pointer"
               >
                 Explore CLI &amp; API Docs
               </button>
@@ -187,14 +187,14 @@ export const Home: React.FC = () => {
 
           <div className="lg:col-span-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-3.5">
             <div className="dsk-panel-3d p-4 rounded-xl">
-              <div className="text-xs font-bold text-[#F4F7F6]">Transparent Software Specifications</div>
-              <p className="text-[11px] text-[#8F9CA8] mt-1">
+              <div className="text-xs font-bold text-white">Transparent Software Specifications</div>
+              <p className="text-[11px] text-[#CBD5E1] mt-1">
                 Clear architecture summaries, runtime prerequisites, and version tags before you commit to a license.
               </p>
             </div>
             <div className="dsk-panel-3d p-4 rounded-xl">
-              <div className="text-xs font-bold text-[#F4F7F6]">Audited Licensing Pipeline</div>
-              <p className="text-[11px] text-[#8F9CA8] mt-1">
+              <div className="text-xs font-bold text-white">Audited Licensing Pipeline</div>
+              <p className="text-[11px] text-[#CBD5E1] mt-1">
                 Orders unlock downloadable JSON deployment manifests and unique license keys once settlement confirms.
               </p>
             </div>

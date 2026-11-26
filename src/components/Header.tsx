@@ -109,14 +109,14 @@ export const Header: React.FC = () => {
     : 'AC';
 
   return (
-    <header className="sticky top-0 z-30 bg-[#07090B]/92 backdrop-blur-md border-b border-[#1E2936]">
+    <header className="sticky top-0 z-30 bg-[#070B10]/96 border-b border-[#2A394C] shadow-[0_14px_34px_-12px_rgba(0,0,0,0.92),inset_0_-1px_0_rgba(255,255,255,0.06)]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 gap-3">
           {/* Left: Mobile menu toggle + DEEPSEEK Brand Logo */}
           <div className="flex items-center gap-3 shrink-0">
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="lg:hidden p-2 rounded-lg bg-[#0D1116] border border-[#1E2936] text-[#8F9CA8] hover:text-[#F4F7F6] transition-colors cursor-pointer"
+              className="lg:hidden dsk-btn-secondary-3d p-2 rounded-lg text-[#CBD5E1] hover:text-white cursor-pointer"
               aria-label="Toggle navigation menu"
             >
               {mobileMenuOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
@@ -134,32 +134,32 @@ export const Header: React.FC = () => {
           <nav className="hidden lg:flex items-center gap-1 xl:gap-1.5">
             <button
               onClick={() => handleNavClick('home')}
-              className={`relative px-2.5 py-2 text-xs font-medium transition-colors cursor-pointer whitespace-nowrap shrink-0 rounded-md ${
-                activeTab === 'home' ? 'text-[#00D69A]' : 'text-[#8F9CA8] hover:text-[#F4F7F6]'
+              className={`relative px-2.5 py-2 text-xs font-semibold transition-colors cursor-pointer whitespace-nowrap shrink-0 rounded-md ${
+                activeTab === 'home' ? 'text-[#00D69A]' : 'text-[#CBD5E1] hover:text-white'
               }`}
             >
               Home
               {activeTab === 'home' && (
                 <motion.span
                   layoutId="dsk-nav-indicator"
-                  className="absolute bottom-0 left-2.5 right-2.5 h-0.5 bg-[#00D69A]"
+                  className="absolute bottom-0 left-2.5 right-2.5 h-0.5 bg-[#00D69A] shadow-[0_0_8px_rgba(0,214,154,0.8)]"
                 />
               )}
             </button>
 
             <button
               onClick={() => handleNavClick('products')}
-              className={`relative px-2.5 py-2 text-xs font-medium transition-colors cursor-pointer whitespace-nowrap shrink-0 rounded-md ${
+              className={`relative px-2.5 py-2 text-xs font-semibold transition-colors cursor-pointer whitespace-nowrap shrink-0 rounded-md ${
                 activeTab === 'products' || activeTab === 'product'
                   ? 'text-[#00D69A]'
-                  : 'text-[#8F9CA8] hover:text-[#F4F7F6]'
+                  : 'text-[#CBD5E1] hover:text-white'
               }`}
             >
               Products
               {(activeTab === 'products' || activeTab === 'product') && (
                 <motion.span
                   layoutId="dsk-nav-indicator"
-                  className="absolute bottom-0 left-2.5 right-2.5 h-0.5 bg-[#00D69A]"
+                  className="absolute bottom-0 left-2.5 right-2.5 h-0.5 bg-[#00D69A] shadow-[0_0_8px_rgba(0,214,154,0.8)]"
                 />
               )}
             </button>
@@ -168,10 +168,10 @@ export const Header: React.FC = () => {
             <div className="relative" ref={catMenuRef}>
               <button
                 onClick={() => setShowCategoryMenu(!showCategoryMenu)}
-                className={`relative px-2.5 py-2 text-xs font-medium transition-colors flex items-center gap-1 cursor-pointer whitespace-nowrap shrink-0 rounded-md ${
+                className={`relative px-2.5 py-2 text-xs font-semibold transition-colors flex items-center gap-1 cursor-pointer whitespace-nowrap shrink-0 rounded-md ${
                   activeTab === 'categories' || selectedCategory !== 'All Categories'
                     ? 'text-[#00D69A]'
-                    : 'text-[#8F9CA8] hover:text-[#F4F7F6]'
+                    : 'text-[#CBD5E1] hover:text-white'
                 }`}
               >
                 <span>Categories</span>
@@ -189,7 +189,7 @@ export const Header: React.FC = () => {
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: 6 }}
                     transition={{ duration: 0.14 }}
-                    className="absolute left-0 mt-2 w-72 rounded-xl bg-[#11161D] border border-[#1E2936] p-2 shadow-2xl z-50"
+                    className="dsk-surface absolute left-0 mt-2 w-72 rounded-xl p-2 z-50"
                   >
                     <button
                       onClick={() => handleNavClick('categories')}
@@ -226,10 +226,10 @@ export const Header: React.FC = () => {
             <div className="relative" ref={resMenuRef}>
               <button
                 onClick={() => setShowResearchMenu(!showResearchMenu)}
-                className={`relative px-2.5 py-2 text-xs font-medium transition-colors flex items-center gap-1 cursor-pointer whitespace-nowrap shrink-0 rounded-md ${
+                className={`relative px-2.5 py-2 text-xs font-semibold transition-colors flex items-center gap-1 cursor-pointer whitespace-nowrap shrink-0 rounded-md ${
                   activeTab === 'research' || activeTab === 'docs'
                     ? 'text-[#00D69A]'
-                    : 'text-[#8F9CA8] hover:text-[#F4F7F6]'
+                    : 'text-[#CBD5E1] hover:text-white'
                 }`}
               >
                 <span>Research &amp; Docs</span>
@@ -247,26 +247,26 @@ export const Header: React.FC = () => {
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: 6 }}
                     transition={{ duration: 0.14 }}
-                    className="absolute left-0 mt-2 w-60 rounded-xl bg-[#11161D] border border-[#1E2936] p-2 shadow-2xl z-50 space-y-1"
+                    className="dsk-surface absolute left-0 mt-2 w-60 rounded-xl p-2 z-50 space-y-1"
                   >
                     <button
                       onClick={() => handleNavClick('research')}
-                      className="w-full text-left px-3 py-2.5 rounded-lg hover:bg-[#0D1116] text-xs flex items-start gap-2.5 cursor-pointer"
+                      className="w-full text-left px-3 py-2.5 rounded-lg hover:bg-[#0B1017] text-xs flex items-start gap-2.5 cursor-pointer"
                     >
                       <BookOpen className="w-4 h-4 text-[#00D69A] shrink-0 mt-0.5" />
                       <div>
-                        <div className="font-semibold text-[#F4F7F6]">Research Library</div>
-                        <div className="text-[11px] text-[#8F9CA8]">Security briefings &amp; whitepapers</div>
+                        <div className="font-semibold text-white">Research Library</div>
+                        <div className="text-[11px] text-[#CBD5E1]">Security briefings &amp; whitepapers</div>
                       </div>
                     </button>
                     <button
                       onClick={() => handleNavClick('docs')}
-                      className="w-full text-left px-3 py-2.5 rounded-lg hover:bg-[#0D1116] text-xs flex items-start gap-2.5 cursor-pointer"
+                      className="w-full text-left px-3 py-2.5 rounded-lg hover:bg-[#0B1017] text-xs flex items-start gap-2.5 cursor-pointer"
                     >
-                      <FileCode2 className="w-4 h-4 text-[#0EA5A4] shrink-0 mt-0.5" />
+                      <FileCode2 className="w-4 h-4 text-[#38BDF8] shrink-0 mt-0.5" />
                       <div>
-                        <div className="font-semibold text-[#F4F7F6]">Documentation</div>
-                        <div className="text-[11px] text-[#8F9CA8]">CLI verification &amp; API reference</div>
+                        <div className="font-semibold text-white">Documentation</div>
+                        <div className="text-[11px] text-[#CBD5E1]">CLI verification &amp; API reference</div>
                       </div>
                     </button>
                   </motion.div>
@@ -276,30 +276,30 @@ export const Header: React.FC = () => {
 
             <button
               onClick={() => handleNavClick('about')}
-              className={`relative px-2.5 py-2 text-xs font-medium transition-colors cursor-pointer whitespace-nowrap shrink-0 rounded-md ${
-                activeTab === 'about' ? 'text-[#00D69A]' : 'text-[#8F9CA8] hover:text-[#F4F7F6]'
+              className={`relative px-2.5 py-2 text-xs font-semibold transition-colors cursor-pointer whitespace-nowrap shrink-0 rounded-md ${
+                activeTab === 'about' ? 'text-[#00D69A]' : 'text-[#CBD5E1] hover:text-white'
               }`}
             >
               About
               {activeTab === 'about' && (
                 <motion.span
                   layoutId="dsk-nav-indicator"
-                  className="absolute bottom-0 left-2.5 right-2.5 h-0.5 bg-[#00D69A]"
+                  className="absolute bottom-0 left-2.5 right-2.5 h-0.5 bg-[#00D69A] shadow-[0_0_8px_rgba(0,214,154,0.8)]"
                 />
               )}
             </button>
 
             <button
               onClick={() => handleNavClick('support')}
-              className={`relative px-2.5 py-2 text-xs font-medium transition-colors cursor-pointer whitespace-nowrap shrink-0 rounded-md ${
-                activeTab === 'support' ? 'text-[#00D69A]' : 'text-[#8F9CA8] hover:text-[#F4F7F6]'
+              className={`relative px-2.5 py-2 text-xs font-semibold transition-colors cursor-pointer whitespace-nowrap shrink-0 rounded-md ${
+                activeTab === 'support' ? 'text-[#00D69A]' : 'text-[#CBD5E1] hover:text-white'
               }`}
             >
               Support
               {activeTab === 'support' && (
                 <motion.span
                   layoutId="dsk-nav-indicator"
-                  className="absolute bottom-0 left-2.5 right-2.5 h-0.5 bg-[#00D69A]"
+                  className="absolute bottom-0 left-2.5 right-2.5 h-0.5 bg-[#00D69A] shadow-[0_0_8px_rgba(0,214,154,0.8)]"
                 />
               )}
             </button>
@@ -328,7 +328,7 @@ export const Header: React.FC = () => {
                   }
                 }}
                 placeholder="Search products, IDs..."
-                className="w-full rounded-lg bg-[#0D1116] border border-[#1E2936] pl-8 pr-7 py-1.5 text-xs text-[#F4F7F6] placeholder-[#8F9CA8]/70 focus:outline-none focus:border-[#00D69A] transition-colors"
+                className="dsk-input-3d w-full rounded-lg pl-8 pr-7 py-1.5 text-xs placeholder-[#9FB0C2]/80 transition-colors"
               />
               {searchQuery && (
                 <button
@@ -336,7 +336,7 @@ export const Header: React.FC = () => {
                     setSearchQuery('');
                     setShowSearchDropdown(false);
                   }}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 text-[#8F9CA8] hover:text-[#F4F7F6] cursor-pointer"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-[#CBD5E1] hover:text-white cursor-pointer"
                   aria-label="Clear search"
                 >
                   <X className="w-3 h-3" />
@@ -350,14 +350,14 @@ export const Header: React.FC = () => {
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: 6 }}
                     transition={{ duration: 0.14 }}
-                    className="absolute right-0 mt-2 w-80 rounded-xl bg-[#11161D] border border-[#1E2936] p-2 shadow-2xl z-50"
+                    className="dsk-surface absolute right-0 mt-2 w-80 rounded-xl p-2 z-50"
                   >
-                    <div className="flex items-center justify-between px-2 py-1 text-[10px] font-mono text-[#8F9CA8] uppercase border-b border-[#1E2936] mb-1">
+                    <div className="flex items-center justify-between px-2 py-1 text-[10px] font-mono text-[#CBD5E1] uppercase border-b border-[#253445] mb-1">
                       <span>Catalog Results</span>
                       <span className="text-[#00D69A] tabular-nums">{searchSuggestions.length} shown</span>
                     </div>
                     {searchSuggestions.length === 0 ? (
-                      <div className="p-4 text-center text-xs text-[#8F9CA8]">
+                      <div className="p-4 text-center text-xs text-[#CBD5E1]">
                         No tools matched &quot;{searchQuery}&quot;
                       </div>
                     ) : (
@@ -369,18 +369,18 @@ export const Header: React.FC = () => {
                               setShowSearchDropdown(false);
                               openProductDetails(item);
                             }}
-                            className="w-full flex items-center gap-2.5 p-2 rounded-lg hover:bg-[#0D1116] text-left transition-colors cursor-pointer group"
+                            className="w-full flex items-center gap-2.5 p-2 rounded-lg hover:bg-[#0B1017] text-left transition-colors cursor-pointer group"
                           >
                             <ProductLiveVisual product={item} compact className="w-9 h-9 shrink-0" />
                             <div className="min-w-0 flex-1">
-                              <div className="text-xs font-semibold text-[#F4F7F6] group-hover:text-[#00D69A] truncate">
+                              <div className="text-xs font-semibold text-white group-hover:text-[#00D69A] truncate">
                                 {item.name}
                               </div>
-                              <div className="text-[10px] font-mono text-[#8F9CA8] truncate">
+                              <div className="text-[10px] font-mono text-[#CBD5E1] truncate">
                                 {item.productCode || item.id} · {item.price.toLocaleString()} USDT
                               </div>
                             </div>
-                            <ArrowUpRight className="w-3.5 h-3.5 text-[#8F9CA8] group-hover:text-[#00D69A] shrink-0" />
+                            <ArrowUpRight className="w-3.5 h-3.5 text-[#CBD5E1] group-hover:text-[#00D69A] shrink-0" />
                           </button>
                         ))}
                         <button
@@ -402,13 +402,13 @@ export const Header: React.FC = () => {
             {/* Wishlist quick link */}
             <button
               onClick={() => handleNavClick('dashboard')}
-              className="relative p-2 rounded-lg bg-[#0D1116] border border-[#1E2936] hover:border-[#00D69A]/50 text-[#8F9CA8] hover:text-[#F4F7F6] transition-colors cursor-pointer shrink-0"
+              className="dsk-btn-secondary-3d relative p-2 rounded-lg text-[#CBD5E1] hover:text-white cursor-pointer shrink-0"
               title="Wishlist"
               aria-label="Wishlist"
             >
               <Heart className="w-4 h-4" />
               {wishlist.length > 0 && (
-                <span className="absolute -top-1 -right-1 min-w-4 h-4 px-1 rounded bg-[#0EA5A4] text-[#07090B] text-[10px] font-mono font-bold flex items-center justify-center tabular-nums">
+                <span className="absolute -top-1 -right-1 min-w-4 h-4 px-1 rounded bg-[#00D69A] text-[#050709] text-[10px] font-mono font-bold flex items-center justify-center tabular-nums">
                   {wishlist.length}
                 </span>
               )}
@@ -417,7 +417,7 @@ export const Header: React.FC = () => {
             {/* Cart Button */}
             <button
               onClick={() => setIsCartOpen(true)}
-              className="relative px-2.5 py-2 rounded-lg bg-[#0D1116] border border-[#1E2936] hover:border-[#00D69A]/50 text-[#F4F7F6] hover:text-[#00D69A] transition-colors cursor-pointer flex items-center gap-1.5 text-xs font-medium whitespace-nowrap shrink-0"
+              className="dsk-btn-secondary-3d relative px-2.5 py-2 rounded-lg text-white hover:text-[#00D69A] cursor-pointer flex items-center gap-1.5 text-xs font-medium whitespace-nowrap shrink-0"
               title="Shopping Cart"
             >
               <ShoppingCart className="w-4 h-4" />
@@ -433,7 +433,7 @@ export const Header: React.FC = () => {
             {!currentUser ? (
               <button
                 onClick={() => setAuthModalOpen(true)}
-                className="px-3 py-2 rounded-lg bg-[#00D69A] hover:bg-[#0EA5A4] text-[#07090B] font-semibold text-xs flex items-center gap-1.5 transition-colors cursor-pointer whitespace-nowrap shrink-0"
+                className="dsk-btn-3d px-3 py-2 rounded-lg text-xs flex items-center gap-1.5 cursor-pointer whitespace-nowrap shrink-0"
               >
                 <LogIn className="w-3.5 h-3.5" />
                 <span>Account</span>
@@ -442,20 +442,20 @@ export const Header: React.FC = () => {
               <div className="relative" ref={userMenuRef}>
                 <button
                   onClick={() => setShowUserMenu(!showUserMenu)}
-                  className="flex items-center gap-2 pl-1.5 pr-2.5 py-1 rounded-lg bg-[#0D1116] border border-[#1E2936] hover:border-[#00D69A]/50 transition-colors cursor-pointer whitespace-nowrap shrink-0"
+                  className="dsk-btn-secondary-3d flex items-center gap-2 pl-1.5 pr-2.5 py-1 rounded-lg cursor-pointer whitespace-nowrap shrink-0"
                 >
-                  <div className="w-7 h-7 rounded-md bg-[#00D69A]/15 border border-[#00D69A]/40 flex items-center justify-center text-[11px] font-mono font-bold text-[#00D69A]">
+                  <div className="w-7 h-7 rounded-md bg-[#00D69A]/15 border border-[#00D69A]/50 flex items-center justify-center text-[11px] font-mono font-bold text-[#00D69A]">
                     {initials}
                   </div>
                   <div className="hidden xl:block text-left">
-                    <div className="text-xs font-semibold text-[#F4F7F6] leading-tight max-w-[92px] truncate">
+                    <div className="text-xs font-semibold text-white leading-tight max-w-[92px] truncate">
                       {currentUser.username}
                     </div>
-                    <div className="text-[10px] font-mono text-[#8F9CA8] leading-tight uppercase">
+                    <div className="text-[10px] font-mono text-[#CBD5E1] leading-tight uppercase">
                       {userRole === 'admin' ? 'Admin' : 'Account'}
                     </div>
                   </div>
-                  <ChevronDown className="w-3.5 h-3.5 text-[#8F9CA8]" />
+                  <ChevronDown className="w-3.5 h-3.5 text-[#CBD5E1]" />
                 </button>
 
                 <AnimatePresence>
@@ -465,7 +465,7 @@ export const Header: React.FC = () => {
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: 6 }}
                       transition={{ duration: 0.14 }}
-                      className="absolute right-0 mt-2 w-60 rounded-xl bg-[#11161D] border border-[#1E2936] p-2.5 shadow-2xl z-50"
+                      className="dsk-surface absolute right-0 mt-2 w-60 rounded-xl p-2.5 z-50"
                     >
                       <div className="px-2 pb-2.5 mb-2 border-b border-[#1E2936]">
                         <div className="text-xs font-semibold text-[#F4F7F6] truncate">

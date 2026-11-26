@@ -144,6 +144,8 @@ interface MarketContextType {
   toggleDiscount: (id: string) => Promise<boolean>;
   deleteDiscount: (id: string) => Promise<boolean>;
   replyAdminTicket: (ticketId: string, message: string, status?: SupportTicket['status']) => Promise<boolean>;
+  updateTicketStatus: (ticketId: string, status: SupportTicket['status']) => Promise<boolean>;
+  deleteAdminOrder: (orderNumber: string) => Promise<boolean>;
   updateAdminSettings: (updates: Partial<SiteSettings>) => Promise<boolean>;
 
   // Toasts
@@ -1056,6 +1058,38 @@ export const MarketProvider: React.FC<{ children: ReactNode }> = ({ children }) 
     }
   };
 
+  const updateTicketStatus = async (ticketId: string, status: SupportTicket['status']) => {
+    try {
+      const res = await fetch(`/api/admin/tickets/${ticketId}/status`, {
+        method: 'PATCH',
+        headers: authHeaders({ 'Content-Type': 'application/json' }),
+        body: JSON.stringify({ status })
+      });
+      if (!res.ok) return false;
+      await Promise.all([fetchAdminData(), fetchUserAssets()]);
+      addToast({ type: 'info', title: 'Ticket Status Updated', message: `Marked as ${status}` });
+      return true;
+    } catch {
+      return false;
+    }
+  };
+
+  const deleteAdminOrder = async (orderNumber: string) => {
+    try {
+      const res = await fetch(`/api/admin/orders/${orderNumber}`, {
+        method: 'DELETE',
+        headers: authHeaders()
+      });
+      if (!res.ok) throw new Error('Order deletion failed');
+      await Promise.all([fetchOrders(), fetchAdminData()]);
+      addToast({ type: 'warning', title: 'Order Deleted', message: `${orderNumber} removed.` });
+      return true;
+    } catch (err: any) {
+      addToast({ type: 'error', title: 'Delete Failed', message: err.message });
+      return false;
+    }
+  };
+
   const updateAdminSettings = async (updates: Partial<SiteSettings>) => {
     try {
       const res = await fetch('/api/admin/settings', {
@@ -1157,6 +1191,8 @@ export const MarketProvider: React.FC<{ children: ReactNode }> = ({ children }) 
         toggleDiscount,
         deleteDiscount,
         replyAdminTicket,
+        updateTicketStatus,
+        deleteAdminOrder,
         updateAdminSettings,
         toasts,
         addToast,

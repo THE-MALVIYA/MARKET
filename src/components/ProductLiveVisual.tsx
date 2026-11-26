@@ -190,20 +190,29 @@ export const ProductLiveVisual: React.FC<ProductLiveVisualProps> = ({
         }}
       />
 
-      {/* Floating 3D Isometric Software/Hardware Package */}
+      {/* Ground Contact Shadow & Radial Studio Floor Reflection */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute bottom-3 w-36 h-7 rounded-full blur-md"
+        style={{
+          background: `radial-gradient(ellipse at center, rgba(0,0,0,0.92) 0%, ${theme.glow} 42%, transparent 75%)`
+        }}
+      />
+
+      {/* Floating 3D Isometric Machined Software/Hardware Module */}
       <div className="dsk-box-float relative z-10 flex items-center justify-center">
         <div
-          className="dsk-box-3d relative w-[124px] h-[146px] transition-transform duration-300 group-hover:scale-105"
+          className="dsk-box-3d relative w-[126px] h-[148px] transition-transform duration-300 group-hover:scale-105"
           style={{ transformStyle: 'preserve-3d' }}
         >
-          {/* Left 3D Spine */}
+          {/* Left Anodized 3D Spine */}
           <div
-            className="absolute top-0 bottom-0 left-[-18px] w-[18px] rounded-l-sm flex items-center justify-center border border-[#1E2936]"
+            className="absolute top-0 bottom-0 left-[-20px] w-[20px] rounded-l-sm flex items-center justify-center border border-[#2C3E52]"
             style={{
-              background: `linear-gradient(180deg, #0D141C 0%, #070A0F 100%)`,
-              transform: 'rotateY(-90deg) translateZ(9px)',
+              background: `linear-gradient(180deg, #162230 0%, #0A1018 50%, #05080C 100%)`,
+              transform: 'rotateY(-90deg) translateZ(10px)',
               transformOrigin: 'right center',
-              boxShadow: `inset 0 0 12px ${theme.glow}`
+              boxShadow: `inset 0 0 14px ${theme.glow}, inset 1px 0 0 rgba(255,255,255,0.16)`
             }}
           >
             <span
@@ -214,17 +223,45 @@ export const ProductLiveVisual: React.FC<ProductLiveVisualProps> = ({
             </span>
           </div>
 
-          {/* Front 3D Packaging Face */}
+          {/* Right Machined Rim */}
+          <div
+            className="absolute top-0 bottom-0 right-[-10px] w-[10px] border border-[#243447]"
+            style={{
+              background: `linear-gradient(180deg, #1E2C3C 0%, #080C12 100%)`,
+              transform: 'rotateY(90deg) translateZ(5px)',
+              transformOrigin: 'left center',
+              boxShadow: `inset 0 1px 0 rgba(255,255,255,0.2)`
+            }}
+          />
+
+          {/* Top Chamfered Lid Bevel */}
+          <div
+            className="absolute left-0 right-0 top-[-14px] h-[14px] border border-[#2E4054]"
+            style={{
+              background: `linear-gradient(90deg, #25364A 0%, #16212E 60%, #0E151E 100%)`,
+              transform: 'rotateX(90deg) translateZ(7px)',
+              transformOrigin: 'bottom center',
+              boxShadow: `inset 0 0 10px ${theme.glow}, inset 0 1px 0 rgba(255,255,255,0.28)`
+            }}
+          />
+
+          {/* Front 3D Armored Faceplate */}
           <div
             className="relative w-full h-full rounded-md overflow-hidden border flex flex-col justify-between p-2.5 shadow-2xl"
             style={{
-              borderColor: `${theme.primary}66`,
-              background: `linear-gradient(155deg, #131B24 0%, #080C12 72%, #05080C 100%)`,
-              boxShadow: `0 18px 34px -10px rgba(0,0,0,0.92), 0 0 22px -6px ${theme.glow}`
+              borderColor: `${theme.primary}75`,
+              background: `linear-gradient(155deg, #182331 0%, #0B1119 65%, #05080D 100%)`,
+              boxShadow: `0 22px 42px -12px rgba(0,0,0,0.95), 0 0 26px -6px ${theme.glow}, inset 0 1px 0 rgba(255,255,255,0.22)`
             }}
           >
-            {/* Dynamic Moving Light Sweep */}
+            {/* Dynamic Specular Light Sweep */}
             <div className="dsk-box-sheen pointer-events-none absolute inset-0" />
+
+            {/* Machined Corner Rivets */}
+            <span className="pointer-events-none absolute top-1.5 left-1.5 w-1 h-1 rounded-full bg-white/35 z-20" />
+            <span className="pointer-events-none absolute top-1.5 right-1.5 w-1 h-1 rounded-full bg-white/35 z-20" />
+            <span className="pointer-events-none absolute bottom-1.5 left-1.5 w-1 h-1 rounded-full bg-white/35 z-20" />
+            <span className="pointer-events-none absolute bottom-1.5 right-1.5 w-1 h-1 rounded-full bg-white/35 z-20" />
 
             {hasCustomLocalAsset && !imgFailed ? (
               <>
@@ -237,10 +274,10 @@ export const ProductLiveVisual: React.FC<ProductLiveVisualProps> = ({
                 />
                 <div className="relative z-10 flex items-center justify-between">
                   <span
-                    className="px-1.5 py-0.5 rounded bg-[#07090B]/85 text-[7px] font-mono font-bold"
+                    className="px-1.5 py-0.5 rounded bg-[#07090B]/90 border border-white/15 text-[7px] font-mono font-bold"
                     style={{ color: theme.primary }}
                   >
-                    3D LIVE
+                    3D 4K
                   </span>
                 </div>
               </>
@@ -249,7 +286,7 @@ export const ProductLiveVisual: React.FC<ProductLiveVisualProps> = ({
                 {/* Top Label Strip */}
                 <div className="relative z-10 flex items-center justify-between gap-1">
                   <span
-                    className="font-mono text-[7px] font-bold tracking-wider px-1.5 py-0.5 rounded bg-[#07090B]/80 border border-[#1E2936]"
+                    className="font-mono text-[7px] font-bold tracking-wider px-1.5 py-0.5 rounded bg-[#07090B]/85 border border-[#2C3E52]"
                     style={{ color: theme.primary }}
                   >
                     {theme.tag}
@@ -262,20 +299,20 @@ export const ProductLiveVisual: React.FC<ProductLiveVisualProps> = ({
                   <div
                     className="w-12 h-12 rounded-xl flex items-center justify-center border mb-1.5"
                     style={{
-                      borderColor: `${theme.primary}55`,
-                      background: `radial-gradient(circle, ${theme.glow}, rgba(7, 9, 11, 0.9))`,
-                      boxShadow: `0 0 18px ${theme.glow}`
+                      borderColor: `${theme.primary}70`,
+                      background: `radial-gradient(circle, ${theme.glow}, rgba(7, 9, 11, 0.92))`,
+                      boxShadow: `0 0 22px ${theme.glow}, inset 0 1px 0 rgba(255,255,255,0.28)`
                     }}
                   >
                     <Icon className="w-6 h-6" style={{ color: theme.primary }} />
                   </div>
-                  <div className="text-[11px] font-extrabold text-[#F4F7F6] text-center leading-tight line-clamp-2 px-1">
+                  <div className="text-[11px] font-extrabold text-white text-center leading-tight line-clamp-2 px-1 drop-shadow">
                     {product.name}
                   </div>
                 </div>
 
                 {/* Bottom Animated Telemetry Bars */}
-                <div className="relative z-10 space-y-1 pt-1 border-t border-[#1E2936]/80">
+                <div className="relative z-10 space-y-1 pt-1 border-t border-[#243447]/90">
                   <div className="flex items-end justify-center gap-1 h-3">
                     {[0.45, 0.85, 0.6, 1, 0.7, 0.9, 0.5].map((h, i) => (
                       <span
@@ -289,7 +326,7 @@ export const ProductLiveVisual: React.FC<ProductLiveVisualProps> = ({
                       />
                     ))}
                   </div>
-                  <div className="text-[7px] font-mono text-[#8F9CA8] text-center truncate">
+                  <div className="text-[7px] font-mono text-[#CBD5E1] text-center truncate">
                     {product.version || 'v2026 LTS'}
                   </div>
                 </div>

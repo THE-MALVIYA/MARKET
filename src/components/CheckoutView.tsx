@@ -171,15 +171,15 @@ export const CheckoutView: React.FC = () => {
   if (!currentOrder && cart.length === 0) {
     return (
       <div className="max-w-3xl mx-auto px-4 py-16 text-center">
-        <div className="p-8 rounded-xl bg-[#11161D] border border-[#1E2936]">
+        <div className="p-8 rounded-2xl dsk-surface">
           <AlertTriangle className="w-10 h-10 text-[#E5B84B] mx-auto mb-3" />
-          <h2 className="text-xl font-bold text-[#F4F7F6] mb-2">No Active Checkout</h2>
-          <p className="text-sm text-[#8F9CA8] max-w-md mx-auto mb-6">
+          <h2 className="text-xl font-extrabold text-white mb-2">No Active Checkout</h2>
+          <p className="text-sm text-[#CBD5E1] max-w-md mx-auto mb-6">
             Add software licenses to your cart before proceeding to USDT blockchain settlement.
           </p>
           <button
             onClick={() => setActiveTab('products')}
-            className="px-6 py-2.5 rounded-lg bg-[#00D69A] hover:bg-[#0EA5A4] text-[#07090B] font-semibold text-xs cursor-pointer"
+            className="px-6 py-2.5 rounded-lg dsk-btn-3d text-xs cursor-pointer"
           >
             Explore Products
           </button>
@@ -190,37 +190,37 @@ export const CheckoutView: React.FC = () => {
 
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div className="flex items-center gap-2 text-xs text-[#8F9CA8] mb-6">
+      <div className="flex items-center gap-2 text-xs text-[#CBD5E1] mb-6">
         <button onClick={() => setActiveTab('home')} className="hover:text-[#00D69A] cursor-pointer">
           Home
         </button>
-        <ChevronRight className="w-3.5 h-3.5 text-[#1E2936]" />
+        <ChevronRight className="w-3.5 h-3.5 text-[#334155]" />
         <button onClick={() => setActiveTab('products')} className="hover:text-[#00D69A] cursor-pointer">
           Products
         </button>
-        <ChevronRight className="w-3.5 h-3.5 text-[#1E2936]" />
-        <span className="text-[#00D69A] font-medium">Crypto Checkout</span>
+        <ChevronRight className="w-3.5 h-3.5 text-[#334155]" />
+        <span className="text-[#00D69A] font-semibold">Crypto Checkout</span>
       </div>
 
-      <div className="mb-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 pb-5 border-b border-[#1E2936]">
+      <div className="mb-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 pb-5 border-b border-[#253445]">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-[#F4F7F6]">
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
             USDT Settlement &amp; Blockchain Verification
           </h1>
-          <p className="text-xs sm:text-sm text-[#8F9CA8] mt-1">
+          <p className="text-xs sm:text-sm text-[#CBD5E1] mt-1">
             Transfer exact USDT on {networkName} and submit your transaction hash (TXID) for ledger verification.
           </p>
         </div>
 
         {currentOrder && (
           <div className="flex items-center gap-3">
-            <div className="px-3.5 py-2 rounded-lg bg-[#11161D] border border-[#1E2936] text-right">
-              <span className="text-[10px] font-mono text-[#8F9CA8] block uppercase">Order Reference</span>
+            <div className="px-3.5 py-2 rounded-lg dsk-panel-3d text-right">
+              <span className="text-[10px] font-mono text-[#CBD5E1] block uppercase">Order Reference</span>
               <span className="font-mono text-sm font-bold text-[#00D69A]">{currentOrder.orderNumber}</span>
             </div>
             {timeRemainingLabel && currentOrder.status !== 'Payment Confirmed' && (
-              <div className="px-3.5 py-2 rounded-lg bg-[#11161D] border border-[#1E2936] text-right">
-                <span className="text-[10px] font-mono text-[#8F9CA8] flex items-center justify-end gap-1 uppercase">
+              <div className="px-3.5 py-2 rounded-lg dsk-panel-3d text-right">
+                <span className="text-[10px] font-mono text-[#CBD5E1] flex items-center justify-end gap-1 uppercase">
                   <Clock className="w-3 h-3 text-[#E5B84B]" /> Window
                 </span>
                 <span className="font-mono text-sm font-bold text-[#E5B84B] tabular-nums">
@@ -236,27 +236,27 @@ export const CheckoutView: React.FC = () => {
         {/* Left Column: Order Summary / Promo / Instructions */}
         <div className="lg:col-span-6 space-y-6">
           {!currentOrder ? (
-            <div className="p-6 rounded-xl bg-[#11161D] border border-[#1E2936] space-y-5">
-              <div className="flex items-center justify-between pb-3 border-b border-[#1E2936]">
-                <h2 className="text-sm font-bold text-[#F4F7F6]">
+            <div className="p-6 rounded-2xl dsk-surface space-y-5">
+              <div className="flex items-center justify-between pb-3 border-b border-[#253445]">
+                <h2 className="text-sm font-bold text-white">
                   Order Summary ({cart.length} {cart.length === 1 ? 'Suite' : 'Suites'})
                 </h2>
-                <span className="text-[11px] font-mono text-[#0EA5A4]">{networkName}</span>
+                <span className="text-[11px] font-mono text-[#00D69A] font-semibold">{networkName}</span>
               </div>
 
               <div className="space-y-2.5 max-h-60 overflow-y-auto pr-1">
                 {cart.map((item) => (
                   <div
                     key={item.product.id}
-                    className="p-3 rounded-lg bg-[#0D1116] border border-[#1E2936] flex items-center justify-between text-xs"
+                    className="p-3 rounded-lg dsk-panel-3d flex items-center justify-between text-xs"
                   >
                     <div className="flex items-center gap-3 min-w-0">
                       <ProductLiveVisual product={item.product} compact className="w-10 h-10 shrink-0" />
                       <div className="truncate">
-                        <span className="text-[#F4F7F6] font-semibold block truncate">
+                        <span className="text-white font-semibold block truncate">
                           {item.product.name}
                         </span>
-                        <span className="text-[10px] font-mono text-[#8F9CA8] tabular-nums">
+                        <span className="text-[10px] font-mono text-[#CBD5E1] tabular-nums">
                           Qty: {item.quantity} · {item.product.version || 'LTS'}
                         </span>
                       </div>
@@ -269,9 +269,9 @@ export const CheckoutView: React.FC = () => {
               </div>
 
               {/* Promo Code Input */}
-              <div className="pt-2 border-t border-[#1E2936]">
-                <label className="text-[11px] font-medium text-[#8F9CA8] mb-1.5 flex items-center gap-1.5">
-                  <Tag className="w-3.5 h-3.5 text-[#0EA5A4]" />
+              <div className="pt-2 border-t border-[#253445]">
+                <label className="text-[11px] font-medium text-[#CBD5E1] mb-1.5 flex items-center gap-1.5">
+                  <Tag className="w-3.5 h-3.5 text-[#00D69A]" />
                   <span>Promo / Discount Code</span>
                 </label>
                 <div className="flex gap-2">
@@ -280,12 +280,12 @@ export const CheckoutView: React.FC = () => {
                     value={promoInput}
                     onChange={(e) => setPromoInput(e.target.value)}
                     placeholder="Enter discount code"
-                    className="flex-1 rounded-lg bg-[#0D1116] border border-[#1E2936] px-3 py-2 text-xs font-mono text-[#F4F7F6] uppercase focus:border-[#00D69A] focus:outline-none"
+                    className="flex-1 rounded-lg dsk-input-3d px-3 py-2 text-xs font-mono text-white uppercase focus:border-[#00D69A] focus:outline-none"
                   />
                   <button
                     type="button"
                     onClick={handleApplyPromo}
-                    className="px-4 py-2 rounded-lg bg-[#0D1116] hover:bg-[#151C24] border border-[#1E2936] text-xs font-semibold text-[#00D69A] cursor-pointer"
+                    className="px-4 py-2 rounded-lg dsk-btn-secondary-3d text-xs font-semibold text-[#00D69A] cursor-pointer"
                   >
                     Apply
                   </button>
@@ -298,8 +298,8 @@ export const CheckoutView: React.FC = () => {
                 )}
               </div>
 
-              <div className="pt-3 border-t border-[#1E2936] space-y-1.5 text-xs">
-                <div className="flex justify-between text-[#8F9CA8]">
+              <div className="pt-3 border-t border-[#253445] space-y-1.5 text-xs">
+                <div className="flex justify-between text-[#CBD5E1]">
                   <span>Subtotal</span>
                   <span className="font-mono tabular-nums">{cartTotal.toLocaleString()} USDT</span>
                 </div>
@@ -311,8 +311,8 @@ export const CheckoutView: React.FC = () => {
                     </span>
                   </div>
                 )}
-                <div className="flex justify-between items-center pt-2 border-t border-[#1E2936]">
-                  <span className="font-semibold text-[#F4F7F6]">Total Due</span>
+                <div className="flex justify-between items-center pt-2 border-t border-[#253445]">
+                  <span className="font-semibold text-white">Total Due</span>
                   <span className="font-mono font-bold text-xl text-[#00D69A] tabular-nums">
                     {finalCartAmount.toLocaleString()} USDT
                   </span>
@@ -320,7 +320,7 @@ export const CheckoutView: React.FC = () => {
               </div>
 
               {!currentUser ? (
-                <div className="p-4 rounded-xl bg-[#0D1116] border border-[#E5B84B]/40 space-y-3">
+                <div className="p-4 rounded-xl dsk-panel-3d border-[#E5B84B]/45 space-y-3">
                   <div className="flex items-center gap-2 text-xs font-semibold text-[#E5B84B]">
                     <Lock className="w-4 h-4" />
                     <span>Sign in required to bind license keys to your account</span>
@@ -328,7 +328,7 @@ export const CheckoutView: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => setAuthModalOpen(true)}
-                    className="w-full py-2.5 rounded-lg bg-[#00D69A] hover:bg-[#0EA5A4] text-[#07090B] font-bold text-xs cursor-pointer"
+                    className="w-full py-2.5 rounded-lg dsk-btn-3d text-xs cursor-pointer"
                   >
                     Sign In or Create Account
                   </button>
@@ -337,7 +337,7 @@ export const CheckoutView: React.FC = () => {
                 <button
                   onClick={handleInitiateOrder}
                   disabled={isGeneratingOrder}
-                  className="w-full py-3 px-4 rounded-lg bg-[#00D69A] hover:bg-[#0EA5A4] text-[#07090B] font-bold text-xs flex items-center justify-center gap-2 transition-colors cursor-pointer disabled:opacity-50"
+                  className="w-full py-3 px-4 rounded-lg dsk-btn-3d text-xs flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
                 >
                   {isGeneratingOrder ? (
                     <>
@@ -354,9 +354,9 @@ export const CheckoutView: React.FC = () => {
               )}
             </div>
           ) : (
-            <div className="p-6 rounded-xl bg-[#11161D] border border-[#1E2936] space-y-5">
-              <div className="flex items-center justify-between pb-3 border-b border-[#1E2936]">
-                <h2 className="text-sm font-bold text-[#F4F7F6]">Order &amp; Payment Status</h2>
+            <div className="p-6 rounded-2xl dsk-surface space-y-5">
+              <div className="flex items-center justify-between pb-3 border-b border-[#253445]">
+                <h2 className="text-sm font-bold text-white">Order &amp; Payment Status</h2>
                 <span
                   className={`text-[11px] font-mono px-2.5 py-0.5 rounded border font-semibold ${
                     currentOrder.status === 'Payment Confirmed' || currentOrder.status === 'Approved'
@@ -375,10 +375,10 @@ export const CheckoutView: React.FC = () => {
                 {currentOrder.items.map((item: any, idx: number) => (
                   <div
                     key={idx}
-                    className="flex justify-between items-center text-xs p-2.5 rounded-lg bg-[#0D1116] border border-[#1E2936]"
+                    className="flex justify-between items-center text-xs p-2.5 rounded-lg dsk-panel-3d"
                   >
-                    <span className="text-[#F4F7F6]">
-                      {item.name} <span className="font-mono text-[#8F9CA8]">x{item.quantity}</span>
+                    <span className="text-white">
+                      {item.name} <span className="font-mono text-[#CBD5E1]">x{item.quantity}</span>
                     </span>
                     <span className="font-mono text-[#00D69A] font-bold tabular-nums">
                       {(item.price * item.quantity).toLocaleString()} USDT
@@ -387,42 +387,42 @@ export const CheckoutView: React.FC = () => {
                 ))}
               </div>
 
-              <div className="p-3.5 rounded-lg bg-[#0D1116] border border-[#1E2936] space-y-1.5 text-xs font-mono">
+              <div className="p-3.5 rounded-lg dsk-panel-3d space-y-1.5 text-xs font-mono">
                 <div className="flex justify-between">
-                  <span className="text-[#8F9CA8]">Total Settlement</span>
+                  <span className="text-[#CBD5E1]">Total Settlement</span>
                   <span className="text-[#00D69A] font-bold tabular-nums">
                     {currentOrder.amount.toLocaleString()} USDT
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-[#8F9CA8]">Network</span>
-                  <span className="text-[#F4F7F6]">{networkName}</span>
+                  <span className="text-[#CBD5E1]">Network</span>
+                  <span className="text-white">{networkName}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-[#8F9CA8]">Confirmations Needed</span>
-                  <span className="text-[#F4F7F6]">
+                  <span className="text-[#CBD5E1]">Confirmations Needed</span>
+                  <span className="text-white">
                     {paymentConfig?.requiredConfirmations || 19} Blocks
                   </span>
                 </div>
               </div>
 
               {paymentConfig?.feeNotice && (
-                <div className="p-3.5 rounded-lg bg-[#0D1116] border border-[#1E2936] text-[11px] text-[#8F9CA8] leading-relaxed">
-                  <strong className="text-[#D1D9E0] block mb-1">Network Fee Notice</strong>
+                <div className="p-3.5 rounded-lg dsk-panel-3d text-[11px] text-[#CBD5E1] leading-relaxed">
+                  <strong className="text-white block mb-1">Network Fee Notice</strong>
                   {paymentConfig.feeNotice}
                 </div>
               )}
 
               {currentOrder.blockchainVerification && (
-                <div className="p-4 rounded-lg bg-[#0D1116] border border-[#1E2936] space-y-2 text-xs">
+                <div className="p-4 rounded-lg dsk-panel-3d space-y-2 text-xs">
                   <div className="font-semibold text-[#00D69A] flex items-center gap-1.5">
                     <ShieldCheck className="w-4 h-4" />
                     <span>Blockchain Verification Log</span>
                   </div>
-                  <p className="text-[#D1D9E0] text-[11px]">
+                  <p className="text-[#E2E8F0] text-[11px]">
                     {currentOrder.blockchainVerification.message}
                   </p>
-                  <div className="font-mono text-[10px] text-[#8F9CA8] break-all">
+                  <div className="font-mono text-[10px] text-[#CBD5E1] break-all">
                     TXID: {currentOrder.blockchainVerification.txHash}
                   </div>
                 </div>
@@ -431,7 +431,7 @@ export const CheckoutView: React.FC = () => {
               {currentOrder.status === 'Payment Confirmed' && (
                 <button
                   onClick={() => setActiveTab('dashboard')}
-                  className="w-full py-2.5 rounded-lg bg-[#00D69A] hover:bg-[#0EA5A4] text-[#07090B] font-bold text-xs cursor-pointer"
+                  className="w-full py-2.5 rounded-lg dsk-btn-3d text-xs cursor-pointer"
                 >
                   Open Dashboard to Download Files &amp; License Keys
                 </button>
@@ -449,25 +449,25 @@ export const CheckoutView: React.FC = () => {
             orderNumber={currentOrder?.orderNumber}
           />
 
-          <div className="p-6 rounded-xl bg-[#11161D] border border-[#1E2936] space-y-4">
-            <div className="flex items-center justify-between pb-2.5 border-b border-[#1E2936]">
-              <h3 className="font-semibold text-sm text-[#F4F7F6] flex items-center gap-2">
+          <div className="p-6 rounded-2xl dsk-surface space-y-4">
+            <div className="flex items-center justify-between pb-2.5 border-b border-[#253445]">
+              <h3 className="font-bold text-sm text-white flex items-center gap-2">
                 <SearchCheck className="w-4 h-4 text-[#00D69A]" />
                 <span>Submit Transaction Hash (TXID)</span>
               </h3>
-              <span className="text-[10px] font-mono text-[#0EA5A4]">ON-CHAIN CHECK</span>
+              <span className="text-[10px] font-mono text-[#00D69A] font-semibold">ON-CHAIN CHECK</span>
             </div>
 
             {currentOrder?.status === 'Payment Confirmed' ? (
-              <div className="p-5 rounded-xl bg-[#0D1116] border border-[#00D69A]/50 text-center space-y-3">
+              <div className="p-5 rounded-xl dsk-panel-3d border-[#00D69A]/50 text-center space-y-3">
                 <CheckCircle2 className="w-8 h-8 text-[#00D69A] mx-auto" />
-                <div className="font-bold text-[#F4F7F6] text-sm">Payment Confirmed on Blockchain</div>
-                <p className="text-xs text-[#8F9CA8]">
+                <div className="font-bold text-white text-sm">Payment Confirmed on Blockchain</div>
+                <p className="text-xs text-[#CBD5E1]">
                   Your software license keys and downloadable package manifests are now unlocked in your User Dashboard.
                 </p>
                 <button
                   onClick={() => setActiveTab('dashboard')}
-                  className="px-4 py-2 rounded-lg bg-[#00D69A] text-[#07090B] font-semibold text-xs cursor-pointer"
+                  className="px-4 py-2 rounded-lg dsk-btn-3d text-xs cursor-pointer"
                 >
                   Go to License Downloads
                 </button>
@@ -476,7 +476,7 @@ export const CheckoutView: React.FC = () => {
               <>
                 <form onSubmit={handleVerifyTx} className="space-y-3">
                   <div>
-                    <label className="block text-xs text-[#8F9CA8] mb-1.5">
+                    <label className="block text-xs text-[#CBD5E1] mb-1.5">
                       Tron TRC-20 Transaction Hash (64 hex characters)
                     </label>
                     <input
@@ -486,14 +486,14 @@ export const CheckoutView: React.FC = () => {
                       value={txHashInput}
                       onChange={(e) => setTxHashInput(e.target.value)}
                       placeholder="Paste 64-character TRC-20 transaction hash..."
-                      className="w-full rounded-lg bg-[#0D1116] border border-[#1E2936] px-3 py-2.5 text-xs font-mono text-[#F4F7F6] placeholder-[#8F9CA8]/60 focus:border-[#00D69A] focus:outline-none disabled:opacity-50"
+                      className="w-full rounded-lg dsk-input-3d px-3 py-2.5 text-xs font-mono text-white placeholder-[#94A3B8] focus:border-[#00D69A] focus:outline-none disabled:opacity-50"
                     />
                   </div>
 
                   <button
                     type="submit"
                     disabled={!currentOrder || isVerifyingTx || !txHashInput.trim()}
-                    className="w-full py-2.5 px-4 rounded-lg bg-[#00D69A] hover:bg-[#0EA5A4] text-[#07090B] font-bold text-xs flex items-center justify-center gap-2 transition-colors cursor-pointer disabled:opacity-45"
+                    className="w-full py-2.5 px-4 rounded-lg dsk-btn-3d text-xs flex items-center justify-center gap-2 cursor-pointer disabled:opacity-45"
                   >
                     {isVerifyingTx ? (
                       <>
@@ -510,8 +510,8 @@ export const CheckoutView: React.FC = () => {
                 </form>
 
                 {/* Optional Receipt Upload */}
-                <div className="pt-4 border-t border-[#1E2936] space-y-2.5">
-                  <div className="flex items-center justify-between text-[11px] text-[#8F9CA8]">
+                <div className="pt-4 border-t border-[#253445] space-y-2.5">
+                  <div className="flex items-center justify-between text-[11px] text-[#CBD5E1]">
                     <span>Optional: Attach Wallet Receipt Screenshot</span>
                     <span className="font-mono">PNG/JPG &le; 5MB</span>
                   </div>
@@ -530,9 +530,9 @@ export const CheckoutView: React.FC = () => {
                       type="button"
                       disabled={!currentOrder}
                       onClick={() => fileInputRef.current?.click()}
-                      className="flex-1 py-2 px-3 rounded-lg bg-[#0D1116] border border-[#1E2936] hover:border-[#00D69A]/40 text-xs text-[#D1D9E0] flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-45"
+                      className="flex-1 py-2 px-3 rounded-lg dsk-btn-secondary-3d text-xs text-white flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-45"
                     >
-                      <FileImage className="w-3.5 h-3.5 text-[#0EA5A4]" />
+                      <FileImage className="w-3.5 h-3.5 text-[#00D69A]" />
                       <span className="truncate">
                         {selectedFile ? selectedFile.fileName : 'Choose Screenshot'}
                       </span>
@@ -542,7 +542,7 @@ export const CheckoutView: React.FC = () => {
                         type="button"
                         disabled={!currentOrder || isUploading}
                         onClick={handleSubmitProof}
-                        className="px-3.5 py-2 rounded-lg bg-[#0D1116] border border-[#00D69A] text-[#00D69A] text-xs font-semibold flex items-center gap-1.5 cursor-pointer"
+                        className="px-3.5 py-2 rounded-lg dsk-btn-secondary-3d border-[#00D69A]/60 text-[#00D69A] text-xs font-semibold flex items-center gap-1.5 cursor-pointer"
                       >
                         <UploadCloud className="w-3.5 h-3.5" />
                         <span>{isUploading ? 'Saving...' : 'Attach'}</span>

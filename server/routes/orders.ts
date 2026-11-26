@@ -1,6 +1,11 @@
 import { Router, Request, Response } from 'express';
 import { db } from '../db';
-import { AuthenticatedRequest, requireAdmin, requireAuth } from '../middleware/auth';
+import {
+  AuthenticatedRequest,
+  extractClientMeta,
+  requireAdmin,
+  requireAuth
+} from '../middleware/auth';
 import { BlockchainVerification, OrderStatus } from '../types';
 
 const router = Router();
@@ -325,10 +330,16 @@ router.post('/', requireAuth, (req: AuthenticatedRequest, res: Response) => {
   }
 
   const finalAmount = Math.max(1, Math.round((subtotal - discountAmount) * 100) / 100);
+  const meta = extractClientMeta(req);
 
   const newOrder = db.createOrder({
     userId: req.user!.id,
     userEmail: req.user!.email,
+    buyerName: req.user!.username,
+    buyerOrganization: req.user!.organization,
+    buyerIp: meta.ip,
+    buyerDevice: meta.device,
+    buyerLocation: meta.location,
     items: authoritativeItems,
     subtotal,
     discountCode: appliedDiscountCode,

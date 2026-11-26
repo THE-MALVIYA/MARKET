@@ -35,22 +35,22 @@ export const ToastContainer: React.FC = () => {
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: -8, scale: 0.97 }}
               transition={{ duration: 0.16 }}
-              className={`pointer-events-auto rounded-xl border ${borderColor} bg-[#11161D]/95 p-3.5 shadow-2xl backdrop-blur-md flex items-start gap-3`}
+              className={`pointer-events-auto rounded-xl border ${borderColor} dsk-surface p-3.5 flex items-start gap-3`}
             >
               <div className="flex-shrink-0 mt-0.5">{icon}</div>
               <div className="flex-1 pr-2">
-                <h4 className={`text-xs font-semibold ${titleColor}`}>
+                <h4 className={`text-xs font-bold ${titleColor}`}>
                   {toast.title}
                 </h4>
                 {toast.message && (
-                  <p className="text-[11px] text-[#8F9CA8] mt-0.5 leading-relaxed">
+                  <p className="text-[11px] text-[#CBD5E1] mt-0.5 leading-relaxed">
                     {toast.message}
                   </p>
                 )}
               </div>
               <button
                 onClick={() => removeToast(toast.id)}
-                className="text-[#8F9CA8] hover:text-[#F4F7F6] p-0.5 cursor-pointer"
+                className="text-[#CBD5E1] hover:text-white p-0.5 cursor-pointer"
                 aria-label="Dismiss notification"
               >
                 <X className="w-3.5 h-3.5" />

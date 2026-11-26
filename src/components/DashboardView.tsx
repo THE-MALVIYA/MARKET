@@ -82,15 +82,15 @@ export const DashboardView: React.FC = () => {
   if (!currentUser) {
     return (
       <div className="max-w-4xl mx-auto px-4 py-16 text-center space-y-6">
-        <div className="p-8 sm:p-10 rounded-2xl bg-[#11161D] border border-[#1E2936] space-y-4">
+        <div className="dsk-surface p-8 sm:p-10 rounded-2xl space-y-4">
           <Lock className="w-10 h-10 text-[#00D69A] mx-auto" />
-          <h1 className="text-2xl font-bold text-[#F4F7F6]">User Account Dashboard</h1>
-          <p className="text-xs sm:text-sm text-[#8F9CA8] max-w-md mx-auto">
+          <h1 className="text-2xl font-bold text-white">User Account Dashboard</h1>
+          <p className="text-xs sm:text-sm text-[#CBD5E1] max-w-md mx-auto">
             Sign in to view your licensing orders, download purchased software manifests, copy license keys, and track support tickets.
           </p>
           <button
             onClick={() => setAuthModalOpen(true)}
-            className="px-6 py-3 rounded-lg bg-[#00D69A] hover:bg-[#0EA5A4] text-[#07090B] font-bold text-xs cursor-pointer"
+            className="dsk-btn-3d px-6 py-3 rounded-lg text-xs cursor-pointer"
           >
             Sign In or Create Account
           </button>
@@ -132,15 +132,15 @@ export const DashboardView: React.FC = () => {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
-      <div className="p-6 sm:p-8 rounded-2xl bg-[#11161D] border border-[#1E2936] flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+      <div className="dsk-surface p-6 sm:p-8 rounded-2xl flex flex-col lg:flex-row lg:items-center justify-between gap-6">
         <div>
           <span className="text-[11px] font-mono uppercase tracking-[0.18em] text-[#00D69A] block mb-1">
             DEEPSEEK Account Workspace
           </span>
-          <h1 className="text-2xl sm:text-3xl font-bold text-[#F4F7F6]">
+          <h1 className="text-2xl sm:text-3xl font-bold text-white">
             {currentUser.username}
           </h1>
-          <p className="text-xs text-[#8F9CA8] mt-1">
+          <p className="text-xs text-[#CBD5E1] mt-1">
             {currentUser.email} · {currentUser.organization || 'Enterprise Client'}
           </p>
         </div>
@@ -148,13 +148,13 @@ export const DashboardView: React.FC = () => {
         <div className="flex flex-wrap gap-3">
           <button
             onClick={() => setActiveTab('products')}
-            className="px-4 py-2.5 rounded-lg bg-[#00D69A] hover:bg-[#0EA5A4] text-[#07090B] font-semibold text-xs cursor-pointer"
+            className="dsk-btn-3d px-4 py-2.5 rounded-lg text-xs cursor-pointer"
           >
             Browse Products
           </button>
           <button
             onClick={() => setActiveTab('checkout')}
-            className="px-4 py-2.5 rounded-lg bg-[#0D1116] border border-[#1E2936] text-[#F4F7F6] font-semibold text-xs cursor-pointer"
+            className="dsk-btn-secondary-3d px-4 py-2.5 rounded-lg text-xs cursor-pointer"
           >
             Active Checkout
           </button>
@@ -162,7 +162,7 @@ export const DashboardView: React.FC = () => {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-        <aside className="lg:col-span-3 rounded-xl bg-[#11161D] border border-[#1E2936] p-2 space-y-1">
+        <aside className="dsk-surface lg:col-span-3 rounded-xl p-2 space-y-1">
           {navItems.map((item) => {
             const Icon = item.icon;
             const active = section === item.id;
@@ -173,7 +173,7 @@ export const DashboardView: React.FC = () => {
                 className={`w-full flex items-center gap-2.5 px-3.5 py-2.5 rounded-lg text-xs font-medium transition-colors cursor-pointer text-left ${
                   active
                     ? 'bg-[#00D69A]/15 text-[#00D69A] font-semibold'
-                    : 'text-[#8F9CA8] hover:text-[#F4F7F6] hover:bg-[#0D1116]'
+                    : 'text-[#CBD5E1] hover:text-white hover:bg-[#0B1017]'
                 }`}
               >
                 <Icon className="w-4 h-4 shrink-0" />
@@ -186,27 +186,27 @@ export const DashboardView: React.FC = () => {
         <div className="lg:col-span-9 space-y-6">
           {section === 'overview' && (
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-              <div className="p-4 rounded-xl bg-[#11161D] border border-[#1E2936]">
-                <span className="text-xs text-[#8F9CA8] block">Orders</span>
-                <div className="text-2xl font-bold font-mono text-[#F4F7F6] mt-1 tabular-nums">
+              <div className="dsk-panel-3d p-4 rounded-xl">
+                <span className="text-xs text-[#CBD5E1] block">Orders</span>
+                <div className="text-2xl font-bold font-mono text-white mt-1 tabular-nums">
                   {orders.length}
                 </div>
               </div>
-              <div className="p-4 rounded-xl bg-[#11161D] border border-[#1E2936]">
-                <span className="text-xs text-[#8F9CA8] block">Active Licenses</span>
+              <div className="dsk-panel-3d p-4 rounded-xl">
+                <span className="text-xs text-[#CBD5E1] block">Active Licenses</span>
                 <div className="text-2xl font-bold font-mono text-[#00D69A] mt-1 tabular-nums">
                   {licenses.filter((l) => l.status === 'Active').length}
                 </div>
               </div>
-              <div className="p-4 rounded-xl bg-[#11161D] border border-[#1E2936]">
-                <span className="text-xs text-[#8F9CA8] block">Saved Wishlist</span>
-                <div className="text-2xl font-bold font-mono text-[#F4F7F6] mt-1 tabular-nums">
+              <div className="dsk-panel-3d p-4 rounded-xl">
+                <span className="text-xs text-[#CBD5E1] block">Saved Wishlist</span>
+                <div className="text-2xl font-bold font-mono text-white mt-1 tabular-nums">
                   {savedProducts.length}
                 </div>
               </div>
-              <div className="p-4 rounded-xl bg-[#11161D] border border-[#1E2936]">
-                <span className="text-xs text-[#8F9CA8] block">Open Tickets</span>
-                <div className="text-2xl font-bold font-mono text-[#0EA5A4] mt-1 tabular-nums">
+              <div className="dsk-panel-3d p-4 rounded-xl">
+                <span className="text-xs text-[#CBD5E1] block">Open Tickets</span>
+                <div className="text-2xl font-bold font-mono text-[#38BDF8] mt-1 tabular-nums">
                   {tickets.filter((t) => t.status !== 'Resolved').length}
                 </div>
               </div>
@@ -214,9 +214,9 @@ export const DashboardView: React.FC = () => {
           )}
 
           {section === 'orders' && (
-            <div className="p-6 rounded-xl bg-[#11161D] border border-[#1E2936] space-y-4">
-              <div className="flex items-center justify-between pb-3 border-b border-[#1E2936]">
-                <h2 className="text-base font-bold text-[#F4F7F6]">My Orders</h2>
+            <div className="dsk-surface p-6 rounded-xl space-y-4">
+              <div className="flex items-center justify-between pb-3 border-b border-[#253445]">
+                <h2 className="text-base font-bold text-white">My Orders</h2>
                 <button
                   onClick={() => setActiveTab('orders')}
                   className="text-xs text-[#00D69A] cursor-pointer"
@@ -264,12 +264,12 @@ export const DashboardView: React.FC = () => {
           )}
 
           {section === 'purchased' && (
-            <div className="p-6 rounded-xl bg-[#11161D] border border-[#1E2936] space-y-4">
-              <h2 className="text-base font-bold text-[#F4F7F6] pb-3 border-b border-[#1E2936]">
+            <div className="dsk-surface p-6 rounded-xl space-y-4">
+              <h2 className="text-base font-bold text-white pb-3 border-b border-[#253445]">
                 Purchased Software Suites
               </h2>
               {purchasedList.length === 0 ? (
-                <p className="text-xs text-[#8F9CA8] py-8 text-center">
+                <p className="text-xs text-[#CBD5E1] py-8 text-center">
                   Confirmed purchases appear here once blockchain settlement completes.
                 </p>
               ) : (
@@ -277,17 +277,17 @@ export const DashboardView: React.FC = () => {
                   {purchasedList.map((item, idx) => (
                     <div
                       key={idx}
-                      className="p-4 rounded-lg bg-[#0D1116] border border-[#1E2936] flex items-center justify-between text-xs"
+                      className="dsk-panel-3d p-4 rounded-lg flex items-center justify-between text-xs"
                     >
                       <div>
-                        <div className="font-bold text-[#F4F7F6]">{item.name}</div>
-                        <div className="text-[#8F9CA8] font-mono mt-0.5">
+                        <div className="font-bold text-white">{item.name}</div>
+                        <div className="text-[#CBD5E1] font-mono mt-0.5">
                           Order {item.orderNumber} · {new Date(item.date).toLocaleDateString()}
                         </div>
                       </div>
                       <button
                         onClick={() => setSection('downloads')}
-                        className="px-3 py-1.5 rounded-lg bg-[#00D69A] text-[#07090B] font-semibold cursor-pointer"
+                        className="dsk-btn-3d px-3 py-1.5 rounded-lg text-xs cursor-pointer"
                       >
                         Download Files
                       </button>
@@ -299,12 +299,12 @@ export const DashboardView: React.FC = () => {
           )}
 
           {section === 'downloads' && (
-            <div className="p-6 rounded-xl bg-[#11161D] border border-[#1E2936] space-y-4">
-              <h2 className="text-base font-bold text-[#F4F7F6] pb-3 border-b border-[#1E2936]">
+            <div className="dsk-surface p-6 rounded-xl space-y-4">
+              <h2 className="text-base font-bold text-white pb-3 border-b border-[#253445]">
                 Downloadable Software Manifests
               </h2>
               {licenses.length === 0 ? (
-                <p className="text-xs text-[#8F9CA8] py-8 text-center">
+                <p className="text-xs text-[#CBD5E1] py-8 text-center">
                   Signed deployment manifests are unlocked automatically when payment confirms.
                 </p>
               ) : (
@@ -312,20 +312,20 @@ export const DashboardView: React.FC = () => {
                   {licenses.map((lic) => (
                     <div
                       key={lic.id}
-                      className="p-4 rounded-lg bg-[#0D1116] border border-[#1E2936] flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs"
+                      className="dsk-panel-3d p-4 rounded-lg flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs"
                     >
                       <div>
-                        <div className="font-bold text-[#F4F7F6]">
+                        <div className="font-bold text-white">
                           {lic.productName} ({lic.productVersion})
                         </div>
-                        <div className="font-mono text-[11px] text-[#8F9CA8] mt-1">
+                        <div className="font-mono text-[11px] text-[#CBD5E1] mt-1">
                           SHA-256: {lic.downloadManifestHash.slice(0, 24)}...
                         </div>
                       </div>
                       <button
                         disabled={lic.status !== 'Active'}
                         onClick={() => downloadLicenseBundle(lic.id, lic.productId)}
-                        className="px-4 py-2 rounded-lg bg-[#00D69A] hover:bg-[#0EA5A4] text-[#07090B] font-semibold flex items-center gap-1.5 cursor-pointer disabled:opacity-40"
+                        className="dsk-btn-3d px-4 py-2 rounded-lg flex items-center gap-1.5 cursor-pointer disabled:opacity-40"
                       >
                         <Download className="w-3.5 h-3.5" />
                         <span>Download Manifest JSON</span>
@@ -338,29 +338,29 @@ export const DashboardView: React.FC = () => {
           )}
 
           {section === 'licenses' && (
-            <div className="p-6 rounded-xl bg-[#11161D] border border-[#1E2936] space-y-4">
-              <h2 className="text-base font-bold text-[#F4F7F6] pb-3 border-b border-[#1E2936]">
+            <div className="dsk-surface p-6 rounded-xl space-y-4">
+              <h2 className="text-base font-bold text-white pb-3 border-b border-[#253445]">
                 Issued License Keys
               </h2>
               {licenses.length === 0 ? (
-                <p className="text-xs text-[#8F9CA8] py-8 text-center">No active license keys issued yet.</p>
+                <p className="text-xs text-[#CBD5E1] py-8 text-center">No active license keys issued yet.</p>
               ) : (
                 <div className="space-y-3">
                   {licenses.map((lic) => (
                     <div
                       key={lic.id}
-                      className="p-4 rounded-lg bg-[#0D1116] border border-[#1E2936] flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs"
+                      className="dsk-panel-3d p-4 rounded-lg flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs"
                     >
                       <div>
-                        <div className="font-bold text-[#F4F7F6]">{lic.productName}</div>
+                        <div className="font-bold text-white">{lic.productName}</div>
                         <div className="font-mono text-[#00D69A] font-bold mt-1">{lic.licenseKey}</div>
-                        <div className="text-[11px] text-[#8F9CA8] mt-1">
+                        <div className="text-[11px] text-[#CBD5E1] mt-1">
                           Status: {lic.status} · Expires {new Date(lic.expiresAt).toLocaleDateString()}
                         </div>
                       </div>
                       <button
                         onClick={() => handleCopyLicense(lic.id, lic.licenseKey)}
-                        className="px-3.5 py-2 rounded-lg bg-[#11161D] border border-[#1E2936] text-[#00D69A] font-mono flex items-center gap-1.5 cursor-pointer"
+                        className="dsk-btn-secondary-3d px-3.5 py-2 rounded-lg text-[#00D69A] font-mono flex items-center gap-1.5 cursor-pointer"
                       >
                         {copiedKeyId === lic.id ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
                         <span>{copiedKeyId === lic.id ? 'Copied' : 'Copy Key'}</span>
@@ -373,26 +373,26 @@ export const DashboardView: React.FC = () => {
           )}
 
           {section === 'payments' && (
-            <div className="p-6 rounded-xl bg-[#11161D] border border-[#1E2936] space-y-4">
-              <h2 className="text-base font-bold text-[#F4F7F6] pb-3 border-b border-[#1E2936]">
+            <div className="dsk-surface p-6 rounded-xl space-y-4">
+              <h2 className="text-base font-bold text-white pb-3 border-b border-[#253445]">
                 Payment History &amp; Blockchain Transaction Details
               </h2>
               {orders.length === 0 ? (
-                <p className="text-xs text-[#8F9CA8] py-8 text-center">No payment transactions recorded.</p>
+                <p className="text-xs text-[#CBD5E1] py-8 text-center">No payment transactions recorded.</p>
               ) : (
                 <div className="space-y-3">
                   {orders.map((o) => (
                     <div
                       key={o.id}
-                      className="p-4 rounded-lg bg-[#0D1116] border border-[#1E2936] text-xs space-y-1.5"
+                      className="dsk-panel-3d p-4 rounded-lg text-xs space-y-1.5"
                     >
                       <div className="flex justify-between font-mono">
                         <span className="text-[#00D69A] font-bold">{o.orderNumber}</span>
-                        <span className="font-bold text-[#F4F7F6]">{o.amount.toLocaleString()} USDT</span>
+                        <span className="font-bold text-white">{o.amount.toLocaleString()} USDT</span>
                       </div>
-                      <div className="text-[#8F9CA8]">Status: {o.status}</div>
+                      <div className="text-[#CBD5E1]">Status: {o.status}</div>
                       {o.txHash && (
-                        <div className="font-mono text-[11px] text-[#0EA5A4] break-all">
+                        <div className="font-mono text-[11px] text-[#38BDF8] break-all">
                           TXID: {o.txHash}
                         </div>
                       )}
@@ -404,12 +404,12 @@ export const DashboardView: React.FC = () => {
           )}
 
           {section === 'wishlist' && (
-            <div className="p-6 rounded-xl bg-[#11161D] border border-[#1E2936] space-y-4">
-              <h2 className="text-base font-bold text-[#F4F7F6] pb-3 border-b border-[#1E2936]">
+            <div className="dsk-surface p-6 rounded-xl space-y-4">
+              <h2 className="text-base font-bold text-white pb-3 border-b border-[#253445]">
                 Saved Products
               </h2>
               {savedProducts.length === 0 ? (
-                <p className="text-xs text-[#8F9CA8] py-8 text-center">Your wishlist is empty.</p>
+                <p className="text-xs text-[#CBD5E1] py-8 text-center">Your wishlist is empty.</p>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                   {savedProducts.map((product) => (
@@ -417,7 +417,7 @@ export const DashboardView: React.FC = () => {
                       <ProductCard product={product} />
                       <button
                         onClick={() => toggleWishlist(product)}
-                        className="mt-2 w-full py-1.5 rounded-lg bg-[#0D1116] border border-[#1E2936] text-[11px] text-[#8F9CA8] hover:text-red-300 flex items-center justify-center gap-1.5 cursor-pointer"
+                        className="dsk-btn-secondary-3d mt-2 w-full py-1.5 rounded-lg text-[11px] text-[#CBD5E1] hover:text-red-300 flex items-center justify-center gap-1.5 cursor-pointer"
                       >
                         <Trash2 className="w-3 h-3" />
                         <span>Remove</span>
@@ -433,14 +433,14 @@ export const DashboardView: React.FC = () => {
             <div className="space-y-6">
               <form
                 onSubmit={handleCreateTicket}
-                className="p-6 rounded-xl bg-[#11161D] border border-[#1E2936] space-y-3.5 text-xs"
+                className="dsk-surface p-6 rounded-xl space-y-3.5 text-xs"
               >
-                <h2 className="text-base font-bold text-[#F4F7F6]">New Support Ticket</h2>
+                <h2 className="text-base font-bold text-white">New Support Ticket</h2>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <select
                     value={ticketForm.category}
                     onChange={(e) => setTicketForm({ ...ticketForm, category: e.target.value })}
-                    className="rounded-lg bg-[#0D1116] border border-[#1E2936] p-2.5 text-[#F4F7F6]"
+                    className="dsk-input-3d rounded-lg p-2.5"
                   >
                     <option value="Order & Payment Reconciliation">Order &amp; Payment Reconciliation</option>
                     <option value="License Key Support">License Key Support</option>
@@ -452,7 +452,7 @@ export const DashboardView: React.FC = () => {
                     value={ticketForm.subject}
                     onChange={(e) => setTicketForm({ ...ticketForm, subject: e.target.value })}
                     placeholder="Ticket subject..."
-                    className="rounded-lg bg-[#0D1116] border border-[#1E2936] p-2.5 text-[#F4F7F6]"
+                    className="dsk-input-3d rounded-lg p-2.5"
                   />
                 </div>
                 <textarea
@@ -461,41 +461,41 @@ export const DashboardView: React.FC = () => {
                   value={ticketForm.message}
                   onChange={(e) => setTicketForm({ ...ticketForm, message: e.target.value })}
                   placeholder="Describe your order reference, TXID, or technical question..."
-                  className="w-full rounded-lg bg-[#0D1116] border border-[#1E2936] p-2.5 text-[#F4F7F6]"
+                  className="dsk-input-3d w-full rounded-lg p-2.5"
                 />
                 <button
                   type="submit"
-                  className="px-4 py-2 rounded-lg bg-[#00D69A] hover:bg-[#0EA5A4] text-[#07090B] font-semibold flex items-center gap-1.5 cursor-pointer"
+                  className="dsk-btn-3d px-4 py-2 rounded-lg flex items-center gap-1.5 cursor-pointer"
                 >
                   <Send className="w-3.5 h-3.5" />
                   <span>Submit Ticket</span>
                 </button>
               </form>
 
-              <div className="p-6 rounded-xl bg-[#11161D] border border-[#1E2936] space-y-3">
-                <h3 className="text-sm font-bold text-[#F4F7F6]">My Support Tickets</h3>
+              <div className="dsk-surface p-6 rounded-xl space-y-3">
+                <h3 className="text-sm font-bold text-white">My Support Tickets</h3>
                 {tickets.length === 0 ? (
-                  <p className="text-xs text-[#8F9CA8]">No tickets submitted yet.</p>
+                  <p className="text-xs text-[#CBD5E1]">No tickets submitted yet.</p>
                 ) : (
                   tickets.map((t) => (
                     <div
                       key={t.id}
-                      className="p-4 rounded-lg bg-[#0D1116] border border-[#1E2936] space-y-2 text-xs"
+                      className="dsk-panel-3d p-4 rounded-lg space-y-2 text-xs"
                     >
                       <div className="flex items-center justify-between">
                         <span className="font-mono text-[#00D69A] font-bold">
                           {t.ticketNumber} · {t.subject}
                         </span>
-                        <span className="font-mono text-[#0EA5A4]">{t.status}</span>
+                        <span className="font-mono text-[#38BDF8]">{t.status}</span>
                       </div>
-                      <p className="text-[#8F9CA8]">{t.message}</p>
+                      <p className="text-[#CBD5E1]">{t.message}</p>
                       {t.replies.map((r) => (
                         <div
                           key={r.id}
-                          className="p-2.5 rounded bg-[#11161D] border border-[#1E2936] text-[11px]"
+                          className="p-2.5 rounded bg-[#0A0F16] border border-[#253445] text-[11px]"
                         >
                           <strong className="text-[#00D69A]">{r.author}:</strong>{' '}
-                          <span className="text-[#D1D9E0]">{r.message}</span>
+                          <span className="text-[#E2E8F0]">{r.message}</span>
                         </div>
                       ))}
                     </div>
@@ -511,34 +511,34 @@ export const DashboardView: React.FC = () => {
                 e.preventDefault();
                 updateUserPreferences(profileForm, 'Account profile preferences updated');
               }}
-              className="p-6 rounded-xl bg-[#11161D] border border-[#1E2936] space-y-4 text-xs"
+              className="dsk-surface p-6 rounded-xl space-y-4 text-xs"
             >
-              <h2 className="text-base font-bold text-[#F4F7F6] pb-3 border-b border-[#1E2936]">
+              <h2 className="text-base font-bold text-white pb-3 border-b border-[#253445]">
                 Account Settings
               </h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-[#8F9CA8] mb-1">Display Name</label>
+                  <label className="block text-[#CBD5E1] mb-1">Display Name</label>
                   <input
                     type="text"
                     value={profileForm.displayName}
                     onChange={(e) => setProfileForm({ ...profileForm, displayName: e.target.value })}
-                    className="w-full rounded-lg bg-[#0D1116] border border-[#1E2936] p-2.5 text-[#F4F7F6]"
+                    className="dsk-input-3d w-full rounded-lg p-2.5"
                   />
                 </div>
                 <div>
-                  <label className="block text-[#8F9CA8] mb-1">Organization</label>
+                  <label className="block text-[#CBD5E1] mb-1">Organization</label>
                   <input
                     type="text"
                     value={profileForm.organization}
                     onChange={(e) => setProfileForm({ ...profileForm, organization: e.target.value })}
-                    className="w-full rounded-lg bg-[#0D1116] border border-[#1E2936] p-2.5 text-[#F4F7F6]"
+                    className="dsk-input-3d w-full rounded-lg p-2.5"
                   />
                 </div>
               </div>
               <button
                 type="submit"
-                className="px-4 py-2 rounded-lg bg-[#00D69A] hover:bg-[#0EA5A4] text-[#07090B] font-semibold flex items-center gap-1.5 cursor-pointer"
+                className="dsk-btn-3d px-4 py-2 rounded-lg flex items-center gap-1.5 cursor-pointer"
               >
                 <Save className="w-3.5 h-3.5" />
                 <span>Save Settings</span>

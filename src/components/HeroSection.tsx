@@ -7,14 +7,14 @@ export const HeroSection: React.FC = () => {
   const { setActiveTab } = useMarket();
 
   return (
-    <section className="relative bg-[#07090B] border-b border-[#1E2936] overflow-hidden">
+    <section className="relative bg-transparent border-b border-[#253344] overflow-hidden">
       {/* Subtle architectural radial sheen behind 3D stage (never over WebGL backdrop-filter) */}
       <div
         aria-hidden="true"
         className="absolute inset-0 pointer-events-none"
         style={{
           background:
-            'radial-gradient(ellipse 65% 75% at 72% 45%, rgba(14, 165, 164, 0.12), transparent 65%), radial-gradient(ellipse 50% 60% at 20% 20%, rgba(0, 214, 154, 0.06), transparent 60%)'
+            'radial-gradient(ellipse 65% 75% at 72% 45%, rgba(14, 165, 164, 0.16), transparent 65%), radial-gradient(ellipse 50% 60% at 20% 20%, rgba(0, 214, 154, 0.08), transparent 60%)'
         }}
       />
 
@@ -22,24 +22,24 @@ export const HeroSection: React.FC = () => {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-8 items-center">
           {/* Left: High-contrast Typography & Actions */}
           <div className="lg:col-span-6 space-y-6">
-            <div className="inline-flex items-center gap-3 text-[11px] font-mono uppercase tracking-[0.2em] text-[#00D69A] font-semibold">
+            <div className="inline-flex items-center gap-3 text-[11px] font-mono uppercase tracking-[0.22em] text-[#00D69A] font-bold">
               <span>DEEPSEEK</span>
-              <span className="text-[#1E2936]">/</span>
-              <span className="text-[#8F9CA8]">ENTERPRISE SOFTWARE INFRASTRUCTURE</span>
+              <span className="text-[#3A4F66]">/</span>
+              <span className="text-[#E2E8F0]">ENTERPRISE SOFTWARE INFRASTRUCTURE</span>
             </div>
 
-            <h1 className="text-3xl sm:text-5xl lg:text-[52px] font-extrabold tracking-tight text-[#F4F7F6] leading-[1.08]">
+            <h1 className="text-3xl sm:text-5xl lg:text-[54px] font-extrabold tracking-tight text-white leading-[1.06] drop-shadow-[0_6px_22px_rgba(0,0,0,0.85)]">
               ENGINEERED FOR THE NEXT ERA OF DEEPHAT.
             </h1>
 
-            <p className="text-sm sm:text-base text-[#8F9CA8] leading-relaxed max-w-xl">
+            <p className="text-sm sm:text-base text-[#CBD5E1] leading-relaxed max-w-xl">
               Discover advanced security software, developer infrastructure, and enterprise technology solutions built for modern digital environments.
             </p>
 
             <div className="flex flex-wrap items-center gap-3.5 pt-2">
               <button
                 onClick={() => setActiveTab('products')}
-                className="px-6 py-3.5 rounded-lg bg-[#00D69A] hover:bg-[#0EA5A4] text-[#07090B] font-bold text-xs sm:text-sm tracking-wide flex items-center gap-2 transition-colors cursor-pointer whitespace-nowrap shadow-lg shadow-[#00D69A]/15"
+                className="dsk-btn-3d px-6 py-3.5 rounded-lg text-xs sm:text-sm tracking-wide flex items-center gap-2 cursor-pointer whitespace-nowrap"
               >
                 <span>EXPLORE PRODUCTS</span>
                 <ArrowRight className="w-4 h-4" />
@@ -47,7 +47,7 @@ export const HeroSection: React.FC = () => {
 
               <button
                 onClick={() => setActiveTab('about')}
-                className="px-6 py-3.5 rounded-lg bg-[#11161D] hover:bg-[#151C24] text-[#F4F7F6] border border-[#1E2936] hover:border-[#00D69A]/50 font-semibold text-xs sm:text-sm tracking-wide transition-colors cursor-pointer whitespace-nowrap"
+                className="dsk-btn-secondary-3d px-6 py-3.5 rounded-lg text-xs sm:text-sm tracking-wide cursor-pointer whitespace-nowrap"
               >
                 DISCOVER DEEPSEEK
               </button>
@@ -56,13 +56,7 @@ export const HeroSection: React.FC = () => {
 
           {/* Right: Dedicated WebGL2 Three.js 3D Infrastructure Stage */}
           <div className="lg:col-span-6">
-            <div
-              className="relative h-[360px] sm:h-[440px] lg:h-[490px] w-full rounded-2xl border border-[#1E2936] bg-[#0B0E13] overflow-hidden"
-              style={{
-                boxShadow:
-                  '0 34px 85px -24px rgba(0, 0, 0, 0.96), 0 0 55px -22px rgba(0, 214, 154, 0.24), inset 0 1px 0 rgba(255, 255, 255, 0.08)'
-              }}
-            >
+            <div className="dsk-chassis-3d relative h-[360px] sm:h-[440px] lg:h-[490px] w-full rounded-2xl overflow-hidden">
               <HeroInfrastructure3D />
             </div>
           </div>

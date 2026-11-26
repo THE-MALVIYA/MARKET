@@ -52,15 +52,15 @@ export const SupportView: React.FC = () => {
 
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-      <div className="text-center max-w-2xl mx-auto mb-10 pb-6 border-b border-[#1E2936]">
+      <div className="text-center max-w-2xl mx-auto mb-10 pb-6 border-b border-[#253445]">
         <div className="inline-flex items-center gap-1.5 text-xs font-mono text-[#00D69A] mb-2">
           <LifeBuoy className="w-3.5 h-3.5" />
           <span>ENTERPRISE SUPPORT DESK</span>
         </div>
-        <h1 className="text-3xl font-bold text-[#F4F7F6] mb-2">
+        <h1 className="text-3xl font-bold text-white mb-2">
           Support &amp; Licensing Helpdesk
         </h1>
-        <p className="text-xs sm:text-sm text-[#8F9CA8]">
+        <p className="text-xs sm:text-sm text-[#CBD5E1]">
           Blockchain settlement verification assistance, deployment guidance, and licensing inquiries.
         </p>
       </div>
@@ -76,21 +76,21 @@ export const SupportView: React.FC = () => {
             {faqs.map((faq, idx) => (
               <div
                 key={idx}
-                className="rounded-xl bg-[#11161D] border border-[#1E2936] overflow-hidden"
+                className="dsk-panel-3d rounded-xl overflow-hidden"
               >
                 <button
                   onClick={() => setOpenFaq(openFaq === idx ? null : idx)}
-                  className="w-full text-left p-4 flex items-center justify-between gap-2 text-xs font-semibold text-[#F4F7F6] hover:text-[#00D69A] transition-colors cursor-pointer"
+                  className="w-full text-left p-4 flex items-center justify-between gap-2 text-xs font-semibold text-white hover:text-[#00D69A] transition-colors cursor-pointer"
                 >
                   <span>{faq.q}</span>
                   <ChevronDown
-                    className={`w-4 h-4 text-[#8F9CA8] transition-transform shrink-0 ${
+                    className={`w-4 h-4 text-[#CBD5E1] transition-transform shrink-0 ${
                       openFaq === idx ? 'rotate-180 text-[#00D69A]' : ''
                     }`}
                   />
                 </button>
                 {openFaq === idx && (
-                  <div className="p-4 pt-2 text-xs text-[#8F9CA8] leading-relaxed border-t border-[#1E2936]">
+                  <div className="p-4 pt-2 text-xs text-[#CBD5E1] leading-relaxed border-t border-[#253445]">
                     {faq.a}
                   </div>
                 )}
@@ -98,7 +98,7 @@ export const SupportView: React.FC = () => {
             ))}
           </div>
 
-          <div className="p-4 rounded-xl bg-[#11161D] border border-[#E5B84B]/35 text-xs text-[#8F9CA8] leading-relaxed">
+          <div className="dsk-surface p-4 rounded-xl border-[#E5B84B]/40 text-xs text-[#CBD5E1] leading-relaxed">
             <div className="font-semibold text-[#E5B84B] flex items-center gap-1.5 mb-1">
               <Shield className="w-4 h-4" />
               <span>Authorized Use &amp; Package Verification</span>
@@ -110,33 +110,33 @@ export const SupportView: React.FC = () => {
         </div>
 
         <div className="md:col-span-5 space-y-4">
-          <div className="p-5 sm:p-6 rounded-xl bg-[#11161D] border border-[#1E2936]">
-            <h3 className="text-sm font-bold text-[#F4F7F6] mb-1.5">
+          <div className="dsk-surface p-5 sm:p-6 rounded-xl">
+            <h3 className="text-sm font-bold text-white mb-1.5">
               Open Support Ticket
             </h3>
-            <p className="text-xs text-[#8F9CA8] mb-4">
+            <p className="text-xs text-[#CBD5E1] mb-4">
               Submit an inquiry regarding TXID confirmation, license activation, or technical specs.
             </p>
 
             {submittedTicketNumber ? (
-              <div className="p-5 rounded-xl bg-[#0D1116] border border-[#00D69A]/40 text-center space-y-3">
+              <div className="dsk-panel-3d p-5 rounded-xl border-[#00D69A]/40 text-center space-y-3">
                 <CheckCircle2 className="w-8 h-8 text-[#00D69A] mx-auto" />
                 <div>
                   <div className="font-bold text-[#00D69A] text-xs">Ticket Created</div>
-                  <div className="text-xs font-mono text-[#8F9CA8] mt-1">
-                    Reference ID: <span className="text-[#F4F7F6] font-bold">{submittedTicketNumber}</span>
+                  <div className="text-xs font-mono text-[#CBD5E1] mt-1">
+                    Reference ID: <span className="text-white font-bold">{submittedTicketNumber}</span>
                   </div>
                 </div>
                 <div className="flex justify-center gap-2">
                   <button
                     onClick={() => setSubmittedTicketNumber(null)}
-                    className="px-3.5 py-2 rounded-lg bg-[#00D69A] text-[#07090B] font-semibold text-xs cursor-pointer"
+                    className="dsk-btn-3d px-3.5 py-2 rounded-lg text-xs cursor-pointer"
                   >
                     New Ticket
                   </button>
                   <button
                     onClick={() => setActiveTab('dashboard')}
-                    className="px-3.5 py-2 rounded-lg bg-[#11161D] border border-[#1E2936] text-[#F4F7F6] font-semibold text-xs cursor-pointer"
+                    className="dsk-btn-secondary-3d px-3.5 py-2 rounded-lg text-xs cursor-pointer"
                   >
                     Track in Dashboard
                   </button>
@@ -145,11 +145,11 @@ export const SupportView: React.FC = () => {
             ) : (
               <form onSubmit={handleTicketSubmit} className="space-y-3 text-xs">
                 <div>
-                  <label className="text-[#8F9CA8] block mb-1 font-medium">Category</label>
+                  <label className="text-[#CBD5E1] block mb-1 font-medium">Category</label>
                   <select
                     value={ticketCategory}
                     onChange={(e) => setTicketCategory(e.target.value)}
-                    className="w-full rounded-lg bg-[#0D1116] border border-[#1E2936] p-2.5 text-[#F4F7F6] focus:border-[#00D69A] focus:outline-none"
+                    className="dsk-input-3d w-full rounded-lg p-2.5"
                   >
                     <option value="License Verification">License &amp; TXID Verification</option>
                     <option value="Technical Specifications">Technical Specifications</option>
@@ -159,33 +159,33 @@ export const SupportView: React.FC = () => {
                 </div>
 
                 <div>
-                  <label className="text-[#8F9CA8] block mb-1 font-medium">Subject</label>
+                  <label className="text-[#CBD5E1] block mb-1 font-medium">Subject</label>
                   <input
                     type="text"
                     required
                     placeholder="e.g. Order DSK-1024 blockchain verification"
                     value={ticketSubject}
                     onChange={(e) => setTicketSubject(e.target.value)}
-                    className="w-full rounded-lg bg-[#0D1116] border border-[#1E2936] p-2.5 text-[#F4F7F6] placeholder-[#8F9CA8]/70 focus:border-[#00D69A] focus:outline-none"
+                    className="dsk-input-3d w-full rounded-lg p-2.5 placeholder-[#9FB0C2]/70"
                   />
                 </div>
 
                 <div>
-                  <label className="text-[#8F9CA8] block mb-1 font-medium">Details</label>
+                  <label className="text-[#CBD5E1] block mb-1 font-medium">Details</label>
                   <textarea
                     rows={4}
                     required
                     placeholder="Include your order reference, TXID hash, or technical question..."
                     value={ticketMessage}
                     onChange={(e) => setTicketMessage(e.target.value)}
-                    className="w-full rounded-lg bg-[#0D1116] border border-[#1E2936] p-2.5 text-[#F4F7F6] placeholder-[#8F9CA8]/70 focus:border-[#00D69A] focus:outline-none"
+                    className="dsk-input-3d w-full rounded-lg p-2.5 placeholder-[#9FB0C2]/70"
                   />
                 </div>
 
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="w-full py-2.5 px-4 rounded-lg bg-[#00D69A] hover:bg-[#0EA5A4] text-[#07090B] font-semibold text-xs flex items-center justify-center gap-1.5 transition-colors cursor-pointer disabled:opacity-50"
+                  className="dsk-btn-3d w-full py-2.5 px-4 rounded-lg text-xs flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
                 >
                   <Send className="w-3.5 h-3.5" />
                   <span>{submitting ? 'Submitting...' : 'Submit Support Ticket'}</span>
@@ -195,9 +195,9 @@ export const SupportView: React.FC = () => {
           </div>
 
           {currentUser && tickets.length > 0 && (
-            <div className="p-4 rounded-xl bg-[#11161D] border border-[#1E2936] text-xs space-y-2">
+            <div className="dsk-surface p-4 rounded-xl text-xs space-y-2">
               <div className="flex items-center justify-between">
-                <span className="font-semibold text-[#F4F7F6]">Your Recent Tickets ({tickets.length})</span>
+                <span className="font-semibold text-white">Your Recent Tickets ({tickets.length})</span>
                 <button
                   onClick={() => setActiveTab('dashboard')}
                   className="text-[#00D69A] hover:underline cursor-pointer"
@@ -206,8 +206,8 @@ export const SupportView: React.FC = () => {
                 </button>
               </div>
               {tickets.slice(0, 2).map((t) => (
-                <div key={t.id} className="p-2.5 rounded-lg bg-[#0D1116] border border-[#1E2936] flex items-center justify-between gap-2">
-                  <span className="truncate text-[#D1D9E0]">{t.subject}</span>
+                <div key={t.id} className="dsk-panel-3d p-2.5 rounded-lg flex items-center justify-between gap-2">
+                  <span className="truncate text-[#E2E8F0]">{t.subject}</span>
                   <span className="font-mono text-[10px] text-[#00D69A] shrink-0">{t.status}</span>
                 </div>
               ))}

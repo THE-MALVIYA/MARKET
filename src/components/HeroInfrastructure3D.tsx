@@ -171,9 +171,9 @@ function computeRingCentroidAndSpan(ring: number[][]) {
   return { lat: avgLat, lon: avgLon, span };
 }
 
-function buildSpaceUniverseTexture(): THREE.CanvasTexture {
-  const W = 2048;
-  const H = 1024;
+function buildSpaceUniverseTexture(isHighRes: boolean): THREE.CanvasTexture {
+  const W = isHighRes ? 4096 : 2048;
+  const H = isHighRes ? 2048 : 1024;
   const canvas = document.createElement('canvas');
   canvas.width = W;
   canvas.height = H;
@@ -188,11 +188,12 @@ function buildSpaceUniverseTexture(): THREE.CanvasTexture {
   ctx.fillRect(0, 0, W, H);
 
   // Subtle Milky Way / cosmic nebula clouds
+  const scaleFactor = W / 2048;
   const nebulae = [
-    { x: 0.22 * W, y: 0.35 * H, r: 420, c1: 'rgba(14, 165, 164, 0.14)', c2: 'rgba(14, 165, 164, 0)' },
-    { x: 0.68 * W, y: 0.58 * H, r: 480, c1: 'rgba(37, 99, 235, 0.14)', c2: 'rgba(37, 99, 235, 0)' },
-    { x: 0.45 * W, y: 0.46 * H, r: 360, c1: 'rgba(0, 214, 154, 0.1)', c2: 'rgba(0, 214, 154, 0)' },
-    { x: 0.85 * W, y: 0.28 * H, r: 340, c1: 'rgba(99, 102, 241, 0.11)', c2: 'rgba(99, 102, 241, 0)' }
+    { x: 0.22 * W, y: 0.35 * H, r: 420 * scaleFactor, c1: 'rgba(14, 165, 164, 0.14)', c2: 'rgba(14, 165, 164, 0)' },
+    { x: 0.68 * W, y: 0.58 * H, r: 480 * scaleFactor, c1: 'rgba(37, 99, 235, 0.14)', c2: 'rgba(37, 99, 235, 0)' },
+    { x: 0.45 * W, y: 0.46 * H, r: 360 * scaleFactor, c1: 'rgba(0, 214, 154, 0.1)', c2: 'rgba(0, 214, 154, 0)' },
+    { x: 0.85 * W, y: 0.28 * H, r: 340 * scaleFactor, c1: 'rgba(99, 102, 241, 0.11)', c2: 'rgba(99, 102, 241, 0)' }
   ];
   nebulae.forEach((n) => {
     const g = ctx.createRadialGradient(n.x, n.y, 10, n.x, n.y, n.r);
@@ -203,11 +204,12 @@ function buildSpaceUniverseTexture(): THREE.CanvasTexture {
   });
 
   // Thousands of crisp background universe stars
-  for (let i = 0; i < 2200; i++) {
+  const starCount = isHighRes ? 3600 : 2200;
+  for (let i = 0; i < starCount; i++) {
     const x = (i * 977 + (i % 37) * 53) % W;
     const y = (i * 593 + (i % 41) * 29) % H;
-    const size = i % 17 === 0 ? 2.0 : i % 5 === 0 ? 1.3 : 0.8;
-    const alpha = 0.25 + ((i * 19) % 75) / 100;
+    const size = (i % 17 === 0 ? 2.2 : i % 5 === 0 ? 1.4 : 0.9) * scaleFactor;
+    const alpha = 0.28 + ((i * 19) % 72) / 100;
     ctx.fillStyle =
       i % 9 === 0
         ? `rgba(147, 197, 253, ${alpha})`
@@ -240,9 +242,10 @@ function buildSunGlowTexture(): THREE.CanvasTexture {
   return tex;
 }
 
-function buildEarthTextures(maxAnisotropy: number) {
-  const W = 2048;
-  const H = 1024;
+function buildEarthTextures(maxAnisotropy: number, isHighRes: boolean) {
+  const W = isHighRes ? 4096 : 2048;
+  const H = isHighRes ? 2048 : 1024;
+  const pxScale = W / 2048;
 
   const dayCanvas = document.createElement('canvas');
   dayCanvas.width = W;
@@ -429,7 +432,7 @@ function buildEarthTextures(maxAnisotropy: number) {
     });
   });
 
-  // Paint all Country Names directly onto Earth texture
+  // Paint all Country Names directly onto Earth texture in crisp 4K
   dayCtx.save();
   dayCtx.textAlign = 'center';
   dayCtx.textBaseline = 'middle';
@@ -437,12 +440,12 @@ function buildEarthTextures(maxAnisotropy: number) {
     if (cl.span < 4) return;
     const x = ((cl.lon + 180) / 360) * W;
     const y = ((90 - cl.lat) / 180) * H;
-    const fontSize = cl.span > 500 ? 15 : cl.span > 90 ? 11 : 8.5;
+    const fontSize = (cl.span > 500 ? 15 : cl.span > 90 ? 11 : 8.5) * pxScale;
     dayCtx.font = `700 ${fontSize}px "JetBrains Mono", monospace`;
-    dayCtx.lineWidth = 2.6;
-    dayCtx.strokeStyle = 'rgba(4, 14, 24, 0.85)';
+    dayCtx.lineWidth = 2.6 * pxScale;
+    dayCtx.strokeStyle = 'rgba(4, 14, 24, 0.9)';
     dayCtx.strokeText(cl.name.toUpperCase(), x, y);
-    dayCtx.fillStyle = 'rgba(220, 246, 240, 0.88)';
+    dayCtx.fillStyle = 'rgba(235, 252, 248, 0.94)';
     dayCtx.fillText(cl.name.toUpperCase(), x, y);
   });
   dayCtx.restore();
@@ -457,20 +460,20 @@ function buildEarthTextures(maxAnisotropy: number) {
 
     // Bright surface dot
     dayCtx.beginPath();
-    dayCtx.arc(cx, cy, city.tier === 1 ? 3.2 : 2.2, 0, Math.PI * 2);
+    dayCtx.arc(cx, cy, (city.tier === 1 ? 3.2 : 2.2) * pxScale, 0, Math.PI * 2);
     dayCtx.fillStyle = city.tier === 1 ? '#00D69A' : '#38BDF8';
     dayCtx.fill();
 
     // Subtle city name on map texture
-    dayCtx.font = `600 ${city.tier === 1 ? 8.5 : 7.2}px "Plus Jakarta Sans", sans-serif`;
-    dayCtx.lineWidth = 2.2;
-    dayCtx.strokeStyle = 'rgba(2, 10, 18, 0.9)';
-    dayCtx.strokeText(city.name, cx + 5, cy - 3);
-    dayCtx.fillStyle = city.tier === 1 ? '#F4F7F6' : '#B8D4E8';
-    dayCtx.fillText(city.name, cx + 5, cy - 3);
+    dayCtx.font = `600 ${(city.tier === 1 ? 8.5 : 7.2) * pxScale}px "Plus Jakarta Sans", sans-serif`;
+    dayCtx.lineWidth = 2.2 * pxScale;
+    dayCtx.strokeStyle = 'rgba(2, 10, 18, 0.92)';
+    dayCtx.strokeText(city.name, cx + 5 * pxScale, cy - 3 * pxScale);
+    dayCtx.fillStyle = city.tier === 1 ? '#FFFFFF' : '#C8E2F4';
+    dayCtx.fillText(city.name, cx + 5 * pxScale, cy - 3 * pxScale);
 
     // Night-side golden urban illumination
-    const rad = city.tier === 1 ? 24 : 15;
+    const rad = (city.tier === 1 ? 24 : 15) * pxScale;
     const g = nightCtx.createRadialGradient(cx, cy, 0.5, cx, cy, rad);
     g.addColorStop(0, 'rgba(255, 226, 150, 0.98)');
     g.addColorStop(0.28, 'rgba(255, 170, 72, 0.45)');
@@ -624,10 +627,10 @@ export const HeroInfrastructure3D: React.FC = () => {
         alpha: false,
         powerPreference: 'high-performance'
       });
-      renderer.setPixelRatio(isSoftwareGl ? 1 : Math.min(window.devicePixelRatio || 1, 2));
+      renderer.setPixelRatio(isSoftwareGl ? 1 : Math.min(window.devicePixelRatio || 1, 2.5));
       renderer.setSize(width, height);
       renderer.toneMapping = THREE.ACESFilmicToneMapping;
-      renderer.toneMappingExposure = 1.2;
+      renderer.toneMappingExposure = 1.28;
       renderer.outputColorSpace = THREE.SRGBColorSpace;
 
       const canvas = renderer.domElement;
@@ -648,11 +651,11 @@ export const HeroInfrastructure3D: React.FC = () => {
       const roomEnv = new RoomEnvironment();
       envRenderTarget = pmremGenerator.fromScene(roomEnv, 0.04);
       scene.environment = envRenderTarget.texture;
-      scene.environmentIntensity = 0.45;
+      scene.environmentIntensity = 0.5;
       roomEnv.dispose();
 
-      // Deep Space Universe Sky Sphere
-      const spaceTex = trackTex(buildSpaceUniverseTexture());
+      // Deep Space Universe Sky Sphere (4K on GPU)
+      const spaceTex = trackTex(buildSpaceUniverseTexture(!isSoftwareGl));
       const spaceSphere = new THREE.Mesh(
         trackGeo(new THREE.SphereGeometry(32, 32, 24)),
         trackMat(
@@ -778,16 +781,17 @@ export const HeroInfrastructure3D: React.FC = () => {
       });
 
       const maxAniso = renderer.capabilities.getMaxAnisotropy();
-      const textures = buildEarthTextures(maxAniso);
+      const textures = buildEarthTextures(maxAniso, !isSoftwareGl);
       trackTex(textures.dayTex);
       trackTex(textures.roughTex);
       trackTex(textures.bumpTex);
       trackTex(textures.nightTex);
       trackTex(textures.cloudTex);
 
-      // Earth Sphere
+      // Earth Sphere (96x96 ultra-smooth UHD geometry on hardware GPU)
+      const earthSegs = isSoftwareGl ? 64 : 96;
       const earthMesh = new THREE.Mesh(
-        trackGeo(new THREE.SphereGeometry(EARTH_RADIUS, 64, 64)),
+        trackGeo(new THREE.SphereGeometry(EARTH_RADIUS, earthSegs, earthSegs)),
         trackMat(
           new THREE.MeshStandardMaterial({
             map: textures.dayTex,
@@ -852,7 +856,7 @@ export const HeroInfrastructure3D: React.FC = () => {
       );
       earthGroup.add(atmosMesh);
 
-      // Dual Orbiting Telemetry Rings + Sentinel Satellites in Space
+      // Dual Orbiting Telemetry Rings + Multi-Part Sentinel Satellites in Space
       const orbitGroup = new THREE.Group();
       scene.add(orbitGroup);
 
@@ -860,41 +864,66 @@ export const HeroInfrastructure3D: React.FC = () => {
         new THREE.MeshBasicMaterial({
           color: 0x0ea5a4,
           transparent: true,
-          opacity: 0.24
+          opacity: 0.28
         })
       );
-      const orbitRing1 = new THREE.Mesh(trackGeo(new THREE.TorusGeometry(1.76, 0.004, 8, 96)), satRingMat);
+      const orbitRing1 = new THREE.Mesh(trackGeo(new THREE.TorusGeometry(1.76, 0.005, 10, 128)), satRingMat);
       orbitRing1.rotation.x = Math.PI / 2.4;
       orbitRing1.rotation.y = 0.35;
       orbitGroup.add(orbitRing1);
 
       const orbitRing2 = new THREE.Mesh(
-        trackGeo(new THREE.TorusGeometry(1.94, 0.0035, 8, 96)),
-        trackMat(new THREE.MeshBasicMaterial({ color: 0x00d69a, transparent: true, opacity: 0.16 }))
+        trackGeo(new THREE.TorusGeometry(1.94, 0.004, 10, 128)),
+        trackMat(new THREE.MeshBasicMaterial({ color: 0x00d69a, transparent: true, opacity: 0.2 }))
       );
       orbitRing2.rotation.x = -Math.PI / 3.1;
       orbitRing2.rotation.z = 0.52;
       orbitGroup.add(orbitRing2);
 
-      const satMesh = new THREE.Mesh(
-        trackGeo(new THREE.OctahedronGeometry(0.028, 0)),
+      // Composite Multi-Part 3D Sentinel Satellite (Metallic Bus + Solar Wings + Telemetry Core)
+      const satMesh = new THREE.Group();
+      const satBus = new THREE.Mesh(
+        trackGeo(new THREE.OctahedronGeometry(0.032, 0)),
+        trackMat(new THREE.MeshPhysicalMaterial({ color: 0xe2e8f0, metalness: 0.92, roughness: 0.16, clearcoat: 1 }))
+      );
+      const satCore = new THREE.Mesh(
+        trackGeo(new THREE.SphereGeometry(0.016, 12, 12)),
         trackMat(new THREE.MeshBasicMaterial({ color: 0x00d69a }))
       );
+      const wingGeo = trackGeo(new THREE.BoxGeometry(0.09, 0.028, 0.004));
+      const wingMat = trackMat(new THREE.MeshPhysicalMaterial({ color: 0x0284c7, metalness: 0.8, roughness: 0.18, clearcoat: 0.9 }));
+      const wingL = new THREE.Mesh(wingGeo, wingMat);
+      wingL.position.x = -0.068;
+      const wingR = new THREE.Mesh(wingGeo, wingMat);
+      wingR.position.x = 0.068;
+      satMesh.add(satBus, satCore, wingL, wingR);
       orbitRing1.add(satMesh);
 
-      // City 3D Surface Beacons
+      const satMesh2 = satMesh.clone();
+      orbitRing2.add(satMesh2);
+
+      // City 3D Surface Beacons + Volumetric Tier-1 Telemetry Pillars
       const cityLocalPositions = GLOBAL_CITIES.map((c) =>
         latLonToVector3(c.lat, c.lon, EARTH_RADIUS + 0.008)
       );
       const cityLocalNormals = cityLocalPositions.map((p) => p.clone().normalize());
 
-      const beaconGeo = trackGeo(new THREE.SphereGeometry(0.015, 10, 10));
+      const beaconGeo = trackGeo(new THREE.SphereGeometry(0.016, 12, 12));
       const beaconMat = trackMat(new THREE.MeshBasicMaterial({ color: 0x00d69a }));
       const cityInstanced = new THREE.InstancedMesh(beaconGeo, beaconMat, GLOBAL_CITIES.length);
+      const pillarGeo = trackGeo(new THREE.CylinderGeometry(0.003, 0.009, 0.14, 8));
+      pillarGeo.translate(0, 0.07, 0);
+      const pillarMat = trackMat(
+        new THREE.MeshBasicMaterial({ color: 0x00d69a, transparent: true, opacity: 0.65 })
+      );
+      const tier1Cities = GLOBAL_CITIES.map((c, idx) => ({ c, idx })).filter((x) => x.c.tier === 1);
+      const pillarInstanced = new THREE.InstancedMesh(pillarGeo, pillarMat, tier1Cities.length);
+
       const beaconColor = new THREE.Color();
       GLOBAL_CITIES.forEach((city, idx) => {
         _dummy.position.copy(cityLocalPositions[idx]);
-        _dummy.scale.setScalar(city.tier === 1 ? 1.2 : 0.85);
+        _dummy.quaternion.identity();
+        _dummy.scale.setScalar(city.tier === 1 ? 1.25 : 0.85);
         _dummy.updateMatrix();
         cityInstanced.setMatrixAt(idx, _dummy.matrix);
         beaconColor.setHex(city.tier === 1 ? 0x00d69a : 0x38bdf8);
@@ -904,6 +933,17 @@ export const HeroInfrastructure3D: React.FC = () => {
       if (cityInstanced.instanceColor) cityInstanced.instanceColor.needsUpdate = true;
       cityInstanced.computeBoundingSphere();
       earthGroup.add(cityInstanced);
+
+      tier1Cities.forEach((entry, pIdx) => {
+        _dummy.position.copy(cityLocalPositions[entry.idx]);
+        _dummy.quaternion.setFromUnitVectors(_up, cityLocalNormals[entry.idx]);
+        _dummy.scale.set(1, 0.75 + (pIdx % 3) * 0.35, 1);
+        _dummy.updateMatrix();
+        pillarInstanced.setMatrixAt(pIdx, _dummy.matrix);
+      });
+      pillarInstanced.instanceMatrix.needsUpdate = true;
+      pillarInstanced.computeBoundingSphere();
+      earthGroup.add(pillarInstanced);
 
       // Projected Floating Labels for Key Cities (transform properly with rotating earthGroup!)
       labelsLayer.innerHTML = '';
@@ -1149,6 +1189,9 @@ export const HeroInfrastructure3D: React.FC = () => {
         cloudMesh.rotation.y += dt * 0.025;
         starPoints.rotation.y += dt * 0.008;
         satMesh.position.set(Math.cos(elapsed * 0.9) * 1.76, Math.sin(elapsed * 0.9) * 1.76, 0);
+        satMesh.lookAt(0, 0, 0);
+        satMesh2.position.set(Math.cos(-elapsed * 0.72 + 1.4) * 1.94, Math.sin(-elapsed * 0.72 + 1.4) * 1.94, 0);
+        satMesh2.lookAt(0, 0, 0);
 
         earthGroup.updateMatrixWorld(true);
         controls.update();

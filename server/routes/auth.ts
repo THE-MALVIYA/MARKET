@@ -1,8 +1,15 @@
 import { Router, Request, Response } from 'express';
 import { db, hashPassword, verifyPassword } from '../db';
-import { AuthenticatedRequest, requireAuth, signAuthToken } from '../middleware/auth';
+import {
+  AuthenticatedRequest,
+  extractClientMeta,
+  requireAuth,
+  signAuthToken
+} from '../middleware/auth';
+import { rateLimit } from '../middleware/rateLimit';
 
 const router = Router();
+const authLimiter = rateLimit(60000, 15);
 
 function serializeUser(user: {
   id: string;
@@ -13,6 +20,10 @@ function serializeUser(user: {
   avatar?: string;
   reputation: number;
   createdAt: string;
+  lastLoginAt?: string;
+  lastIp?: string;
+  lastDevice?: string;
+  lastLocation?: string;
 }) {
   return {
     id: user.id,
@@ -22,7 +33,11 @@ function serializeUser(user: {
     organization: user.organization,
     avatar: user.avatar,
     reputation: user.reputation,
-    createdAt: user.createdAt
+    createdAt: user.createdAt,
+    lastLoginAt: user.lastLoginAt,
+    lastIp: user.lastIp,
+    lastDevice: user.lastDevice,
+    lastLocation: user.lastLocation
   };
 }
 
@@ -32,7 +47,7 @@ router.get('/me', requireAuth, (req: AuthenticatedRequest, res: Response) => {
 });
 
 // POST /api/auth/login
-router.post('/login', (req: Request, res: Response) => {
+router.post('/login', authLimiter, (req: Request, res: Response) => {
   const { email, password } = req.body;
 
   if (!email || !password) {
@@ -50,22 +65,39 @@ router.post('/login', (req: Request, res: Response) => {
     });
   }
 
+  // Strictly enforce that Admin Panel access requires the dedicated admin passcode only
+  if (user.role === 'admin') {
+    return res.status(403).json({
+      error: 'ADMIN_LOGIN_RESTRICTED',
+      message: 'Administrator access requires the Admin Console passcode.'
+    });
+  }
+
   // Upgrade legacy SHA-256 hash seamlessly on successful sign-in
   if (!user.passwordHash.startsWith('scrypt:')) {
     db.upgradeUserPasswordHash(user.id, String(password));
   }
 
+  const meta = extractClientMeta(req);
+  db.recordUserLoginMeta(user.id, meta);
+
   const token = signAuthToken(user);
-  db.logActivity('USER_LOGIN', 'AUTH', `User ${user.username} signed in`, user.email, user.id);
+  db.logActivity('USER_LOGIN', 'AUTH', `User ${user.username} signed in`, user.email, user.id, meta);
 
   res.json({
     token,
-    user: serializeUser(user)
+    user: serializeUser({
+      ...user,
+      lastLoginAt: new Date().toISOString(),
+      lastIp: meta.ip,
+      lastDevice: meta.device,
+      lastLocation: meta.location
+    })
   });
 });
 
 // POST /api/auth/register
-router.post('/register', (req: Request, res: Response) => {
+router.post('/register', authLimiter, (req: Request, res: Response) => {
   const { username, email, password, organization } = req.body;
 
   if (!username || !email || !password) {
@@ -98,13 +130,15 @@ router.post('/register', (req: Request, res: Response) => {
     });
   }
 
+  const meta = extractClientMeta(req);
   const hashed = hashPassword(String(password));
   const newUser = db.createUser(
     cleanName,
     cleanEmail,
     hashed,
     'user',
-    organization ? String(organization).trim() : undefined
+    organization ? String(organization).trim() : undefined,
+    meta
   );
   const token = signAuthToken(newUser);
 
@@ -121,13 +155,13 @@ router.get('/admin-status', (_req: Request, res: Response) => {
 });
 
 // POST /api/auth/claim-admin - one-time admin passphrase claim if unconfigured
-router.post('/claim-admin', (req: Request, res: Response) => {
+router.post('/claim-admin', authLimiter, (req: Request, res: Response) => {
   const { passcode } = req.body;
   const status = db.getAdminPasscodeStatus();
   if (!status.setupRequired) {
     return res.status(409).json({
       error: 'ADMIN_ALREADY_CONFIGURED',
-      message: 'Administrator access is already configured. Sign in with your admin credentials.'
+      message: 'Administrator access is already configured. Sign in with your admin passcode.'
     });
   }
   if (!passcode || String(passcode).trim().length < 8) {
@@ -152,8 +186,8 @@ router.post('/claim-admin', (req: Request, res: Response) => {
   });
 });
 
-// POST /api/auth/admin-login - verify server-side admin passcode
-router.post('/admin-login', (req: Request, res: Response) => {
+// POST /api/auth/admin-login - verify server-side admin passcode exclusively
+router.post('/admin-login', authLimiter, (req: Request, res: Response) => {
   const { passcode } = req.body;
   if (!passcode) {
     return res.status(400).json({
@@ -166,12 +200,22 @@ router.post('/admin-login', (req: Request, res: Response) => {
   if (!admin) {
     return res.status(401).json({
       error: 'INVALID_ADMIN_PASSCODE',
-      message: 'Administrator verification failed.'
+      message: 'Invalid administrator passcode.'
     });
   }
 
+  const meta = extractClientMeta(req);
+  db.recordUserLoginMeta(admin.id, meta);
+
   const token = signAuthToken(admin);
-  db.logActivity('ADMIN_LOGIN', 'AUTH', 'Administrator console session unlocked', admin.email, admin.id);
+  db.logActivity(
+    'ADMIN_LOGIN',
+    'AUTH',
+    'Administrator console session unlocked',
+    admin.email,
+    admin.id,
+    meta
+  );
 
   res.json({
     token,
