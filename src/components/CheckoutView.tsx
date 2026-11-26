@@ -1,19 +1,20 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useMarket } from '../context/MarketContext';
 import { QRCodeDisplay } from './QRCodeDisplay';
+import { ProductLiveVisual } from './ProductLiveVisual';
 import {
-  UploadCloud,
-  FileImage,
   CheckCircle2,
   AlertTriangle,
   ArrowRight,
   RefreshCw,
-  Info,
   ChevronRight,
-  Send,
-  Copy,
-  Check,
-  ExternalLink
+  Clock,
+  Tag,
+  ShieldCheck,
+  SearchCheck,
+  UploadCloud,
+  FileImage,
+  Lock
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 
@@ -24,14 +25,28 @@ export const CheckoutView: React.FC = () => {
     createOrder,
     activeOrderNumber,
     orders,
+    submitTxVerification,
     uploadPaymentProof,
+    validateDiscountCode,
+    paymentConfig,
+    currentUser,
+    setAuthModalOpen,
     setActiveTab,
     addToast
   } = useMarket();
 
-  const [paymentMethod, setPaymentMethod] = useState<'USDT_TRC20'>('USDT_TRC20');
+  const [promoInput, setPromoInput] = useState('');
+  const [appliedPromo, setAppliedPromo] = useState<{
+    code: string;
+    discountAmount: number;
+    description?: string;
+  } | null>(null);
+  const [promoError, setPromoError] = useState<string | null>(null);
   const [isGeneratingOrder, setIsGeneratingOrder] = useState(false);
   const [createdOrder, setCreatedOrder] = useState<any>(null);
+
+  const [txHashInput, setTxHashInput] = useState('');
+  const [isVerifyingTx, setIsVerifyingTx] = useState(false);
 
   const [selectedFile, setSelectedFile] = useState<{
     fileName: string;
@@ -40,55 +55,99 @@ export const CheckoutView: React.FC = () => {
     fileData: string;
   } | null>(null);
   const [isUploading, setIsUploading] = useState(false);
-  const [isDragOver, setIsDragOver] = useState(false);
-  const [uploadSuccess, setUploadSuccess] = useState(false);
-  const [copiedBot, setCopiedBot] = useState(false);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const [timeRemainingLabel, setTimeRemainingLabel] = useState<string>('');
 
   const currentOrder = activeOrderNumber
     ? orders.find((o) => o.orderNumber === activeOrderNumber) || createdOrder
     : createdOrder;
 
-  const depositAddress = 'TL9sU4A1ydN9AT2LTaC7P94K4y4BdAgDFx';
+  const depositAddress =
+    currentOrder?.paymentAddress || paymentConfig?.receivingAddress || '';
+  const networkName = paymentConfig?.network || 'Tron TRC-20';
 
-  const handleInitiateOrder = async () => {
-    if (cart.length === 0) {
-      addToast({
-        type: 'warning',
-        title: 'Cart is Empty',
-        message: 'Please add items to your cart to proceed.'
-      });
+  useEffect(() => {
+    if (!currentOrder?.expiresAt) {
+      setTimeRemainingLabel('');
       return;
     }
+    const tick = () => {
+      const diffMs = Date.parse(currentOrder.expiresAt) - Date.now();
+      if (diffMs <= 0) {
+        setTimeRemainingLabel('Expired');
+        return;
+      }
+      const mins = Math.floor(diffMs / 60000);
+      const secs = Math.floor((diffMs % 60000) / 1000);
+      setTimeRemainingLabel(`${mins}m ${String(secs).padStart(2, '0')}s`);
+    };
+    tick();
+    const id = setInterval(tick, 1000);
+    return () => clearInterval(id);
+  }, [currentOrder?.expiresAt]);
+
+  const handleApplyPromo = async () => {
+    setPromoError(null);
+    if (!promoInput.trim()) return;
+    const res = await validateDiscountCode(promoInput.trim(), cartTotal);
+    if (!res.valid) {
+      setPromoError(res.message || 'Invalid code');
+      setAppliedPromo(null);
+      return;
+    }
+    setAppliedPromo({
+      code: res.code!,
+      discountAmount: res.discountAmount,
+      description: res.description
+    });
+    addToast({
+      type: 'success',
+      title: 'Discount Applied',
+      message: `${res.code} saved ${res.discountAmount.toLocaleString()} USDT`
+    });
+  };
+
+  const finalCartAmount = Math.max(1, cartTotal - (appliedPromo?.discountAmount || 0));
+
+  const handleInitiateOrder = async () => {
+    if (cart.length === 0) return;
     setIsGeneratingOrder(true);
-    const order = await createOrder(cart);
+    const order = await createOrder(cart, appliedPromo?.code);
     if (order) {
       setCreatedOrder(order);
     }
     setIsGeneratingOrder(false);
   };
 
+  const handleVerifyTx = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!currentOrder) return;
+    if (!txHashInput.trim()) return;
+    setIsVerifyingTx(true);
+    const updated = await submitTxVerification(currentOrder.orderNumber, txHashInput.trim());
+    setIsVerifyingTx(false);
+    if (updated) {
+      setCreatedOrder(updated);
+      if (updated.status === 'Payment Confirmed') {
+        try {
+          confetti({
+            particleCount: 50,
+            spread: 60,
+            origin: { y: 0.7 },
+            colors: ['#00D69A', '#0EA5A4', '#F4F7F6']
+          });
+        } catch {
+          // ignore
+        }
+      }
+    }
+  };
+
   const handleFileChange = (file: File) => {
-    const MAX_SIZE = 5 * 1024 * 1024;
-    if (file.size > MAX_SIZE) {
-      addToast({
-        type: 'error',
-        title: 'File Too Large',
-        message: 'Screenshot exceeds 5MB size limit. Please upload a smaller file.'
-      });
+    if (file.size > 5 * 1024 * 1024) {
+      addToast({ type: 'error', title: 'File Too Large', message: 'Maximum file size is 5MB.' });
       return;
     }
-
-    const allowedTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/webp'];
-    if (!allowedTypes.includes(file.type)) {
-      addToast({
-        type: 'error',
-        title: 'Invalid File Format',
-        message: 'Only PNG, JPG, and JPEG image files are permitted.'
-      });
-      return;
-    }
-
     const reader = new FileReader();
     reader.onload = () => {
       setSelectedFile({
@@ -101,76 +160,28 @@ export const CheckoutView: React.FC = () => {
     reader.readAsDataURL(file);
   };
 
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragOver(false);
-    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      handleFileChange(e.dataTransfer.files[0]);
-    }
-  };
-
-  const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragOver(true);
-  };
-
-  const handleDragLeave = () => {
-    setIsDragOver(false);
-  };
-
   const handleSubmitProof = async () => {
-    if (!selectedFile) {
-      addToast({
-        type: 'warning',
-        title: 'No File Selected',
-        message: 'Please choose or drag a payment screenshot.'
-      });
-      return;
-    }
-
-    const orderNum = currentOrder?.orderNumber;
-    if (!orderNum) {
-      addToast({
-        type: 'error',
-        title: 'Order Missing',
-        message: 'Please generate an order reference first.'
-      });
-      return;
-    }
-
+    if (!selectedFile || !currentOrder) return;
     setIsUploading(true);
-    const updated = await uploadPaymentProof(orderNum, selectedFile);
+    const updated = await uploadPaymentProof(currentOrder.orderNumber, selectedFile);
     setIsUploading(false);
-
-    if (updated) {
-      setUploadSuccess(true);
-      try {
-        confetti({
-          particleCount: 50,
-          spread: 60,
-          origin: { y: 0.7 },
-          colors: ['#22c55e', '#f59e0b', '#4ade80']
-        });
-      } catch {
-        // ignore
-      }
-    }
+    if (updated) setCreatedOrder(updated);
   };
 
   if (!currentOrder && cart.length === 0) {
     return (
-      <div className="max-w-3xl mx-auto px-4 py-16 text-center font-mono">
-        <div className="p-8 bg-[#070907] border border-[#1d271d]">
-          <AlertTriangle className="w-10 h-10 text-amber-400 mx-auto mb-3" />
-          <h2 className="text-xl font-bold text-white mb-2">NO ACTIVE ESCROW SESSION</h2>
-          <p className="text-sm text-zinc-400 max-w-md mx-auto mb-6">
-            Your escrow queue has no pending packages ready for checkout.
+      <div className="max-w-3xl mx-auto px-4 py-16 text-center">
+        <div className="p-8 rounded-xl bg-[#11161D] border border-[#1E2936]">
+          <AlertTriangle className="w-10 h-10 text-[#E5B84B] mx-auto mb-3" />
+          <h2 className="text-xl font-bold text-[#F4F7F6] mb-2">No Active Checkout</h2>
+          <p className="text-sm text-[#8F9CA8] max-w-md mx-auto mb-6">
+            Add software licenses to your cart before proceeding to USDT blockchain settlement.
           </p>
           <button
-            onClick={() => setActiveTab('marketplace')}
-            className="px-6 py-2.5 bg-emerald-500 hover:bg-emerald-400 text-black font-bold text-xs transition-colors cursor-pointer"
+            onClick={() => setActiveTab('products')}
+            className="px-6 py-2.5 rounded-lg bg-[#00D69A] hover:bg-[#0EA5A4] text-[#07090B] font-semibold text-xs cursor-pointer"
           >
-            Open Market Directory
+            Explore Products
           </button>
         </div>
       </div>
@@ -178,442 +189,368 @@ export const CheckoutView: React.FC = () => {
   }
 
   return (
-    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 font-sans">
-      {/* Breadcrumb */}
-      <div className="flex items-center gap-2 text-xs font-mono text-zinc-500 mb-6">
-        <button onClick={() => setActiveTab('home')} className="hover:text-emerald-400 cursor-pointer">
-          Index
+    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="flex items-center gap-2 text-xs text-[#8F9CA8] mb-6">
+        <button onClick={() => setActiveTab('home')} className="hover:text-[#00D69A] cursor-pointer">
+          Home
         </button>
-        <ChevronRight className="w-3 h-3 text-zinc-600" />
-        <button onClick={() => setActiveTab('marketplace')} className="hover:text-emerald-400 cursor-pointer">
-          Market
+        <ChevronRight className="w-3.5 h-3.5 text-[#1E2936]" />
+        <button onClick={() => setActiveTab('products')} className="hover:text-[#00D69A] cursor-pointer">
+          Products
         </button>
-        <ChevronRight className="w-3 h-3 text-zinc-600" />
-        <span className="text-emerald-400">Escrow Settlement</span>
+        <ChevronRight className="w-3.5 h-3.5 text-[#1E2936]" />
+        <span className="text-[#00D69A] font-medium">Crypto Checkout</span>
       </div>
 
-      {/* Page Header */}
-      <div className="mb-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 pb-4 border-b border-[#1d271d]">
+      <div className="mb-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 pb-5 border-b border-[#1E2936]">
         <div>
-          <div className="flex flex-wrap items-center gap-3">
-            <h1 className="text-2xl sm:text-3xl font-mono font-bold text-white">
-              ESCROW CHECKOUT GATEWAY
-            </h1>
-            <span className="text-xs font-mono text-emerald-400">USDT TRC-20</span>
-          </div>
-          <p className="text-xs font-mono text-zinc-400 mt-1">
-            Direct TRC-20 cryptographic settlement with automated license delivery after receipt confirmation.
+          <h1 className="text-2xl sm:text-3xl font-bold text-[#F4F7F6]">
+            USDT Settlement &amp; Blockchain Verification
+          </h1>
+          <p className="text-xs sm:text-sm text-[#8F9CA8] mt-1">
+            Transfer exact USDT on {networkName} and submit your transaction hash (TXID) for ledger verification.
           </p>
         </div>
 
         {currentOrder && (
           <div className="flex items-center gap-3">
-            <div className="px-3 py-1.5 bg-[#070907] border border-[#243224] text-right">
-              <span className="text-[10px] font-mono text-zinc-500 block uppercase">Active Escrow Ref</span>
-              <span className="font-mono text-sm font-bold text-emerald-400">{currentOrder.orderNumber}</span>
+            <div className="px-3.5 py-2 rounded-lg bg-[#11161D] border border-[#1E2936] text-right">
+              <span className="text-[10px] font-mono text-[#8F9CA8] block uppercase">Order Reference</span>
+              <span className="font-mono text-sm font-bold text-[#00D69A]">{currentOrder.orderNumber}</span>
             </div>
-            <button
-              onClick={() => setActiveTab('orders')}
-              className="px-3 py-2 bg-[#0b0e0b] hover:bg-[#131a13] border border-[#222c22] text-xs font-mono text-zinc-300 transition-colors cursor-pointer"
-            >
-              Order Status
-            </button>
+            {timeRemainingLabel && currentOrder.status !== 'Payment Confirmed' && (
+              <div className="px-3.5 py-2 rounded-lg bg-[#11161D] border border-[#1E2936] text-right">
+                <span className="text-[10px] font-mono text-[#8F9CA8] flex items-center justify-end gap-1 uppercase">
+                  <Clock className="w-3 h-3 text-[#E5B84B]" /> Window
+                </span>
+                <span className="font-mono text-sm font-bold text-[#E5B84B] tabular-nums">
+                  {timeRemainingLabel}
+                </span>
+              </div>
+            )}
           </div>
         )}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-        {/* Left Column */}
+        {/* Left Column: Order Summary / Promo / Instructions */}
         <div className="lg:col-span-6 space-y-6">
-          <div className="p-5 bg-[#070907] border border-[#1d271d]">
-            <h3 className="font-mono font-bold text-sm text-zinc-200 mb-3 flex items-center justify-between">
-              <span>SETTLEMENT CHANNEL</span>
-              <span className="text-[11px] text-emerald-400 font-normal">USDT (TRC-20)</span>
-            </h3>
-
-            <label
-              className={`flex items-center justify-between p-3 border transition-colors cursor-pointer ${
-                paymentMethod === 'USDT_TRC20'
-                  ? 'bg-[#0b100b] border-emerald-500/50 text-white'
-                  : 'bg-[#040504] border-[#1a221a] text-zinc-400'
-              }`}
-            >
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 bg-emerald-500/15 border border-emerald-500/40 flex items-center justify-center font-mono font-bold text-emerald-400 text-xs">
-                  ₮
-                </div>
-                <div>
-                  <div className="font-mono font-bold text-xs text-zinc-100 flex items-center gap-2">
-                    <span>USDT - Tether USD</span>
-                    <span className="text-[10px] font-normal text-amber-400">TRC-20</span>
-                  </div>
-                  <div className="text-[11px] text-zinc-400">
-                    Encrypted Tron Network direct transfer
-                  </div>
-                </div>
-              </div>
-              <input
-                type="radio"
-                name="payment"
-                checked={paymentMethod === 'USDT_TRC20'}
-                onChange={() => setPaymentMethod('USDT_TRC20')}
-                className="w-4 h-4 accent-emerald-500"
-              />
-            </label>
-          </div>
-
           {!currentOrder ? (
-            <div className="p-5 bg-[#070907] border border-[#223022]">
-              <h3 className="font-mono font-bold text-sm text-zinc-200 mb-3">
-                ESCROW MANIFEST ({cart.length} PACKAGES)
-              </h3>
-              <div className="space-y-2 max-h-56 overflow-y-auto mb-4 pr-1">
+            <div className="p-6 rounded-xl bg-[#11161D] border border-[#1E2936] space-y-5">
+              <div className="flex items-center justify-between pb-3 border-b border-[#1E2936]">
+                <h2 className="text-sm font-bold text-[#F4F7F6]">
+                  Order Summary ({cart.length} {cart.length === 1 ? 'Suite' : 'Suites'})
+                </h2>
+                <span className="text-[11px] font-mono text-[#0EA5A4]">{networkName}</span>
+              </div>
+
+              <div className="space-y-2.5 max-h-60 overflow-y-auto pr-1">
                 {cart.map((item) => (
                   <div
                     key={item.product.id}
-                    className="p-2.5 bg-[#040504] border border-[#1a221a] flex items-center justify-between text-xs font-mono"
+                    className="p-3 rounded-lg bg-[#0D1116] border border-[#1E2936] flex items-center justify-between text-xs"
                   >
-                    <div className="flex items-center gap-2.5 min-w-0">
-                      <img
-                        src={item.product.image}
-                        alt=""
-                        referrerPolicy="no-referrer"
-                        className="w-8 h-8 object-cover bg-black border border-[#1d271d]"
-                      />
+                    <div className="flex items-center gap-3 min-w-0">
+                      <ProductLiveVisual product={item.product} compact className="w-10 h-10 shrink-0" />
                       <div className="truncate">
-                        <span className="text-zinc-200 block truncate">{item.product.name}</span>
-                        <span className="text-[10px] text-zinc-500 tabular-nums">Qty: {item.quantity}</span>
+                        <span className="text-[#F4F7F6] font-semibold block truncate">
+                          {item.product.name}
+                        </span>
+                        <span className="text-[10px] font-mono text-[#8F9CA8] tabular-nums">
+                          Qty: {item.quantity} · {item.product.version || 'LTS'}
+                        </span>
                       </div>
                     </div>
-                    <span className="text-emerald-400 font-bold ml-2 tabular-nums">
+                    <span className="font-mono text-[#00D69A] font-bold ml-2 tabular-nums">
                       {(item.product.price * item.quantity).toLocaleString()} USDT
                     </span>
                   </div>
                 ))}
               </div>
 
-              <div className="pt-3 border-t border-[#182018] flex justify-between items-center mb-4">
-                <span className="text-xs font-mono text-zinc-400">Total Escrow Due:</span>
-                <span className="font-mono font-bold text-xl text-emerald-400 tabular-nums">
-                  {cartTotal.toLocaleString()} USDT
-                </span>
+              {/* Promo Code Input */}
+              <div className="pt-2 border-t border-[#1E2936]">
+                <label className="text-[11px] font-medium text-[#8F9CA8] mb-1.5 flex items-center gap-1.5">
+                  <Tag className="w-3.5 h-3.5 text-[#0EA5A4]" />
+                  <span>Promo / Discount Code</span>
+                </label>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={promoInput}
+                    onChange={(e) => setPromoInput(e.target.value)}
+                    placeholder="Enter discount code"
+                    className="flex-1 rounded-lg bg-[#0D1116] border border-[#1E2936] px-3 py-2 text-xs font-mono text-[#F4F7F6] uppercase focus:border-[#00D69A] focus:outline-none"
+                  />
+                  <button
+                    type="button"
+                    onClick={handleApplyPromo}
+                    className="px-4 py-2 rounded-lg bg-[#0D1116] hover:bg-[#151C24] border border-[#1E2936] text-xs font-semibold text-[#00D69A] cursor-pointer"
+                  >
+                    Apply
+                  </button>
+                </div>
+                {promoError && <p className="text-[11px] text-red-400 mt-1">{promoError}</p>}
+                {appliedPromo && (
+                  <p className="text-[11px] text-[#00D69A] mt-1 font-mono">
+                    {appliedPromo.code} applied: -{appliedPromo.discountAmount.toLocaleString()} USDT
+                  </p>
+                )}
               </div>
 
-              <button
-                onClick={handleInitiateOrder}
-                disabled={isGeneratingOrder}
-                className="w-full py-3 px-4 bg-emerald-500 hover:bg-emerald-400 text-black font-mono font-bold text-xs flex items-center justify-center gap-2 transition-colors cursor-pointer disabled:opacity-50"
-              >
-                {isGeneratingOrder ? (
-                  <>
-                    <RefreshCw className="w-4 h-4 animate-spin" />
-                    <span>Generating Escrow Order...</span>
-                  </>
-                ) : (
-                  <>
-                    <span>Confirm &amp; Proceed to Settlement</span>
-                    <ArrowRight className="w-4 h-4" />
-                  </>
+              <div className="pt-3 border-t border-[#1E2936] space-y-1.5 text-xs">
+                <div className="flex justify-between text-[#8F9CA8]">
+                  <span>Subtotal</span>
+                  <span className="font-mono tabular-nums">{cartTotal.toLocaleString()} USDT</span>
+                </div>
+                {appliedPromo && (
+                  <div className="flex justify-between text-[#00D69A]">
+                    <span>Discount ({appliedPromo.code})</span>
+                    <span className="font-mono tabular-nums">
+                      -{appliedPromo.discountAmount.toLocaleString()} USDT
+                    </span>
+                  </div>
                 )}
-              </button>
+                <div className="flex justify-between items-center pt-2 border-t border-[#1E2936]">
+                  <span className="font-semibold text-[#F4F7F6]">Total Due</span>
+                  <span className="font-mono font-bold text-xl text-[#00D69A] tabular-nums">
+                    {finalCartAmount.toLocaleString()} USDT
+                  </span>
+                </div>
+              </div>
+
+              {!currentUser ? (
+                <div className="p-4 rounded-xl bg-[#0D1116] border border-[#E5B84B]/40 space-y-3">
+                  <div className="flex items-center gap-2 text-xs font-semibold text-[#E5B84B]">
+                    <Lock className="w-4 h-4" />
+                    <span>Sign in required to bind license keys to your account</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setAuthModalOpen(true)}
+                    className="w-full py-2.5 rounded-lg bg-[#00D69A] hover:bg-[#0EA5A4] text-[#07090B] font-bold text-xs cursor-pointer"
+                  >
+                    Sign In or Create Account
+                  </button>
+                </div>
+              ) : (
+                <button
+                  onClick={handleInitiateOrder}
+                  disabled={isGeneratingOrder}
+                  className="w-full py-3 px-4 rounded-lg bg-[#00D69A] hover:bg-[#0EA5A4] text-[#07090B] font-bold text-xs flex items-center justify-center gap-2 transition-colors cursor-pointer disabled:opacity-50"
+                >
+                  {isGeneratingOrder ? (
+                    <>
+                      <RefreshCw className="w-4 h-4 animate-spin" />
+                      <span>Generating Order...</span>
+                    </>
+                  ) : (
+                    <>
+                      <span>Generate Settlement Order</span>
+                      <ArrowRight className="w-4 h-4" />
+                    </>
+                  )}
+                </button>
+              )}
             </div>
           ) : (
-            <div className="p-5 bg-[#070907] border border-[#223022]">
-              <div className="flex items-center justify-between mb-3 pb-2 border-b border-[#182018]">
-                <h3 className="font-mono font-bold text-sm text-emerald-400">
-                  ORDER MANIFEST
-                </h3>
+            <div className="p-6 rounded-xl bg-[#11161D] border border-[#1E2936] space-y-5">
+              <div className="flex items-center justify-between pb-3 border-b border-[#1E2936]">
+                <h2 className="text-sm font-bold text-[#F4F7F6]">Order &amp; Payment Status</h2>
                 <span
-                  className={`text-[10px] font-mono px-2 py-0.5 border font-bold ${
-                    currentOrder.status === 'Approved'
-                      ? 'bg-emerald-950/60 text-emerald-300 border-emerald-600/50'
-                      : currentOrder.status === 'Proof Uploaded'
-                      ? 'bg-emerald-950/40 text-emerald-400 border-emerald-500/40'
-                      : 'bg-amber-950/50 text-amber-300 border-amber-500/40'
+                  className={`text-[11px] font-mono px-2.5 py-0.5 rounded border font-semibold ${
+                    currentOrder.status === 'Payment Confirmed' || currentOrder.status === 'Approved'
+                      ? 'bg-[#00D69A]/15 text-[#00D69A] border-[#00D69A]/40'
+                      : currentOrder.status === 'Payment Failed' ||
+                        currentOrder.status === 'Payment Expired'
+                      ? 'bg-red-950/60 text-red-300 border-red-700'
+                      : 'bg-[#E5B84B]/15 text-[#E5B84B] border-[#E5B84B]/40'
                   }`}
                 >
-                  {currentOrder.status.toUpperCase()}
+                  {currentOrder.status}
                 </span>
               </div>
 
-              <div className="space-y-2 mb-4">
+              <div className="space-y-2">
                 {currentOrder.items.map((item: any, idx: number) => (
                   <div
                     key={idx}
-                    className="flex justify-between items-center text-xs font-mono p-2 bg-[#040504] border border-[#1a221a]"
+                    className="flex justify-between items-center text-xs p-2.5 rounded-lg bg-[#0D1116] border border-[#1E2936]"
                   >
-                    <span className="text-zinc-200 truncate">
-                      {item.name} <span className="text-zinc-500">x{item.quantity}</span>
+                    <span className="text-[#F4F7F6]">
+                      {item.name} <span className="font-mono text-[#8F9CA8]">x{item.quantity}</span>
                     </span>
-                    <span className="text-emerald-400 font-bold ml-2 tabular-nums">
+                    <span className="font-mono text-[#00D69A] font-bold tabular-nums">
                       {(item.price * item.quantity).toLocaleString()} USDT
                     </span>
                   </div>
                 ))}
               </div>
 
-              <div className="p-3 bg-[#040504] border border-[#1a221a] space-y-1.5 text-xs font-mono mb-4">
+              <div className="p-3.5 rounded-lg bg-[#0D1116] border border-[#1E2936] space-y-1.5 text-xs font-mono">
                 <div className="flex justify-between">
-                  <span className="text-zinc-500">Order ID:</span>
-                  <span className="text-emerald-400 font-bold">{currentOrder.orderNumber}</span>
+                  <span className="text-[#8F9CA8]">Total Settlement</span>
+                  <span className="text-[#00D69A] font-bold tabular-nums">
+                    {currentOrder.amount.toLocaleString()} USDT
+                  </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-zinc-500">Total Due:</span>
-                  <span className="text-emerald-400 font-bold tabular-nums">{currentOrder.amount.toLocaleString()} USDT</span>
+                  <span className="text-[#8F9CA8]">Network</span>
+                  <span className="text-[#F4F7F6]">{networkName}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-zinc-500">Network:</span>
-                  <span className="text-zinc-300">TRC-20 (Tron)</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-zinc-500">Account:</span>
-                  <span className="text-zinc-400 truncate max-w-[200px]">{currentOrder.userEmail}</span>
+                  <span className="text-[#8F9CA8]">Confirmations Needed</span>
+                  <span className="text-[#F4F7F6]">
+                    {paymentConfig?.requiredConfirmations || 19} Blocks
+                  </span>
                 </div>
               </div>
 
-              <div className="p-3.5 bg-[#090d09] border border-[#1d271d] text-xs font-mono text-zinc-300 space-y-2">
-                <div className="font-bold text-emerald-400 flex items-center gap-1.5">
-                  <Info className="w-3.5 h-3.5" />
-                  <span>ESCROW PROTOCOL</span>
+              {paymentConfig?.feeNotice && (
+                <div className="p-3.5 rounded-lg bg-[#0D1116] border border-[#1E2936] text-[11px] text-[#8F9CA8] leading-relaxed">
+                  <strong className="text-[#D1D9E0] block mb-1">Network Fee Notice</strong>
+                  {paymentConfig.feeNotice}
                 </div>
-                <ol className="list-decimal list-inside space-y-1 text-[11px] text-zinc-400">
-                  <li>Copy the TRC-20 deposit address or scan the QR matrix.</li>
-                  <li>Transfer <strong className="text-zinc-200">{currentOrder.amount.toLocaleString()} USDT</strong> strictly on Tron TRC-20.</li>
-                  <li>Capture transaction screenshot showing confirmed TXID hash.</li>
-                  <li>Upload proof screenshot in the verification panel.</li>
-                  <li>Receive instant package delivery and keys via verified relay bot.</li>
-                </ol>
-              </div>
+              )}
+
+              {currentOrder.blockchainVerification && (
+                <div className="p-4 rounded-lg bg-[#0D1116] border border-[#1E2936] space-y-2 text-xs">
+                  <div className="font-semibold text-[#00D69A] flex items-center gap-1.5">
+                    <ShieldCheck className="w-4 h-4" />
+                    <span>Blockchain Verification Log</span>
+                  </div>
+                  <p className="text-[#D1D9E0] text-[11px]">
+                    {currentOrder.blockchainVerification.message}
+                  </p>
+                  <div className="font-mono text-[10px] text-[#8F9CA8] break-all">
+                    TXID: {currentOrder.blockchainVerification.txHash}
+                  </div>
+                </div>
+              )}
+
+              {currentOrder.status === 'Payment Confirmed' && (
+                <button
+                  onClick={() => setActiveTab('dashboard')}
+                  className="w-full py-2.5 rounded-lg bg-[#00D69A] hover:bg-[#0EA5A4] text-[#07090B] font-bold text-xs cursor-pointer"
+                >
+                  Open Dashboard to Download Files &amp; License Keys
+                </button>
+              )}
             </div>
           )}
         </div>
 
-        {/* Right Column */}
+        {/* Right Column: Live QR Code + TXID Verification Form */}
         <div className="lg:col-span-6 space-y-6">
           <QRCodeDisplay
             address={depositAddress}
-            amount={currentOrder?.amount || cartTotal}
+            network={networkName}
+            amount={currentOrder?.amount || finalCartAmount}
             orderNumber={currentOrder?.orderNumber}
           />
 
-          {/* Proof Upload */}
-          <div className="p-5 bg-[#070907] border border-emerald-500/35 relative">
-            <div className="flex items-center justify-between mb-3 pb-2 border-b border-[#182018]">
-              <h3 className="font-mono font-bold text-sm text-zinc-100 flex items-center gap-2">
-                <UploadCloud className="w-4 h-4 text-emerald-400" />
-                <span>UPLOAD TXID SCREENSHOT PROOF</span>
+          <div className="p-6 rounded-xl bg-[#11161D] border border-[#1E2936] space-y-4">
+            <div className="flex items-center justify-between pb-2.5 border-b border-[#1E2936]">
+              <h3 className="font-semibold text-sm text-[#F4F7F6] flex items-center gap-2">
+                <SearchCheck className="w-4 h-4 text-[#00D69A]" />
+                <span>Submit Transaction Hash (TXID)</span>
               </h3>
-              <span className="text-[10px] font-mono text-zinc-500">MAX 5 MB</span>
+              <span className="text-[10px] font-mono text-[#0EA5A4]">ON-CHAIN CHECK</span>
             </div>
 
-            {currentOrder?.paymentProof || uploadSuccess ? (
-              <div className="p-4 sm:p-5 bg-[#040504] border border-emerald-500/60 text-center space-y-4">
-                <div className="w-11 h-11 bg-emerald-500/15 border border-emerald-400 flex items-center justify-center mx-auto text-emerald-400">
-                  <CheckCircle2 className="w-6 h-6" />
-                </div>
-                <div>
-                  <div className="font-mono font-bold text-white text-base tracking-wide">
-                    PAYMENT PROOF VERIFICATION QUEUED
-                  </div>
-                  <div className="font-mono text-xs text-emerald-400 mt-1">
-                    Receipt Captured · Verification In Progress
-                  </div>
-                </div>
-
-                {/* TELEGRAM BOT ACCESS PANEL */}
-                <div className="p-4 bg-[#080c08] border border-emerald-500/60 text-left space-y-3">
-                  <div className="flex items-center justify-between gap-2">
-                    <div className="flex items-center gap-2.5">
-                      <div className="w-8 h-8 bg-emerald-500 flex items-center justify-center text-black font-bold flex-shrink-0">
-                        <Send className="w-4 h-4 fill-black text-black" />
-                      </div>
-                      <div>
-                        <span className="text-[10px] font-mono font-bold text-emerald-400 uppercase block tracking-wider">
-                          Encrypted Delivery Bot · Instant Access
-                        </span>
-                        <span className="text-white font-mono font-bold text-sm sm:text-base">
-                          @getfilex_bot
-                        </span>
-                      </div>
-                    </div>
-
-                    <button
-                      type="button"
-                      onClick={() => {
-                        navigator.clipboard.writeText('@getfilex_bot');
-                        setCopiedBot(true);
-                        setTimeout(() => setCopiedBot(false), 2000);
-                        addToast({
-                          type: 'success',
-                          title: 'Copied to Clipboard',
-                          message: '@getfilex_bot copied! Open Telegram to start the bot.'
-                        });
-                      }}
-                      className="px-2.5 py-1.5 bg-[#040504] hover:bg-[#111711] border border-[#243224] text-emerald-400 text-xs font-mono flex items-center gap-1.5 transition-colors cursor-pointer flex-shrink-0"
-                      title="Copy bot username"
-                    >
-                      {copiedBot ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
-                      <span>{copiedBot ? 'Copied' : 'Copy'}</span>
-                    </button>
-                  </div>
-
-                  <p className="text-xs text-zinc-300 font-sans leading-relaxed">
-                    Aapka payment proof upload ho chuka hai! Product files, setup bundle aur access key lene ke liye abhi niche diye gaye Telegram bot par click karein:
-                  </p>
-
-                  <a
-                    href="https://t.me/getfilex_bot"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="w-full py-3 px-4 bg-emerald-500 hover:bg-emerald-400 text-black font-mono font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition-colors cursor-pointer no-underline"
-                  >
-                    <Send className="w-4 h-4 fill-black text-black" />
-                    <span>Open Telegram Bot (@getfilex_bot)</span>
-                    <ExternalLink className="w-3.5 h-3.5" />
-                  </a>
-
-                  <div className="flex items-center justify-between text-[11px] font-mono text-zinc-400 pt-2 border-t border-[#182018]">
-                    <span>Relay Bot URL:</span>
-                    <a
-                      href="https://t.me/getfilex_bot"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-emerald-400 underline hover:text-emerald-300"
-                    >
-                      https://t.me/getfilex_bot
-                    </a>
-                  </div>
-                </div>
-
-                {(currentOrder?.paymentProof || selectedFile) && (
-                  <div className="mt-3 p-3 bg-[#070907] border border-[#1a221a] text-left font-mono text-xs space-y-1">
-                    <div className="text-zinc-400 flex justify-between">
-                      <span>Uploaded File:</span>
-                      <span className="text-emerald-400 truncate max-w-[200px]">
-                        {currentOrder?.paymentProof?.fileName || selectedFile?.fileName}
-                      </span>
-                    </div>
-                    <div className="text-zinc-400 flex justify-between">
-                      <span>File Size:</span>
-                      <span className="text-zinc-300 tabular-nums">
-                        {Math.round(((currentOrder?.paymentProof?.fileSize || selectedFile?.fileSize || 0) / 1024))} KB
-                      </span>
-                    </div>
-                    <div className="text-zinc-400 flex justify-between">
-                      <span>Status:</span>
-                      <span className="text-emerald-400 font-bold">Proof Received</span>
-                    </div>
-
-                    {(currentOrder?.paymentProof?.fileData || selectedFile?.fileData) && (
-                      <div className="mt-2 pt-2 border-t border-[#182018]">
-                        <span className="text-[10px] text-zinc-500 block mb-1">SCREENSHOT PREVIEW:</span>
-                        <div className="max-h-40 overflow-hidden border border-[#222e22] bg-black">
-                          <img
-                            src={currentOrder?.paymentProof?.fileData || selectedFile?.fileData}
-                            alt="Payment Proof"
-                            className="w-full h-auto object-contain"
-                          />
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                )}
-
-                <div className="pt-2">
-                  <button
-                    onClick={() => setActiveTab('orders')}
-                    className="w-full py-2.5 bg-[#0c100c] hover:bg-[#141c14] border border-[#222e22] text-zinc-200 font-mono text-xs transition-colors cursor-pointer"
-                  >
-                    View Order Timeline &amp; Status
-                  </button>
-                </div>
+            {currentOrder?.status === 'Payment Confirmed' ? (
+              <div className="p-5 rounded-xl bg-[#0D1116] border border-[#00D69A]/50 text-center space-y-3">
+                <CheckCircle2 className="w-8 h-8 text-[#00D69A] mx-auto" />
+                <div className="font-bold text-[#F4F7F6] text-sm">Payment Confirmed on Blockchain</div>
+                <p className="text-xs text-[#8F9CA8]">
+                  Your software license keys and downloadable package manifests are now unlocked in your User Dashboard.
+                </p>
+                <button
+                  onClick={() => setActiveTab('dashboard')}
+                  className="px-4 py-2 rounded-lg bg-[#00D69A] text-[#07090B] font-semibold text-xs cursor-pointer"
+                >
+                  Go to License Downloads
+                </button>
               </div>
             ) : (
-              <div className="space-y-4">
-                <div
-                  onDrop={handleDrop}
-                  onDragOver={handleDragOver}
-                  onDragLeave={handleDragLeave}
-                  onClick={() => fileInputRef.current?.click()}
-                  className={`border border-dashed p-6 text-center transition-colors cursor-pointer ${
-                    isDragOver
-                      ? 'border-emerald-400 bg-emerald-950/20'
-                      : 'border-[#273627] hover:border-emerald-500/60 bg-[#040504]'
-                  }`}
-                >
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept=".png,.jpg,.jpeg,.webp"
-                    className="hidden"
-                    onChange={(e) => {
-                      if (e.target.files && e.target.files[0]) {
-                        handleFileChange(e.target.files[0]);
-                      }
-                    }}
-                  />
-
-                  <div className="w-11 h-11 bg-[#0a0f0a] border border-emerald-500/30 flex items-center justify-center mx-auto mb-3 text-emerald-400">
-                    <FileImage className="w-5 h-5" />
+              <>
+                <form onSubmit={handleVerifyTx} className="space-y-3">
+                  <div>
+                    <label className="block text-xs text-[#8F9CA8] mb-1.5">
+                      Tron TRC-20 Transaction Hash (64 hex characters)
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      disabled={!currentOrder || isVerifyingTx}
+                      value={txHashInput}
+                      onChange={(e) => setTxHashInput(e.target.value)}
+                      placeholder="Paste 64-character TRC-20 transaction hash..."
+                      className="w-full rounded-lg bg-[#0D1116] border border-[#1E2936] px-3 py-2.5 text-xs font-mono text-[#F4F7F6] placeholder-[#8F9CA8]/60 focus:border-[#00D69A] focus:outline-none disabled:opacity-50"
+                    />
                   </div>
 
-                  <p className="text-xs font-mono font-semibold text-zinc-200">
-                    {selectedFile ? selectedFile.fileName : 'Drop transaction screenshot here or browse'}
-                  </p>
-                  <p className="text-[11px] font-mono text-zinc-500 mt-1">
-                    PNG, JPG, JPEG up to 5MB
-                  </p>
+                  <button
+                    type="submit"
+                    disabled={!currentOrder || isVerifyingTx || !txHashInput.trim()}
+                    className="w-full py-2.5 px-4 rounded-lg bg-[#00D69A] hover:bg-[#0EA5A4] text-[#07090B] font-bold text-xs flex items-center justify-center gap-2 transition-colors cursor-pointer disabled:opacity-45"
+                  >
+                    {isVerifyingTx ? (
+                      <>
+                        <RefreshCw className="w-4 h-4 animate-spin" />
+                        <span>Checking Tron Ledger...</span>
+                      </>
+                    ) : (
+                      <>
+                        <SearchCheck className="w-4 h-4" />
+                        <span>Verify Transaction on Blockchain</span>
+                      </>
+                    )}
+                  </button>
+                </form>
+
+                {/* Optional Receipt Upload */}
+                <div className="pt-4 border-t border-[#1E2936] space-y-2.5">
+                  <div className="flex items-center justify-between text-[11px] text-[#8F9CA8]">
+                    <span>Optional: Attach Wallet Receipt Screenshot</span>
+                    <span className="font-mono">PNG/JPG &le; 5MB</span>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept=".png,.jpg,.jpeg,.webp"
+                      className="hidden"
+                      onChange={(e) => {
+                        if (e.target.files?.[0]) handleFileChange(e.target.files[0]);
+                      }}
+                    />
+                    <button
+                      type="button"
+                      disabled={!currentOrder}
+                      onClick={() => fileInputRef.current?.click()}
+                      className="flex-1 py-2 px-3 rounded-lg bg-[#0D1116] border border-[#1E2936] hover:border-[#00D69A]/40 text-xs text-[#D1D9E0] flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-45"
+                    >
+                      <FileImage className="w-3.5 h-3.5 text-[#0EA5A4]" />
+                      <span className="truncate">
+                        {selectedFile ? selectedFile.fileName : 'Choose Screenshot'}
+                      </span>
+                    </button>
+                    {selectedFile && (
+                      <button
+                        type="button"
+                        disabled={!currentOrder || isUploading}
+                        onClick={handleSubmitProof}
+                        className="px-3.5 py-2 rounded-lg bg-[#0D1116] border border-[#00D69A] text-[#00D69A] text-xs font-semibold flex items-center gap-1.5 cursor-pointer"
+                      >
+                        <UploadCloud className="w-3.5 h-3.5" />
+                        <span>{isUploading ? 'Saving...' : 'Attach'}</span>
+                      </button>
+                    )}
+                  </div>
                 </div>
-
-                {selectedFile && (
-                  <div className="p-3 bg-[#040504] border border-emerald-500/30 space-y-2">
-                    <div className="flex items-center justify-between text-xs font-mono">
-                      <span className="text-zinc-400">Selected File:</span>
-                      <span className="text-emerald-400 font-bold truncate max-w-[200px]">
-                        {selectedFile.fileName}
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between text-xs font-mono">
-                      <span className="text-zinc-400">Size:</span>
-                      <span className="text-zinc-300 tabular-nums">
-                        {(selectedFile.fileSize / 1024).toFixed(1)} KB
-                      </span>
-                    </div>
-
-                    <div className="mt-2 overflow-hidden max-h-36 border border-[#1f291f] bg-black">
-                      <img
-                        src={selectedFile.fileData}
-                        alt="Selected Preview"
-                        className="w-full h-auto object-contain"
-                      />
-                    </div>
-                  </div>
-                )}
-
-                <button
-                  onClick={handleSubmitProof}
-                  disabled={!selectedFile || isUploading || !currentOrder}
-                  className="w-full py-3 px-4 bg-emerald-500 hover:bg-emerald-400 text-black font-mono font-bold text-xs flex items-center justify-center gap-2 transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
-                >
-                  {isUploading ? (
-                    <>
-                      <RefreshCw className="w-4 h-4 animate-spin" />
-                      <span>Submitting Payment Proof...</span>
-                    </>
-                  ) : (
-                    <>
-                      <UploadCloud className="w-4 h-4" />
-                      <span>Submit Proof for Verification</span>
-                    </>
-                  )}
-                </button>
-
-                {!currentOrder && (
-                  <p className="text-[11px] font-mono text-amber-400 text-center">
-                    * Generate an escrow order reference on the left before uploading proof.
-                  </p>
-                )}
-              </div>
+              </>
             )}
           </div>
         </div>

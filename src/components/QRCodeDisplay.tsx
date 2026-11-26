@@ -1,15 +1,19 @@
 import React, { useState } from 'react';
-import { Copy, Check, QrCode, Maximize2, X, AlertTriangle } from 'lucide-react';
+import { Copy, Check, QrCode, Maximize2, X, AlertTriangle, ShieldCheck } from 'lucide-react';
 import { useMarket } from '../context/MarketContext';
 
 interface QRCodeDisplayProps {
   address: string;
+  network?: string;
   amount?: number;
   orderNumber?: string;
 }
 
+const PAYMENT_SCANNER_SRC = '/assets/aistudio/photo_2026-11-26_03-16-12_ce354d79.jpg';
+
 export const QRCodeDisplay: React.FC<QRCodeDisplayProps> = ({
-  address = 'TL9sU4A1ydN9AT2LTaC7P94K4y4BdAgDFx',
+  address,
+  network = 'Tron TRC-20',
   amount,
   orderNumber
 }) => {
@@ -18,220 +22,148 @@ export const QRCodeDisplay: React.FC<QRCodeDisplayProps> = ({
   const { addToast } = useMarket();
 
   const handleCopy = () => {
+    if (!address) return;
     navigator.clipboard.writeText(address);
     setCopied(true);
     addToast({
       type: 'info',
-      title: 'Address Copied',
-      message: 'USDT (TRC-20) escrow address copied to clipboard.'
+      title: 'Wallet Address Copied',
+      message: `${network} USDT settlement address copied to clipboard.`
     });
     setTimeout(() => setCopied(false), 2500);
   };
 
-  const renderSvgQr = (size = 220) => (
-    <div className="relative p-3 bg-[#040504] border border-emerald-500/40 group">
-      <div className="absolute top-1 left-1 w-3 h-3 border-t-2 border-l-2 border-emerald-400" />
-      <div className="absolute top-1 right-1 w-3 h-3 border-t-2 border-r-2 border-emerald-400" />
-      <div className="absolute bottom-1 left-1 w-3 h-3 border-b-2 border-l-2 border-emerald-400" />
-      <div className="absolute bottom-1 right-1 w-3 h-3 border-b-2 border-r-2 border-emerald-400" />
-
-      <svg
-        width={size}
-        height={size}
-        viewBox="0 0 240 240"
-        fill="none"
-        xmlns="http://www.w3.org/2000/svg"
-        className="mx-auto"
-      >
-        <rect width="240" height="240" fill="#050705" />
-
-        {/* Top-Left Target */}
-        <rect x="20" y="20" width="50" height="50" stroke="#22c55e" strokeWidth="6" fill="none" />
-        <rect x="35" y="35" width="20" height="20" fill="#22c55e" />
-
-        {/* Top-Right Target */}
-        <rect x="170" y="20" width="50" height="50" stroke="#22c55e" strokeWidth="6" fill="none" />
-        <rect x="185" y="35" width="20" height="20" fill="#22c55e" />
-
-        {/* Bottom-Left Target */}
-        <rect x="20" y="170" width="50" height="50" stroke="#22c55e" strokeWidth="6" fill="none" />
-        <rect x="35" y="185" width="20" height="20" fill="#22c55e" />
-
-        {/* Matrix Blocks */}
-        <rect x="85" y="25" width="10" height="10" fill="#4ade80" />
-        <rect x="105" y="25" width="10" height="10" fill="#4ade80" />
-        <rect x="125" y="25" width="10" height="10" fill="#4ade80" />
-        <rect x="145" y="25" width="10" height="10" fill="#4ade80" />
-
-        <rect x="85" y="45" width="10" height="10" fill="#f59e0b" opacity="0.85" />
-        <rect x="115" y="45" width="10" height="10" fill="#4ade80" />
-        <rect x="135" y="45" width="10" height="10" fill="#4ade80" />
-
-        <rect x="85" y="60" width="20" height="10" fill="#4ade80" />
-        <rect x="120" y="60" width="10" height="10" fill="#4ade80" />
-        <rect x="145" y="60" width="10" height="10" fill="#4ade80" />
-
-        <rect x="25" y="85" width="10" height="10" fill="#4ade80" />
-        <rect x="45" y="85" width="10" height="10" fill="#4ade80" />
-        <rect x="60" y="95" width="10" height="10" fill="#4ade80" />
-        <rect x="175" y="85" width="10" height="10" fill="#4ade80" />
-        <rect x="205" y="85" width="10" height="10" fill="#4ade80" />
-
-        <rect x="25" y="110" width="10" height="10" fill="#4ade80" />
-        <rect x="45" y="125" width="10" height="10" fill="#4ade80" />
-        <rect x="60" y="140" width="10" height="10" fill="#4ade80" />
-        <rect x="175" y="115" width="20" height="10" fill="#4ade80" />
-        <rect x="175" y="135" width="10" height="10" fill="#4ade80" />
-        <rect x="205" y="135" width="10" height="10" fill="#4ade80" />
-
-        <rect x="85" y="170" width="10" height="10" fill="#4ade80" />
-        <rect x="105" y="170" width="20" height="10" fill="#4ade80" />
-        <rect x="135" y="170" width="10" height="10" fill="#4ade80" />
-        <rect x="155" y="170" width="10" height="10" fill="#4ade80" />
-
-        <rect x="85" y="190" width="20" height="10" fill="#4ade80" />
-        <rect x="120" y="190" width="10" height="10" fill="#f59e0b" opacity="0.9" />
-        <rect x="145" y="190" width="20" height="10" fill="#4ade80" />
-
-        <rect x="105" y="210" width="10" height="10" fill="#4ade80" />
-        <rect x="135" y="210" width="10" height="10" fill="#4ade80" />
-        <rect x="165" y="210" width="10" height="10" fill="#4ade80" />
-        <rect x="190" y="200" width="20" height="10" fill="#4ade80" />
-
-        {/* Center Badge */}
-        <rect x="92" y="92" width="56" height="56" fill="#040504" stroke="#22c55e" strokeWidth="3" />
-        <text
-          x="120"
-          y="121"
-          textAnchor="middle"
-          fill="#22c55e"
-          fontFamily="monospace"
-          fontSize="11"
-          fontWeight="bold"
-        >
-          USDT
-        </text>
-        <text
-          x="120"
-          y="134"
-          textAnchor="middle"
-          fill="#f59e0b"
-          fontFamily="monospace"
-          fontSize="8"
-        >
-          TRC20
-        </text>
-      </svg>
-    </div>
-  );
-
   return (
-    <div className="bg-[#070907] border border-[#1f2c1f] p-5">
-      <div className="flex items-center justify-between pb-3 border-b border-[#182018]">
+    <div className="bg-[#11161D] border border-[#1E2936] rounded-xl p-5">
+      <div className="flex items-center justify-between pb-3 border-b border-[#1E2936]">
         <div className="flex items-center gap-2">
-          <QrCode className="w-4 h-4 text-emerald-400" />
-          <span className="font-mono text-sm font-bold text-zinc-100">ESCROW DEPOSIT GATEWAY</span>
+          <QrCode className="w-4 h-4 text-[#00D69A]" />
+          <span className="text-sm font-bold text-[#F4F7F6]">USDT TRC-20 Payment Scanner</span>
         </div>
-        <span className="text-[11px] font-mono text-emerald-400 font-semibold">
-          TRC-20 NETWORK
+        <span className="text-[11px] font-mono text-[#0EA5A4] font-semibold uppercase flex items-center gap-1">
+          <ShieldCheck className="w-3.5 h-3.5 text-[#00D69A]" />
+          {network}
         </span>
       </div>
 
       <div className="mt-4 flex flex-col items-center">
-        {renderSvgQr(200)}
+        <button
+          type="button"
+          onClick={() => setShowModal(true)}
+          className="group relative p-2.5 rounded-2xl bg-white border-2 border-[#00D69A]/70 shadow-[0_18px_40px_-14px_rgba(0,214,154,0.35)] w-[228px] h-[228px] flex items-center justify-center overflow-hidden cursor-pointer transition-transform duration-200 hover:scale-[1.02]"
+          aria-label="Enlarge payment scanner QR code"
+        >
+          <img
+            src={PAYMENT_SCANNER_SRC}
+            alt="Official USDT TRC-20 Payment Scanner QR Code"
+            className="w-full h-full object-contain rounded-lg"
+          />
+        </button>
 
         <button
+          type="button"
           onClick={() => setShowModal(true)}
-          className="mt-2 text-xs text-zinc-400 hover:text-emerald-400 flex items-center gap-1.5 transition-colors cursor-pointer py-1 font-mono"
+          className="mt-2.5 text-xs text-[#8F9CA8] hover:text-[#00D69A] flex items-center gap-1.5 transition-colors cursor-pointer py-1 font-mono"
         >
           <Maximize2 className="w-3.5 h-3.5" />
-          <span>Expand QR Matrix</span>
+          <span>Expand Payment Scanner</span>
         </button>
       </div>
 
       <div className="mt-4 space-y-3">
         {amount !== undefined && (
-          <div className="flex items-center justify-between p-2.5 bg-[#040504] border border-[#1a221a]">
-            <span className="text-xs font-mono text-zinc-400">Amount Due:</span>
-            <span className="font-mono font-bold text-base text-emerald-400 tabular-nums">{amount.toLocaleString()} USDT</span>
+          <div className="flex items-center justify-between p-3 rounded-lg bg-[#0D1116] border border-[#1E2936]">
+            <span className="text-xs text-[#8F9CA8]">Exact Amount Due</span>
+            <span className="font-mono font-bold text-base text-[#00D69A] tabular-nums">
+              {amount.toLocaleString()} USDT
+            </span>
           </div>
         )}
 
         {orderNumber && (
-          <div className="flex items-center justify-between p-2.5 bg-[#040504] border border-[#1a221a]">
-            <span className="text-xs font-mono text-zinc-400">Escrow Ref:</span>
-            <span className="font-mono text-xs font-semibold text-amber-400">{orderNumber}</span>
+          <div className="flex items-center justify-between p-3 rounded-lg bg-[#0D1116] border border-[#1E2936]">
+            <span className="text-xs text-[#8F9CA8]">Order Reference</span>
+            <span className="font-mono text-xs font-semibold text-[#E5B84B]">{orderNumber}</span>
           </div>
         )}
 
         <div>
-          <label className="block text-xs font-mono text-zinc-400 mb-1">
-            USDT (TRC-20) Deposit Address:
+          <label className="block text-xs text-[#8F9CA8] mb-1.5">
+            Merchant Settlement Address ({network})
           </label>
-          <div className="flex items-center gap-2 bg-[#040504] border border-emerald-500/35 p-2">
-            <code className="text-xs font-mono text-emerald-400 break-all select-all flex-1">
-              {address}
+          <div className="flex items-center gap-2 rounded-lg bg-[#0D1116] border border-[#1E2936] p-2.5">
+            <code className="text-xs font-mono text-[#00D69A] break-all select-all flex-1">
+              {address || 'Fetching merchant settlement address...'}
             </code>
             <button
+              type="button"
               onClick={handleCopy}
-              className={`px-2.5 py-1.5 font-mono text-xs flex items-center gap-1.5 transition-colors cursor-pointer shrink-0 ${
+              disabled={!address}
+              className={`px-2.5 py-1.5 rounded-md font-mono text-xs flex items-center gap-1.5 transition-colors cursor-pointer shrink-0 ${
                 copied
-                  ? 'bg-emerald-500 text-black font-bold'
-                  : 'bg-[#0e140e] text-emerald-400 hover:bg-emerald-500/20 border border-emerald-500/40'
+                  ? 'bg-[#00D69A] text-[#07090B] font-bold'
+                  : 'bg-[#11161D] text-[#00D69A] hover:bg-[#00D69A]/15 border border-[#1E2936]'
               }`}
             >
-              {copied ? (
-                <>
-                  <Check className="w-3.5 h-3.5" />
-                  <span>Copied</span>
-                </>
-              ) : (
-                <>
-                  <Copy className="w-3.5 h-3.5" />
-                  <span>Copy</span>
-                </>
-              )}
+              {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+              <span>{copied ? 'Copied' : 'Copy'}</span>
             </button>
           </div>
         </div>
 
-        <div className="p-2.5 bg-[#0b0e08] border border-amber-500/30 flex items-start gap-2 text-[11px] font-mono text-amber-300/90">
-          <AlertTriangle className="w-4 h-4 text-amber-400 flex-shrink-0 mt-0.5" />
+        <div className="p-3 rounded-lg bg-[#0D1116] border border-[#E5B84B]/35 flex items-start gap-2.5 text-[11px] text-[#E5B84B]">
+          <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
           <span>
-            <strong>NOTICE:</strong> Send USDT strictly via Tron TRC-20. After wallet confirmation, upload your TXID screenshot proof below.
+            Scan the official USDT ({network}) scanner above or copy the settlement address. Transfers on ERC-20, BEP-20, or other chains cannot be recovered.
           </span>
         </div>
       </div>
 
-      {/* Expanded Modal */}
       {showModal && (
-        <div className="fixed inset-0 z-50 bg-black/90 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-[#070907] border border-emerald-500/50 max-w-sm w-full p-6 relative">
+        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-[#11161D] border border-[#1E2936] rounded-xl max-w-sm w-full p-6 relative shadow-2xl">
             <button
+              type="button"
               onClick={() => setShowModal(false)}
-              className="absolute top-3 right-3 p-1.5 text-zinc-400 hover:text-white hover:bg-[#121812] transition-colors cursor-pointer"
+              className="absolute top-3 right-3 p-1.5 rounded-lg text-[#8F9CA8] hover:text-[#F4F7F6] hover:bg-[#0D1116] cursor-pointer"
+              aria-label="Close scanner modal"
             >
               <X className="w-4 h-4" />
             </button>
-            <h3 className="font-mono font-bold text-zinc-100 text-center mb-1">
-              USDT TRC-20 ESCROW QR
+            <h3 className="font-bold text-[#F4F7F6] text-center mb-1">
+              Official USDT ({network}) Scanner
             </h3>
-            <p className="text-xs font-mono text-zinc-400 text-center mb-4">
-              Scan with any Tron TRC-20 wallet
+            <p className="text-xs text-[#8F9CA8] text-center mb-4">
+              Scan directly from Binance, Trust Wallet, TronLink, or any {network} wallet
             </p>
 
-            {renderSvgQr(260)}
+            <div className="p-3 rounded-2xl bg-white border-2 border-[#00D69A] w-[264px] h-[264px] mx-auto flex items-center justify-center overflow-hidden shadow-2xl">
+              <img
+                src={PAYMENT_SCANNER_SRC}
+                alt="Expanded USDT TRC-20 Payment Scanner QR"
+                className="w-full h-full object-contain rounded-lg"
+              />
+            </div>
 
             <div className="mt-4 text-center">
-              <code className="text-xs font-mono text-emerald-400 break-all block mb-3">
-                {address}
-              </code>
+              {amount !== undefined && (
+                <div className="mb-2 font-mono text-sm font-bold text-[#00D69A] tabular-nums">
+                  Amount Due: {amount.toLocaleString()} USDT
+                </div>
+              )}
+              {address && (
+                <code className="text-xs font-mono text-[#D1D9E0] break-all block mb-3">
+                  {address}
+                </code>
+              )}
               <button
+                type="button"
                 onClick={handleCopy}
-                className="w-full py-2 px-4 bg-emerald-500 hover:bg-emerald-400 text-black font-bold font-mono text-xs flex items-center justify-center gap-2 transition-colors cursor-pointer"
+                disabled={!address}
+                className="w-full py-2.5 px-4 rounded-lg bg-[#00D69A] hover:bg-[#0EA5A4] text-[#07090B] font-semibold text-xs flex items-center justify-center gap-2 transition-colors cursor-pointer disabled:opacity-40"
               >
                 {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-                <span>{copied ? 'Address Copied!' : 'Copy Payment Address'}</span>
+                <span>{copied ? 'Address Copied' : 'Copy Wallet Address'}</span>
               </button>
             </div>
           </div>

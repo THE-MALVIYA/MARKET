@@ -2,14 +2,37 @@
 
 @layer base {
   :root {
-    --font-mono: 'IBM Plex Mono', 'JetBrains Mono', monospace;
-    --font-sans: 'Archivo', system-ui, sans-serif;
+    --bg-main: #07090B;
+    --bg-secondary: #0D1116;
+    --bg-card: #11161D;
+    --bg-elevated: #151C24;
+    --accent-emerald: #00D69A;
+    --accent-teal: #0EA5A4;
+    --text-main: #F4F7F6;
+    --text-silver: #D1D9E0;
+    --text-muted: #8F9CA8;
+    --border-hairline: #1E2936;
+    --accent-amber: #E5B84B;
+
+    --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+    --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
+  }
+
+  html {
+    background-color: var(--bg-main);
+    color: var(--text-main);
+    scroll-behavior: smooth;
   }
 
   body {
     font-family: var(--font-sans);
-    background-color: #040504;
-    color: #d4d8d4;
+    background-color: var(--bg-main);
+    color: var(--text-main);
+    overflow-x: hidden;
+  }
+
+  h1, h2, h3 {
+    text-wrap: balance;
   }
 
   code, pre, .font-mono {
@@ -17,56 +40,244 @@
     font-variant-numeric: tabular-nums;
   }
 
-  /* Custom darknet scrollbar */
   ::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
+    width: 7px;
+    height: 7px;
   }
   ::-webkit-scrollbar-track {
-    background: #040504;
+    background: #07090B;
   }
   ::-webkit-scrollbar-thumb {
-    background: #1d261d;
-    border-radius: 0px;
+    background: #1E2936;
+    border-radius: 4px;
   }
   ::-webkit-scrollbar-thumb:hover {
-    background: #22c55e88;
+    background: #0EA5A4;
   }
 }
 
-/* Darkweb terminal & phosphor utilities */
-.onion-panel {
-  background-color: #090b09;
-  border: 1px solid #1b241b;
+.dsk-surface {
+  background: linear-gradient(160deg, #131922 0%, #0D1116 100%);
+  border: 1px solid #1E2936;
+  box-shadow:
+    0 22px 48px -22px rgba(0, 0, 0, 0.88),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
 }
 
-.onion-panel-active {
-  background-color: #0a0e0a;
-  border: 1px solid rgba(34, 197, 94, 0.35);
-  box-shadow: inset 0 0 24px rgba(34, 197, 94, 0.04);
+.dsk-panel-3d {
+  background: linear-gradient(155deg, #141B24 0%, #0E131A 65%, #0A0E13 100%);
+  border: 1px solid #1E2936;
+  box-shadow:
+    0 20px 44px -22px rgba(0, 0, 0, 0.9),
+    inset 0 1px 0 rgba(255, 255, 255, 0.07);
+  transition: transform 220ms cubic-bezier(0.22, 1, 0.36, 1), border-color 220ms ease, box-shadow 220ms ease;
 }
 
-.darknet-scanlines {
-  background-image: repeating-linear-gradient(
-    to bottom,
-    rgba(0, 0, 0, 0) 0px,
-    rgba(0, 0, 0, 0) 2px,
-    rgba(0, 0, 0, 0.28) 3px
-  );
+.dsk-panel-3d:hover {
+  transform: translateY(-4px);
+  border-color: rgba(0, 214, 154, 0.42);
+  box-shadow:
+    0 28px 54px -20px rgba(0, 0, 0, 0.94),
+    0 0 24px -10px rgba(0, 214, 154, 0.25),
+    inset 0 1px 0 rgba(0, 214, 154, 0.2);
 }
 
-.darknet-grid {
-  background-size: 40px 40px;
+.dsk-icon-3d {
+  background: linear-gradient(145deg, #16202B 0%, #090D12 100%);
+  border: 1px solid #243242;
+  box-shadow:
+    0 8px 18px -6px rgba(0, 0, 0, 0.85),
+    inset 0 1px 0 rgba(255, 255, 255, 0.09);
+}
+
+.dsk-card-3d {
+  transform-style: preserve-3d;
+  background: linear-gradient(160deg, #131922 0%, #0E131A 100%);
+  box-shadow:
+    0 20px 46px -22px rgba(0, 0, 0, 0.9),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  transition: transform 240ms cubic-bezier(0.22, 1, 0.36, 1), border-color 220ms ease, box-shadow 240ms ease;
+}
+
+.dsk-card-3d:hover {
+  box-shadow:
+    0 28px 56px -18px rgba(0, 0, 0, 0.92),
+    0 0 0 1px rgba(0, 214, 154, 0.32),
+    0 0 32px -12px rgba(0, 214, 154, 0.26);
+}
+
+.dsk-subtle-grid {
+  background-size: 64px 64px;
   background-image:
-    linear-gradient(to right, rgba(34, 197, 94, 0.035) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(34, 197, 94, 0.035) 1px, transparent 1px);
+    linear-gradient(to right, rgba(30, 41, 54, 0.25) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(30, 41, 54, 0.25) 1px, transparent 1px);
 }
 
-@keyframes subtle-flicker {
-  0%, 100% { opacity: 0.96; }
-  50% { opacity: 1; }
+.dsk-3d-horizon {
+  background-size: 46px 46px;
+  background-image:
+    linear-gradient(to right, rgba(0, 214, 154, 0.14) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(14, 165, 164, 0.14) 1px, transparent 1px);
+  transform: perspective(640px) rotateX(68deg);
+  transform-origin: center top;
 }
 
-.onion-crt {
-  animation: subtle-flicker 5s ease-in-out infinite;
+@keyframes dsk-shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
 }
+
+.cp-skeleton {
+  background: linear-gradient(90deg, #0D1116 25%, #161F29 50%, #0D1116 75%);
+  background-size: 200% 100%;
+  animation: dsk-shimmer 1.6s infinite linear;
+}
+
+@keyframes dskFloatBox {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+@keyframes dskBoxTilt3D {
+  0%, 100% {
+    transform: rotateX(7deg) rotateY(-18deg) rotateZ(-1deg);
+  }
+  50% {
+    transform: rotateX(11deg) rotateY(14deg) rotateZ(1deg);
+  }
+}
+
+@keyframes dskSheenSweep {
+  0% {
+    transform: translateX(-140%) skewX(-22deg);
+    opacity: 0;
+  }
+  20% {
+    opacity: 0.45;
+  }
+  55% {
+    transform: translateX(180%) skewX(-22deg);
+    opacity: 0;
+  }
+  100% {
+    transform: translateX(180%) skewX(-22deg);
+    opacity: 0;
+  }
+}
+
+@keyframes dskOrbitSpin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes dskOrbitSpinRev {
+  0% {
+    transform: rotateX(72deg) rotateZ(360deg);
+  }
+  100% {
+    transform: rotateX(72deg) rotateZ(0deg);
+  }
+}
+
+@keyframes dskWaveScale {
+  0%, 100% {
+    transform: scaleY(0.45);
+    opacity: 0.72;
+  }
+  50% {
+    transform: scaleY(1.1);
+    opacity: 1;
+  }
+}
+
+@keyframes dskGridDrift {
+  0% {
+    background-position: 0 0;
+  }
+  100% {
+    background-position: 0 28px;
+  }
+}
+
+.dsk-live-grid {
+  animation: dskGridDrift 2.6s linear infinite;
+}
+
+.dsk-orbit-ring {
+  animation: dskOrbitSpin 16s linear infinite;
+}
+
+.dsk-orbit-ring-rev {
+  animation: dskOrbitSpinRev 11s linear infinite;
+}
+
+.dsk-box-float {
+  perspective: 900px;
+  animation: dskFloatBox 4.2s ease-in-out infinite;
+}
+
+.dsk-box-3d {
+  animation: dskBoxTilt3D 6.8s ease-in-out infinite;
+}
+
+.dsk-box-sheen {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.22) 50%,
+    transparent 100%
+  );
+  animation: dskSheenSweep 4.8s ease-in-out infinite;
+}
+
+.dsk-wave-bar {
+  transform-origin: bottom center;
+  animation: dskWaveScale 1.35s ease-in-out infinite;
+}
+
+@keyframes dskWebsiteReveal {
+  0% {
+    opacity: 0;
+    transform: perspective(1200px) translateY(18px) scale(0.965);
+    filter: brightness(0.65);
+  }
+  100% {
+    opacity: 1;
+    transform: perspective(1200px) translateY(0) scale(1);
+    filter: brightness(1);
+  }
+}
+
+.dsk-website-reveal {
+  animation: dskWebsiteReveal 0.85s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cp-skeleton,
+  .dsk-live-grid,
+  .dsk-orbit-ring,
+  .dsk-orbit-ring-rev,
+  .dsk-box-float,
+  .dsk-box-3d,
+  .dsk-box-sheen,
+  .dsk-wave-bar,
+  .dsk-website-reveal {
+    animation: none;
+  }
+  .dsk-card-3d {
+    transition: border-color 150ms ease;
+  }
+}
+

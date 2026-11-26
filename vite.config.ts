@@ -16,15 +16,16 @@ export default defineConfig(() => {
           'apple-touch-icon.png',
           'pwa-192x192.png',
           'pwa-512x512.png',
-          'pwa-maskable-512x512.png'
+          'pwa-maskable-512x512.png',
+          'assets/aistudio/photo_2026-11-26_03-16-12_ce354d79.jpg'
         ],
         manifest: {
           id: '/',
-          name: 'CYBERPLACES',
-          short_name: 'CyberPlaces',
-          description: 'Encrypted darkweb security tooling & infrastructure marketplace.',
-          theme_color: '#040504',
-          background_color: '#040504',
+          name: 'DEEPSEEK',
+          short_name: 'DEEPSEEK',
+          description: 'Deephat software, developer infrastructure, and enterprise technology marketplace.',
+          theme_color: '#07090B',
+          background_color: '#07090B',
           display: 'standalone',
           display_override: ['standalone', 'minimal-ui'],
           orientation: 'portrait-primary',
@@ -35,24 +36,24 @@ export default defineConfig(() => {
               src: '/pwa-192x192.png',
               sizes: '192x192',
               type: 'image/png',
-              purpose: 'any',
+              purpose: 'any'
             },
             {
               src: '/pwa-512x512.png',
               sizes: '512x512',
               type: 'image/png',
-              purpose: 'any',
+              purpose: 'any'
             },
             {
               src: '/pwa-maskable-512x512.png',
               sizes: '512x512',
               type: 'image/png',
-              purpose: 'maskable',
-            },
-          ],
+              purpose: 'maskable'
+            }
+          ]
         },
         workbox: {
-          globPatterns: ['**/*.{js,css,html,ico,png,svg,webp,woff,woff2}'],
+          globPatterns: ['**/*.{js,css,html,ico,png,jpg,svg,webp,woff,woff2}'],
           navigateFallback: '/index.html',
           navigateFallbackDenylist: [/^\/api\//, /^\/uploads\//],
           runtimeCaching: [
@@ -63,12 +64,12 @@ export default defineConfig(() => {
                 cacheName: 'api-products-cache',
                 expiration: {
                   maxEntries: 20,
-                  maxAgeSeconds: 60 * 60 * 24,
+                  maxAgeSeconds: 60 * 60 * 24
                 },
                 cacheableResponse: {
-                  statuses: [0, 200],
-                },
-              },
+                  statuses: [0, 200]
+                }
+              }
             },
             {
               urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
@@ -77,12 +78,12 @@ export default defineConfig(() => {
                 cacheName: 'google-fonts-cache',
                 expiration: {
                   maxEntries: 10,
-                  maxAgeSeconds: 60 * 60 * 24 * 365,
+                  maxAgeSeconds: 60 * 60 * 24 * 365
                 },
                 cacheableResponse: {
-                  statuses: [0, 200],
-                },
-              },
+                  statuses: [0, 200]
+                }
+              }
             },
             {
               urlPattern: /^https:\/\/fonts\.gstatic\.com\/.*/i,
@@ -91,33 +92,31 @@ export default defineConfig(() => {
                 cacheName: 'gstatic-fonts-cache',
                 expiration: {
                   maxEntries: 10,
-                  maxAgeSeconds: 60 * 60 * 24 * 365,
+                  maxAgeSeconds: 60 * 60 * 24 * 365
                 },
                 cacheableResponse: {
-                  statuses: [0, 200],
-                },
-              },
-            },
-          ],
+                  statuses: [0, 200]
+                }
+              }
+            }
+          ]
         },
         devOptions: {
           enabled: true,
           type: 'module',
-          navigateFallback: 'index.html',
-        },
-      }),
+          navigateFallback: 'index.html'
+        }
+      })
     ],
     resolve: {
       alias: {
-        '@': path.resolve(__dirname, '.'),
-      },
+        '@': path.resolve(__dirname, '.')
+      }
     },
     server: {
-      // HMR is disabled in AI Studio via DISABLE_HMR env var.
-      // Do not modify—file watching is disabled to prevent flickering during agent edits.
-      hmr: process.env.DISABLE_HMR !== 'true',
-      // Disable file watching when DISABLE_HMR is true to save CPU during agent edits.
-      watch: process.env.DISABLE_HMR === 'true' ? null : {},
-    },
+      hmr: false as const,
+      ws: false as const,
+      watch: process.env.DISABLE_HMR === 'true' ? null : {}
+    }
   };
 });

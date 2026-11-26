@@ -1,98 +1,143 @@
 import React from 'react';
-import { Terminal, Shield, Cpu } from 'lucide-react';
 import { useMarket } from '../context/MarketContext';
+import { DeepSeekLogo } from './DeepSeekLogo';
 
-export const TerminalFooter: React.FC = () => {
-  const { setActiveTab } = useMarket();
+interface TerminalFooterProps {
+  onReplayIntro?: () => void;
+}
+
+export const TerminalFooter: React.FC<TerminalFooterProps> = ({ onReplayIntro }) => {
+  const { setActiveTab, openLegalDoc, siteSettings } = useMarket();
 
   return (
-    <footer className="mt-16 border-t border-[#1d271d] bg-[#040504] relative z-20 font-mono">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-8 mb-8">
-          {/* Brand Notice */}
-          <div className="md:col-span-6 space-y-3">
-            <div className="flex items-center gap-2.5">
-              <div className="w-6 h-6 bg-[#0a0e0a] border border-emerald-500/40 flex items-center justify-center text-emerald-400">
-                <Shield className="w-3.5 h-3.5" />
-              </div>
-              <span className="font-bold text-sm tracking-wider text-white">
-                CYBERPLACES · ONION MARKETPLACE
-              </span>
-            </div>
-
-            <p className="text-xs text-zinc-400 leading-relaxed max-w-md font-sans">
-              Encrypted darknet repository for verified security auditing tools, adversary frameworks, cryptographic engines, and cyber infrastructure packages.
+    <footer className="mt-20 border-t border-[#1E2936] bg-[#0D1116] relative z-20">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-8 mb-10">
+          {/* Brand Summary */}
+          <div className="md:col-span-4 space-y-4">
+            <DeepSeekLogo />
+            <p className="text-xs text-[#8F9CA8] leading-relaxed max-w-sm">
+              Independent enterprise marketplace for Deephat software, distributed telemetry platforms, cryptographic key management, and developer infrastructure.
             </p>
-
-            <div className="p-3 bg-[#070907] border border-[#1d271d] text-[11px] text-zinc-400 leading-relaxed space-y-1">
-              <div className="font-bold text-emerald-400 uppercase tracking-wider">
-                PGP &amp; CHECKSUM VERIFICATION
-              </div>
-              <p className="text-[11px] text-zinc-400">
-                Every release listed on CyberPlaces is cryptographically signed and checked against clean SHA-256 hashes prior to escrow fulfillment.
-              </p>
-            </div>
+            <p className="text-[11px] text-[#8F9CA8]/80 leading-relaxed max-w-sm">
+              DEEPSEEK is an independent software marketplace and is not affiliated with DeepSeek AI.
+            </p>
           </div>
 
-          {/* Navigation */}
-          <div className="md:col-span-3 space-y-2 text-xs">
-            <h4 className="text-white font-bold uppercase tracking-wider mb-2 flex items-center gap-1.5">
-              <Terminal className="w-3.5 h-3.5 text-emerald-400" />
-              <span>Directory</span>
+          {/* Marketplace */}
+          <div className="md:col-span-2 space-y-2.5 text-xs">
+            <h4 className="text-[#F4F7F6] font-semibold uppercase tracking-wider text-[11px] mb-3">
+              Marketplace
             </h4>
-            <ul className="space-y-1.5 text-zinc-400">
+            <ul className="space-y-2 text-[#8F9CA8]">
               <li>
-                <button
-                  onClick={() => setActiveTab('home')}
-                  className="hover:text-emerald-400 transition-colors cursor-pointer"
-                >
-                  &gt; Market Index
+                <button onClick={() => setActiveTab('products')} className="hover:text-[#00D69A] cursor-pointer">
+                  Products Catalog
                 </button>
               </li>
               <li>
-                <button
-                  onClick={() => setActiveTab('marketplace')}
-                  className="hover:text-emerald-400 transition-colors cursor-pointer"
-                >
-                  &gt; Full Catalog
+                <button onClick={() => setActiveTab('categories')} className="hover:text-[#00D69A] cursor-pointer">
+                  Categories
                 </button>
               </li>
               <li>
-                <button
-                  onClick={() => setActiveTab('orders')}
-                  className="hover:text-emerald-400 transition-colors cursor-pointer"
-                >
-                  &gt; Escrow Orders
+                <button onClick={() => setActiveTab('dashboard')} className="hover:text-[#00D69A] cursor-pointer">
+                  User Dashboard
                 </button>
               </li>
               <li>
-                <button
-                  onClick={() => setActiveTab('support')}
-                  className="hover:text-emerald-400 transition-colors cursor-pointer"
-                >
-                  &gt; PGP Support &amp; FAQ
+                <button onClick={() => setActiveTab('orders')} className="hover:text-[#00D69A] cursor-pointer">
+                  Orders &amp; Licenses
                 </button>
               </li>
             </ul>
           </div>
 
-          {/* Escrow & Onion Details */}
-          <div className="md:col-span-3 space-y-2 text-xs">
-            <h4 className="text-white font-bold uppercase tracking-wider mb-2 flex items-center gap-1.5">
-              <Cpu className="w-3.5 h-3.5 text-amber-400" />
-              <span>Escrow Gateway</span>
+          {/* Knowledge & Support */}
+          <div className="md:col-span-3 space-y-2.5 text-xs">
+            <h4 className="text-[#F4F7F6] font-semibold uppercase tracking-wider text-[11px] mb-3">
+              Engineering &amp; Company
             </h4>
-            <div className="text-[11px] text-zinc-400 space-y-1.5">
-              <div>Settlement: <span className="text-emerald-400">USDT TRC-20 Direct</span></div>
-              <div>Escrow Address: <span className="text-zinc-300 break-all text-[10px]">TL9sU4A1ydN...DFx</span></div>
-              <div>Onion Mirror: <span className="text-zinc-300">cyber7x9q4m2...onion</span></div>
-              <div>PGP Key ID: <span className="text-amber-400">0x8F4C92E1</span></div>
-            </div>
+            <ul className="space-y-2 text-[#8F9CA8]">
+              <li>
+                <button onClick={() => setActiveTab('about')} className="hover:text-[#00D69A] cursor-pointer">
+                  About DEEPSEEK
+                </button>
+              </li>
+              <li>
+                <button onClick={() => setActiveTab('research')} className="hover:text-[#00D69A] cursor-pointer">
+                  Research Library
+                </button>
+              </li>
+              <li>
+                <button onClick={() => setActiveTab('docs')} className="hover:text-[#00D69A] cursor-pointer">
+                  Documentation
+                </button>
+              </li>
+              <li>
+                <button onClick={() => setActiveTab('support')} className="hover:text-[#00D69A] cursor-pointer">
+                  Support Helpdesk
+                </button>
+              </li>
+              <li>
+                <button onClick={() => setActiveTab('admin')} className="hover:text-[#E5B84B] cursor-pointer">
+                  Administrator Console
+                </button>
+              </li>
+            </ul>
+          </div>
+
+          {/* Legal & Billing Policies */}
+          <div className="md:col-span-3 space-y-2.5 text-xs">
+            <h4 className="text-[#F4F7F6] font-semibold uppercase tracking-wider text-[11px] mb-3">
+              Legal &amp; Settlement
+            </h4>
+            <ul className="space-y-2 text-[#8F9CA8]">
+              <li>
+                <button onClick={() => openLegalDoc('terms')} className="hover:text-[#00D69A] cursor-pointer">
+                  Terms &amp; Conditions
+                </button>
+              </li>
+              <li>
+                <button onClick={() => openLegalDoc('privacy')} className="hover:text-[#00D69A] cursor-pointer">
+                  Privacy Policy
+                </button>
+              </li>
+              <li>
+                <button onClick={() => openLegalDoc('refund')} className="hover:text-[#00D69A] cursor-pointer">
+                  Refund &amp; Licensing Policy
+                </button>
+              </li>
+              <li>
+                <button onClick={() => openLegalDoc('payment')} className="hover:text-[#00D69A] cursor-pointer">
+                  Payment &amp; TRC-20 Information
+                </button>
+              </li>
+              <li>
+                <button onClick={() => openLegalDoc('contact')} className="hover:text-[#00D69A] cursor-pointer">
+                  Contact Information
+                </button>
+              </li>
+            </ul>
           </div>
         </div>
 
-        <div className="pt-6 border-t border-[#161e16] text-center text-[11px] text-zinc-500">
-          CYBERPLACES &copy; 2026 · Encrypted Security Tooling &amp; Infrastructure Bazaar
+        <div className="pt-6 border-t border-[#1E2936] flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-[#8F9CA8]">
+          <span>&copy; 2017 DEEPSEEK Marketplace. All rights reserved.</span>
+          <div className="flex items-center gap-4">
+            {onReplayIntro && (
+              <button
+                type="button"
+                onClick={onReplayIntro}
+                className="text-xs text-[#00D69A] hover:text-[#0EA5A4] font-medium cursor-pointer"
+              >
+                Replay 3D Intro
+              </button>
+            )}
+            <span className="font-mono text-[11px]">
+              {siteSettings?.supportEmail || 'support@deepseek-infra.io'} · {siteSettings?.trc20Network || 'Tron TRC-20'}
+            </span>
+          </div>
         </div>
       </div>
     </footer>

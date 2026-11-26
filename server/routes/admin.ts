@@ -1,81 +1,227 @@
 import { Router, Response } from 'express';
 import { db } from '../db';
 import { AuthenticatedRequest, requireAdmin } from '../middleware/auth';
-import { OrderStatus } from '../types';
+import { verifyTronTransaction } from './orders';
+import { OrderStatus, SupportTicket } from '../types';
 
 const router = Router();
 
-// Apply requireAdmin to all admin endpoints
+// Strict admin authorization on every route in this router
 router.use(requireAdmin);
 
 // GET /api/admin/stats
 router.get('/stats', (_req: AuthenticatedRequest, res: Response) => {
-  const stats = db.getAdminStats();
-  res.json({ stats });
+  res.json({ stats: db.getAdminStats() });
 });
 
 // GET /api/admin/activity-logs
 router.get('/activity-logs', (req: AuthenticatedRequest, res: Response) => {
-  const limit = parseInt(req.query.limit as string) || 50;
-  const logs = db.getActivityLogs(limit);
-  res.json({ logs });
+  const limit = parseInt(req.query.limit as string) || 100;
+  res.json({ logs: db.getActivityLogs(limit) });
 });
 
-// GET /api/admin/payment-proofs
-router.get('/payment-proofs', (_req: AuthenticatedRequest, res: Response) => {
-  const orders = db.getOrders();
-  const proofs = orders
-    .filter((o) => !!o.paymentProof)
-    .map((o) => ({
-      orderNumber: o.orderNumber,
-      orderId: o.id,
-      amount: o.amount,
-      currency: o.currency,
-      userEmail: o.userEmail,
-      status: o.status,
-      createdAt: o.createdAt,
-      items: o.items,
-      paymentProof: o.paymentProof
-    }));
-
-  res.json({ proofs });
-});
-
-// POST /api/admin/orders/:orderNumber/review - quick approve or reject proof
-router.post('/orders/:orderNumber/review', (req: AuthenticatedRequest, res: Response) => {
-  const { decision, note } = req.body;
-  const { orderNumber } = req.params;
-
-  if (decision !== 'Approved' && decision !== 'Rejected' && decision !== 'Under Review') {
-    return res.status(400).json({ error: 'INVALID_DECISION', message: 'Decision must be Approved, Rejected, or Under Review.' });
-  }
-
-  const actor = req.user?.username || 'root_overseer';
-  const updatedOrder = db.updateOrderStatus(orderNumber, decision as OrderStatus, actor, note || `Proof ${decision} by administrator`);
-
-  if (!updatedOrder) {
-    return res.status(404).json({ error: 'ORDER_NOT_FOUND', message: 'Order reference not found' });
-  }
-
-  res.json({
-    success: true,
-    message: `Order ${orderNumber} proof review set to ${decision}`,
-    order: updatedOrder
-  });
-});
-
-// GET /api/admin/users - list simulated marketplace users
+// GET /api/admin/users
 router.get('/users', (_req: AuthenticatedRequest, res: Response) => {
   const users = db.getUsers().map((u) => ({
     id: u.id,
     username: u.username,
     email: u.email,
     role: u.role,
+    organization: u.organization,
     reputation: u.reputation,
     avatar: u.avatar,
     createdAt: u.createdAt
   }));
   res.json({ users });
+});
+
+// POST /api/admin/categories/rename
+router.post('/categories/rename', (req: AuthenticatedRequest, res: Response) => {
+  const { oldCategory, newCategory } = req.body;
+  if (!oldCategory || !newCategory) {
+    return res.status(400).json({ error: 'INVALID_INPUT', message: 'Both category names are required.' });
+  }
+  const updatedCount = db.renameCategory(
+    String(oldCategory).trim(),
+    String(newCategory).trim(),
+    req.user!.username
+  );
+  res.json({ success: true, updatedCount });
+});
+
+// POST /api/admin/orders/:orderNumber/recheck-tx
+router.post('/orders/:orderNumber/recheck-tx', async (req: AuthenticatedRequest, res: Response) => {
+  const order = db.getOrderByNumber(req.params.orderNumber);
+  if (!order) {
+    return res.status(404).json({ error: 'ORDER_NOT_FOUND', message: 'Order not found.' });
+  }
+  if (!order.txHash) {
+    return res.status(400).json({ error: 'NO_TX_HASH', message: 'No transaction hash attached to this order.' });
+  }
+
+  const settings = db.getSiteSettings();
+  const { verification, status } = await verifyTronTransaction(
+    order.txHash,
+    order.paymentAddress || settings.trc20ReceivingAddress,
+    order.amount,
+    settings.requiredConfirmations
+  );
+  const updated = db.recordTransactionSubmission(
+    order.orderNumber,
+    order.txHash,
+    verification,
+    status,
+    req.user!.username
+  );
+  res.json({ success: true, order: updated, verification });
+});
+
+// POST /api/admin/orders/:orderNumber/review
+router.post('/orders/:orderNumber/review', (req: AuthenticatedRequest, res: Response) => {
+  const { decision, note } = req.body;
+  const { orderNumber } = req.params;
+
+  const allowed: OrderStatus[] = [
+    'Payment Confirmed',
+    'Payment Failed',
+    'Confirming on Blockchain',
+    'Payment Expired',
+    'Approved',
+    'Rejected'
+  ];
+
+  if (!allowed.includes(decision)) {
+    return res.status(400).json({ error: 'INVALID_DECISION', message: 'Invalid verification decision.' });
+  }
+
+  const updated = db.updateOrderStatus(
+    orderNumber,
+    decision as OrderStatus,
+    req.user!.username,
+    note || `Order verification marked ${decision} by administrator.`
+  );
+
+  if (!updated) {
+    return res.status(404).json({ error: 'ORDER_NOT_FOUND', message: 'Order not found.' });
+  }
+
+  res.json({ success: true, order: updated });
+});
+
+// GET /api/admin/licenses
+router.get('/licenses', (_req: AuthenticatedRequest, res: Response) => {
+  res.json({ licenses: db.getLicenses() });
+});
+
+// PATCH /api/admin/licenses/:id/toggle
+router.patch('/licenses/:id/toggle', (req: AuthenticatedRequest, res: Response) => {
+  const lic = db.toggleLicenseStatus(req.params.id, req.user!.username);
+  if (!lic) {
+    return res.status(404).json({ error: 'NOT_FOUND', message: 'License record not found.' });
+  }
+  res.json({ license: lic });
+});
+
+// GET /api/admin/discounts
+router.get('/discounts', (_req: AuthenticatedRequest, res: Response) => {
+  res.json({ discounts: db.getDiscounts() });
+});
+
+// POST /api/admin/discounts
+router.post('/discounts', (req: AuthenticatedRequest, res: Response) => {
+  const { code, type, value, maxUses, description } = req.body;
+  if (!code || !value) {
+    return res.status(400).json({ error: 'INVALID_INPUT', message: 'Code and value are required.' });
+  }
+  const discount = db.createDiscount(
+    {
+      code: String(code),
+      type: type === 'fixed' ? 'fixed' : 'percent',
+      value: Number(value),
+      active: true,
+      maxUses: Number(maxUses) || 100,
+      description: String(description || '')
+    },
+    req.user!.username
+  );
+  res.status(201).json({ discount });
+});
+
+// PATCH /api/admin/discounts/:id/toggle
+router.patch('/discounts/:id/toggle', (req: AuthenticatedRequest, res: Response) => {
+  const discount = db.toggleDiscount(req.params.id, req.user!.username);
+  if (!discount) return res.status(404).json({ error: 'NOT_FOUND' });
+  res.json({ discount });
+});
+
+// DELETE /api/admin/discounts/:id
+router.delete('/discounts/:id', (req: AuthenticatedRequest, res: Response) => {
+  const ok = db.deleteDiscount(req.params.id, req.user!.username);
+  if (!ok) return res.status(404).json({ error: 'NOT_FOUND' });
+  res.json({ success: true });
+});
+
+// GET /api/admin/tickets
+router.get('/tickets', (_req: AuthenticatedRequest, res: Response) => {
+  res.json({ tickets: db.getTickets() });
+});
+
+// POST /api/admin/tickets/:id/reply
+router.post('/tickets/:id/reply', (req: AuthenticatedRequest, res: Response) => {
+  const { message, status } = req.body;
+  if (!message || !String(message).trim()) {
+    return res.status(400).json({ error: 'MESSAGE_REQUIRED', message: 'Reply message is required.' });
+  }
+  const ticket = db.replyToTicket(
+    req.params.id,
+    req.user!.username,
+    'admin',
+    String(message).trim(),
+    status as SupportTicket['status'] | undefined
+  );
+  if (!ticket) return res.status(404).json({ error: 'NOT_FOUND' });
+  res.json({ ticket });
+});
+
+// GET & PUT /api/admin/settings
+router.get('/settings', (_req: AuthenticatedRequest, res: Response) => {
+  res.json({ settings: db.getSiteSettings() });
+});
+
+router.put('/settings', (req: AuthenticatedRequest, res: Response) => {
+  const {
+    tagline,
+    supportEmail,
+    announcementText,
+    announcementActive,
+    trc20ReceivingAddress,
+    trc20Network,
+    requiredConfirmations,
+    orderExpiryMinutes,
+    dispatchChannel
+  } = req.body;
+
+  const updated = db.updateSiteSettings(
+    {
+      ...(tagline !== undefined ? { tagline: String(tagline) } : {}),
+      ...(supportEmail !== undefined ? { supportEmail: String(supportEmail) } : {}),
+      ...(announcementText !== undefined ? { announcementText: String(announcementText) } : {}),
+      ...(typeof announcementActive === 'boolean' ? { announcementActive } : {}),
+      ...(trc20ReceivingAddress !== undefined
+        ? { trc20ReceivingAddress: String(trc20ReceivingAddress).trim() }
+        : {}),
+      ...(trc20Network !== undefined ? { trc20Network: String(trc20Network) } : {}),
+      ...(typeof requiredConfirmations === 'number'
+        ? { requiredConfirmations: Math.max(1, requiredConfirmations) }
+        : {}),
+      ...(typeof orderExpiryMinutes === 'number'
+        ? { orderExpiryMinutes: Math.max(15, orderExpiryMinutes) }
+        : {}),
+      ...(dispatchChannel !== undefined ? { dispatchChannel: String(dispatchChannel) } : {})
+    },
+    req.user!.username
+  );
+  res.json({ settings: updated });
 });
 
 export default router;

@@ -1,7 +1,18 @@
 import fs from 'fs';
 import path from 'path';
 import crypto from 'crypto';
-import { Product, Order, User, ActivityLog, OrderStatus } from './types';
+import {
+  Product,
+  Order,
+  User,
+  ActivityLog,
+  OrderStatus,
+  LicenseRecord,
+  DiscountCode,
+  SupportTicket,
+  SiteSettings,
+  BlockchainVerification
+} from './types';
 
 const DATA_DIR = path.join(process.cwd(), 'server', 'data');
 const STORE_FILE = path.join(DATA_DIR, 'store.json');
@@ -11,499 +22,95 @@ export interface DatabaseStore {
   products: Product[];
   orders: Order[];
   activityLogs: ActivityLog[];
+  licenses: LicenseRecord[];
+  discounts: DiscountCode[];
+  tickets: SupportTicket[];
+  usedTxHashes: Record<string, string>; // lowercase txHash -> orderNumber
+  siteSettings: SiteSettings;
+  adminPasscodeHash?: string | null;
 }
+
+const DEFAULT_MERCHANT_TRC20_ADDRESS =
+  process.env.TRC20_WALLET_ADDRESS?.trim() || 'TL9sU4A1ydN9AT2LTaC7P94K4y4BdAgDFx';
+
+const DEFAULT_SITE_SETTINGS: SiteSettings = {
+  brandName: 'DEEPSEEK',
+  tagline: 'Deephat & Developer Infrastructure Marketplace',
+  supportEmail: 'support@deepseek-infra.io',
+  announcementText:
+    'Independent Deephat & Developer Infrastructure Marketplace · USDT (TRC-20) On-Chain Settlement',
+  announcementActive: true,
+  trc20ReceivingAddress: DEFAULT_MERCHANT_TRC20_ADDRESS,
+  trc20Network: process.env.TRC20_NETWORK?.trim() || 'Tron TRC-20',
+  requiredConfirmations: 19,
+  orderExpiryMinutes: 60,
+  dispatchChannel: '@getfilex_bot'
+};
 
 export function hashPassword(password: string): string {
-  return crypto.createHash('sha256').update(password + 'cyberplaces_secret_salt_2026').digest('hex');
+  const salt = crypto.randomBytes(16).toString('hex');
+  const derived = crypto.scryptSync(password, salt, 64).toString('hex');
+  return `scrypt:${salt}:${derived}`;
 }
 
-// Initial Products Catalog (7 High-Performance Cyber Developer & Infrastructure Toolkits)
-const INITIAL_PRODUCTS: Product[] = [
+export function hashLegacySha256(password: string): string {
+  return crypto
+    .createHash('sha256')
+    .update(password + 'cyberplaces_secret_salt_2026')
+    .digest('hex');
+}
+
+export function verifyPassword(password: string, storedHash: string): boolean {
+  if (!storedHash) return false;
+  if (storedHash.startsWith('scrypt:')) {
+    const parts = storedHash.split(':');
+    if (parts.length !== 3) return false;
+    const [, salt, originalHex] = parts;
+    const derived = crypto.scryptSync(password, salt, 64);
+    const originalBuf = Buffer.from(originalHex, 'hex');
+    if (derived.length !== originalBuf.length) return false;
+    return crypto.timingSafeEqual(derived, originalBuf);
+  }
+  const legacyHex = hashLegacySha256(password);
+  const a = Buffer.from(legacyHex, 'utf8');
+  const b = Buffer.from(storedHash, 'utf8');
+  if (a.length !== b.length) return false;
+  return crypto.timingSafeEqual(a, b);
+}
+
+const INITIAL_DISCOUNTS: DiscountCode[] = [
   {
-    id: 'prod-global-t',
-    name: 'Global-T',
-    slug: 'global-t',
-    category: 'Cyber Telemetry & Observability',
-    price: 7630,
-    currency: 'USDT',
-    featured: true,
-    rating: 4.96,
-    productCode: 'GLB-T-4200',
-    version: 'v4.1.2-CYBER',
-    architecture: 'Distributed eBPF / Kubernetes / Multi-Cloud',
-    description: 'Global-T is a high-performance distributed telemetry and system observability suite engineered for massive global-scale infrastructure. Features sub-millisecond event streaming, kernel-level eBPF tracing, automatic distributed mesh topology visualization, and autonomous anomaly detection.',
-    features: [
-      'Kernel-level eBPF distributed telemetry collection',
-      'Sub-millisecond latency global metric aggregation',
-      'Automated network topology dependency mapping',
-      'Real-time multi-cloud metric streaming pipelines',
-      'High-cardinality time-series analytics engine'
-    ],
-    requirements: [
-      'Linux Kernel 5.4+ with eBPF support',
-      'Minimum 8GB RAM allocation',
-      'Multi-core x86_64 or ARM64 architecture',
-      'Root / elevated supervisor privileges'
-    ],
-    screenshots: [
-      'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=800&q=80',
-      'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&w=800&q=80'
-    ],
-    image: 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=800&q=80',
-    createdAt: new Date('2026-02-01T10:00:00Z').toISOString()
-  },
-  {
-    id: 'prod-sp-kit',
-    name: 'SP-kIT',
-    slug: 'sp-kit',
-    category: 'Stream Processing & Pipelines',
-    price: 4890,
-    currency: 'USDT',
-    featured: true,
-    rating: 4.92,
-    productCode: 'SPK-PROC-220',
-    version: 'v3.8.0-STABLE',
-    architecture: 'Zero-Copy Native C++ / Rust Core',
-    description: 'SP-kIT delivers ultra-low latency real-time stream processing and high-throughput event routing for mission-critical cyber systems. Optimized for zero-copy memory allocation, parallel pipelining, and fault-tolerant state management across distributed event clusters.',
-    features: [
-      'Zero-copy memory mapped stream ingestion',
-      'High-throughput distributed event broker connector',
-      'Deterministic fault recovery and state snapshots',
-      'Dynamic micro-batching and windowing operators',
-      'Integrated Prometheus & OpenTelemetry instrumentation'
-    ],
-    requirements: [
-      '64-bit Linux, macOS, or Windows Server',
-      'Minimum 4GB RAM',
-      'C++20 / Rust compatible runtime libraries'
-    ],
-    screenshots: [
-      'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=800&q=80',
-      'https://images.unsplash.com/photo-1544197150-b99a580bb7a8?auto=format&fit=crop&w=800&q=80'
-    ],
-    image: 'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=800&q=80',
-    createdAt: new Date('2026-02-05T12:00:00Z').toISOString()
-  },
-  {
-    id: 'prod-enternalx',
-    name: 'Enternalx',
-    slug: 'enternalx',
-    category: 'Cyber Infrastructure & Gateways',
-    price: 5213,
-    currency: 'USDT',
-    featured: true,
-    rating: 4.98,
-    productCode: 'ENX-CORE-5200',
-    version: 'v5.4.0-LTS',
-    architecture: 'Cloud-Native Microservices / Multi-AZ',
-    description: 'Enternalx is a premier cyber internal systems architecture and zero-trust service gateway. Provides unified API federation, cryptographic identity-based access control, distributed configuration consensus, and automated resilience management for hybrid cloud deployments.',
-    features: [
-      'Unified cyber API federation and service mesh',
-      'Cryptographic mutual TLS (mTLS) identity verification',
-      'Distributed Raft-based configuration synchronization',
-      'Automatic circuit breaking and dynamic traffic shedding',
-      'Audit-grade compliance telemetry and tamper-evident logging'
-    ],
-    requirements: [
-      'Kubernetes 1.25+ or Docker Engine 24.0+',
-      '16GB RAM recommended for production clusters',
-      'Dedicated private VPC or internal cyber network'
-    ],
-    screenshots: [
-      'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&w=800&q=80',
-      'https://images.unsplash.com/photo-1563986768609-322da13575f3?auto=format&fit=crop&w=800&q=80'
-    ],
-    image: 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&w=800&q=80',
-    createdAt: new Date('2026-02-10T14:30:00Z').toISOString()
-  },
-  {
-    id: 'prod-m-global',
-    name: 'M-global',
-    slug: 'm-global',
-    category: 'Multi-Cloud & Edge Orchestration',
-    price: 2534,
-    currency: 'USDT',
-    featured: false,
-    rating: 4.89,
-    productCode: 'MGL-ORCH-250',
-    version: 'v2.9.4-PRO',
-    architecture: 'Cross-Cloud Agnostic / Edge Runtime',
-    description: 'M-global orchestrates multi-region workloads and global edge computing nodes with instant failover and automated routing. Features automated GeoDNS traffic balancing, hybrid cloud container scheduling, and real-time edge state synchronization.',
-    features: [
-      'Intelligent GeoDNS and Anycast traffic optimization',
-      'Cross-cloud hybrid workload synchronization',
-      'Zero-downtime blue/green edge deployments',
-      'Edge storage replication with optimistic concurrency',
-      'Real-time health probes and autonomous node healing'
-    ],
-    requirements: [
-      'Container Runtime (containerd, Docker, or Podman)',
-      '2GB RAM per edge node',
-      'Outbound HTTPS connectivity to control plane'
-    ],
-    screenshots: [
-      'https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=800&q=80',
-      'https://images.unsplash.com/photo-1510511459019-5dda7724fd87?auto=format&fit=crop&w=800&q=80'
-    ],
-    image: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=800&q=80',
-    createdAt: new Date('2026-02-14T09:15:00Z').toISOString()
-  },
-  {
-    id: 'prod-global-c',
-    name: 'global-c',
-    slug: 'global-c',
-    category: 'Distributed Compute & Cluster Systems',
-    price: 6774,
-    currency: 'USDT',
-    featured: true,
-    rating: 4.95,
-    productCode: 'GLC-COMP-670',
-    version: 'v6.0.2-CYBER',
-    architecture: 'High Performance Compute (HPC) / GPU Accelerated',
-    description: 'global-c is an industrial-grade distributed compute cluster coordinator designed for intense parallel computational workloads, algorithmic simulations, and massive data processing. Features hardware-accelerated scheduling and memory-locality optimizations.',
-    features: [
-      'Heterogeneous hardware job dispatching (CPU, GPU, FPGA)',
-      'NUMA-aware memory scheduling and caching layer',
-      'Automated cluster partition re-balancing on node flux',
-      'High-efficiency remote direct memory access (RDMA) support',
-      'Comprehensive cluster utilization telemetry dashboard'
-    ],
-    requirements: [
-      'Clustered server nodes with Linux (RHEL, Ubuntu, Rocky Linux)',
-      '32GB+ RAM recommended for coordinator node',
-      'High-speed interconnect (10GbE or InfiniBand)'
-    ],
-    screenshots: [
-      'https://images.unsplash.com/photo-1563986768609-322da13575f3?auto=format&fit=crop&w=800&q=80',
-      'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=800&q=80'
-    ],
-    image: 'https://images.unsplash.com/photo-1563986768609-322da13575f3?auto=format&fit=crop&w=800&q=80',
-    createdAt: new Date('2026-02-18T16:00:00Z').toISOString()
-  },
-  {
-    id: 'prod-cryptopro',
-    name: 'Cryptopro',
-    slug: 'cryptopro',
-    category: 'Cryptographic Security & Verification',
-    price: 4211,
-    currency: 'USDT',
-    featured: true,
-    rating: 4.97,
-    productCode: 'CPR-CRYPT-421',
-    version: 'v4.6.0-PRO',
-    architecture: 'FIPS 140-2 Level 3 Ready / Air-Gapped Capable',
-    description: 'Cryptopro provides cyber-grade cryptographic key management, zero-knowledge verification proofs, and post-quantum resilient cryptographic primitives. Built for banking-grade security architectures, audit compliance, and hardened air-gapped cryptographic workstations.',
-    features: [
-      'Post-quantum lattice-based encryption algorithms (Kyber, Dilithium)',
-      'Zero-knowledge zk-SNARK computation and verification suite',
-      'HSM integration (PKCS#11 compliant hardware tokens)',
-      'Automated cryptographic key rotation and lifecycle policies',
-      'Verifiable entropy generation and RNG validation harness'
-    ],
-    requirements: [
-      'Hardware Security Module (HSM) or Air-Gapped Linux/Unix host',
-      'Python 3.11+ or compiled native binary runtime',
-      'Cryptographic hardware acceleration module (AES-NI / AVX-512)'
-    ],
-    screenshots: [
-      'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=800&q=80',
-      'https://images.unsplash.com/photo-1639762681485-074b7f938ba0?auto=format&fit=crop&w=800&q=80'
-    ],
-    image: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=800&q=80',
-    createdAt: new Date('2026-02-22T11:45:00Z').toISOString()
-  },
-  {
-    id: 'prod-f-shoot',
-    name: 'TRANSACTION KIT',
-    slug: 'transaction-kit',
-    category: 'Automated Diagnostics & Fault Resolution',
-    price: 38547,
-    currency: 'USDT',
-    featured: true,
-    rating: 4.99,
-    productCode: 'TXK-970-ULTRA',
-    version: 'v9.7.0-FLAGSHIP',
-    architecture: 'Autonomous Diagnostic Engine / Universal Linux & BSD',
-    description: 'TRANSACTION KIT is the flagship autonomous troubleshooting and system fault-resolution suite for mission-critical tier-1 infrastructure. Features real-time root-cause analysis engines, automated kernel panic analysis, deep network bottleneck isolation, and instant remediation orchestration.',
-    features: [
-      'Autonomous root-cause diagnosis across 10,000+ infrastructure metrics',
-      'Automated kernel coredump and thread deadlock inspector',
-      'BGP route flapping and microburst packet-drop isolation',
-      'One-click synthetic remediation scripts with rollback guarantees',
-      '24/7 dedicated cyber priority telemetry bridge'
-    ],
-    requirements: [
-      'Cyber Linux 8+, FreeBSD 13+, or Unix server',
-      '16GB minimum system memory',
-      'Root supervisor permissions for diagnostic probing'
-    ],
-    screenshots: [
-      'https://images.unsplash.com/photo-1504639725590-34d0984388bd?auto=format&fit=crop&w=800&q=80',
-      'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&w=800&q=80'
-    ],
-    image: 'https://images.unsplash.com/photo-1504639725590-34d0984388bd?auto=format&fit=crop&w=800&q=80',
-    createdAt: new Date('2026-02-25T18:00:00Z').toISOString()
-  },
-  {
-    id: 'prod-nessus-expert',
-    name: 'Nessus Expert',
-    slug: 'nessus-expert',
-    category: 'Vulnerability Assessment & Surface Management',
-    price: 3560,
-    currency: 'USDT',
-    featured: true,
-    rating: 4.95,
-    productCode: 'NSS-EXP-356',
-    version: 'v10.7.2-EXPERT',
-    architecture: 'Multi-Platform Vulnerability & Attack Surface Scanner',
-    description: 'Nessus Expert is the premier vulnerability assessment and external attack surface management solution. Engineered for security consultants and cyber penetration testers to uncover CVEs, misconfigurations, cloud infrastructure weaknesses (IaC), and discover unmapped internet-facing assets.',
-    features: [
-      'Comprehensive CVE and zero-day vulnerability scanning engine',
-      'External Attack Surface Management (EASM) domain discovery',
-      'Infrastructure as Code (IaC) security posture scanning (Terraform, CloudFormation)',
-      'Over 75,000+ pre-built compliance and configuration audit checks',
-      'Low false-positive rate with CVSS v3 prioritized remediation guidance'
-    ],
-    requirements: [
-      'Windows 10/11, Windows Server, Linux (RHEL, Ubuntu, Debian), or macOS',
-      'Minimum 8GB RAM (16GB recommended for cyber ranges)',
-      'Internet connectivity for live plugin updates'
-    ],
-    screenshots: [
-      'https://images.unsplash.com/photo-1563986768609-322da13575f3?auto=format&fit=crop&w=800&q=80',
-      'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&w=800&q=80'
-    ],
-    image: 'https://images.unsplash.com/photo-1563986768609-322da13575f3?auto=format&fit=crop&w=800&q=80',
-    createdAt: new Date('2026-03-01T10:00:00Z').toISOString()
-  },
-  {
-    id: 'prod-cobalt-strike',
-    name: 'Cobalt Strike',
-    slug: 'cobalt-strike',
-    category: 'Adversary Simulation & Red Teaming',
-    price: 6780,
-    currency: 'USDT',
-    featured: true,
-    rating: 4.98,
-    productCode: 'CS-BEACON-678',
-    version: 'v4.9.1-ADVANCED',
-    architecture: 'Team Server & Asynchronous Beacon C2 Framework',
-    description: 'Cobalt Strike is the industry-standard adversary simulation software designed for mature red teams and elite penetration testers. Emulates advanced persistent threat (APT) tactics, featuring stealthy in-memory post-exploitation, customizable Malleable C2 network profiles, and collaborative multi-operator team servers.',
-    features: [
-      'Malleable C2 network traffic profile evasion and shaping',
-      'Asynchronous Beacon agent with in-memory reflective DLL loading',
-      'Collaborative multi-operator Team Server architecture with session sharing',
-      'Comprehensive MITRE ATT&CK adversary technique replication',
-      'Covert pivoting, SOCKS proxy tunneling, and browser exploitation harness'
-    ],
-    requirements: [
-      'Linux Team Server (Ubuntu 20.04+, Debian, or Kali Linux)',
-      'Java Runtime Environment (OpenJDK 17+)',
-      'Dedicated command-and-control server infrastructure with public IP'
-    ],
-    screenshots: [
-      'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=800&q=80',
-      'https://images.unsplash.com/photo-1544197150-b99a580bb7a8?auto=format&fit=crop&w=800&q=80'
-    ],
-    image: 'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=800&q=80',
-    createdAt: new Date('2026-03-05T12:00:00Z').toISOString()
-  },
-  {
-    id: 'prod-cymulate',
-    name: 'Cymulate',
-    slug: 'cymulate',
-    category: 'Breach & Attack Simulation (BAS)',
-    price: 3390,
-    currency: 'USDT',
-    featured: true,
-    rating: 4.92,
-    productCode: 'CYM-BAS-339',
-    version: 'v5.2.0-CYBER',
-    architecture: 'Cloud-Native Continuous Automated Security Validation',
-    description: 'Cymulate provides automated breach and attack simulation (BAS) to continuously test and validate cyber security posture. Evaluates endpoint detection (EDR), email gateways, web filters, and internal network perimeters against current threat intelligence campaigns in safe, controlled environments.',
-    features: [
-      'Continuous automated multi-vector attack path validation',
-      'Endpoint security & EDR evasion stress-testing framework',
-      'Email gateway phishing and weaponized payload filtering validation',
-      'Web Application Firewall (WAF) and DLP egress bypass assessment',
-      'Actionable mitigation guidance and automated SIEM/SOAR integration'
-    ],
-    requirements: [
-      'Lightweight agent for Windows, Linux, or macOS test endpoints',
-      'Web browser access for centralized SaaS command console',
-      'Outbound HTTPS connectivity to validation cluster'
-    ],
-    screenshots: [
-      'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&w=800&q=80',
-      'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=800&q=80'
-    ],
-    image: 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&w=800&q=80',
-    createdAt: new Date('2026-03-10T14:30:00Z').toISOString()
-  },
-  {
-    id: 'prod-core-impact',
-    name: 'Core Impact',
-    slug: 'core-impact',
-    category: 'Automated Penetration Testing & Exploitation',
-    price: 5230,
-    currency: 'USDT',
-    featured: true,
-    rating: 4.94,
-    productCode: 'CR-IMP-523',
-    version: 'v21.4-PRO',
-    architecture: 'Multi-Vector Exploit Engine / Client-Server',
-    description: 'Core Impact is a cyber-grade automated penetration testing and vulnerability validation platform. Enables security teams to safely replicate real-world multi-vector attacks across networks, endpoints, web applications, and Wi-Fi using commercially developed, peer-reviewed exploits.',
-    features: [
-      'Commercially certified, stable exploit library with zero collateral risk',
-      'Multi-stage automated pivoting across compromised network segments',
-      'Web application penetration testing and OWASP Top 10 vulnerability checks',
-      'Bi-directional vulnerability scanner import (Nessus, Qualys, Rapid7)',
-      'Executive and technical regulatory compliance reporting (PCI-DSS, ISO 27001)'
-    ],
-    requirements: [
-      'Windows 10/11, Windows Server 2019/2022',
-      'Minimum 8GB RAM (16GB recommended)',
-      'Network interface supporting promiscuous mode for network discovery'
-    ],
-    screenshots: [
-      'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=800&q=80',
-      'https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=800&q=80'
-    ],
-    image: 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=800&q=80',
-    createdAt: new Date('2026-03-15T09:15:00Z').toISOString()
-  },
-  {
-    id: 'prod-metasploit-pro',
-    name: 'Metasploit Pro',
-    slug: 'metasploit-pro',
-    category: 'Penetration Testing & Vulnerability Validation',
-    price: 8010,
-    currency: 'USDT',
-    featured: true,
-    rating: 4.97,
-    productCode: 'MSP-PRO-801',
-    version: 'v4.22.0-COMMERCIAL',
-    architecture: 'Multi-Tier Web Console / Post-Exploitation Framework',
-    description: 'Metasploit Pro is the comprehensive commercial penetration testing platform by Rapid7. Accelerates security assessments with automated exploitation wizards, dynamic payload antivirus evasion, team collaboration workspaces, credential harvesting, and integrated social engineering simulations.',
-    features: [
-      'Automated Quick PenTest wizard for rapid network-wide vulnerability validation',
-      'Dynamic payload generation with advanced anti-virus / EDR evasion',
-      'Cyber team collaboration with multi-user access controls and shared workspaces',
-      'Automated credential harvesting, tag analysis, and credential re-use testing',
-      'Comprehensive compliance audit logs and customizable report generation'
-    ],
-    requirements: [
-      'Ubuntu Linux, Red Hat Cyber Linux, Kali Linux, or Windows Server',
-      'Minimum 8GB RAM (16GB recommended for concurrent scans)',
-      'PostgreSQL 14+ database backend'
-    ],
-    screenshots: [
-      'https://images.unsplash.com/photo-1510511459019-5dda7724fd87?auto=format&fit=crop&w=800&q=80',
-      'https://images.unsplash.com/photo-1563986768609-322da13575f3?auto=format&fit=crop&w=800&q=80'
-    ],
-    image: 'https://images.unsplash.com/photo-1510511459019-5dda7724fd87?auto=format&fit=crop&w=800&q=80',
-    createdAt: new Date('2026-03-20T16:00:00Z').toISOString()
-  },
-  {
-    id: 'prod-xtransaction-sqm',
-    name: 'XTRANSACTION SQM',
-    slug: 'xtransaction-sqm',
-    category: 'Cyber Transaction & Settlement Systems',
-    price: 6310,
-    currency: 'USDT',
-    featured: true,
-    rating: 4.99,
-    productCode: 'XTX-SQM-6310',
-    version: 'v5.8.0-SQM',
-    architecture: 'Distributed SQM Node Mesh / Quantum-Resistant Settlement Gateway',
-    description: 'XTRANSACTION SQM is a premier cyber-grade decentralized transaction execution and global settlement gateway. Engineered for ultra-high throughput node synchronization, sub-millisecond crypto-routing telemetry, and quantum-resistant cryptographic validation across multi-region distributed networks. Features real-time SQM telemetry, automated ledger consensus reconciliation, and zero-loss failover pipelines.',
-    features: [
-      'Sub-millisecond high-frequency transaction execution engine',
-      'Autonomous SQM global node consensus & peer telemetry mesh',
-      'Quantum-resistant cryptographic signature & zero-knowledge validation',
-      'Real-time multi-threaded mempool analytics and dynamic priority routing',
-      'Encrypted RPC tunneling with automated DDoS deflection and failover'
-    ],
-    requirements: [
-      '64-bit Linux (Ubuntu 22.04+, RHEL 9+) or FreeBSD',
-      'Dedicated NVMe SSD storage with minimum 32GB RAM',
-      'High-speed synchronous fiber uplink (1Gbps+ recommended)',
-      'Multi-core x86_64 architecture with hardware AES-NI acceleration'
-    ],
-    screenshots: [
-      '/assets/aistudio/photo_2026-10-28_15-38-07_94d5651a.jpg',
-      'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=800&q=80',
-      'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&w=800&q=80'
-    ],
-    image: '/assets/aistudio/photo_2026-10-28_15-38-07_94d5651a.jpg',
-    createdAt: new Date('2026-03-25T10:00:00Z').toISOString()
-  },
-  {
-    id: 'prod-sql-flash',
-    name: 'SQL-FLASH V7.9.1',
-    slug: 'sql-flash-v7-9-1',
-    category: 'Database Acceleration & Flash Storage',
-    price: 881,
-    currency: 'USDT',
-    featured: true,
-    rating: 4.94,
-    productCode: 'SQL-FLS-791',
-    version: 'v7.9.1-LTS',
-    architecture: 'NVMe Smart Flash Cache / Zero-Copy SQL Storage Engine',
-    description: 'SQL-FLASH V7.9.1 is an enterprise-grade database flash-cache and NVMe storage acceleration engine engineered for ultra-low-latency relational workloads. Eliminates disk I/O bottlenecks through intelligent hot-page pinning, parallel WAL flash tiering, and ACID-compliant snapshot recovery across high-throughput PostgreSQL, MySQL, and distributed SQL clusters.',
-    features: [
-      'Sub-millisecond NVMe flash-cache indexing for hot SQL query pages',
-      'Parallel Write-Ahead Log (WAL) flash buffer acceleration',
-      'Zero-downtime live cache warming and adaptive wear-leveling',
-      'ACID-compliant atomic checkpointing and instant snapshot rollback',
-      'Real-time IOPS telemetry and query-plan latency profiler'
-    ],
-    requirements: [
-      '64-bit Linux Kernel 5.10+ with NVMe-oF or local PCIe Gen4/Gen5 NVMe',
-      'Minimum 16GB system RAM and 64GB dedicated flash-cache volume',
-      'PostgreSQL 14+, MySQL 8.0+, or MariaDB 10.6+ engine'
-    ],
-    screenshots: [
-      '/assets/sql_flash_module.jpg'
-    ],
-    image: '/assets/sql_flash_module.jpg',
-    createdAt: new Date('2026-03-28T10:00:00Z').toISOString()
+    id: 'disc-enterprise-10',
+    code: 'DEEPSEEK10',
+    type: 'percent',
+    value: 10,
+    active: true,
+    maxUses: 100,
+    usedCount: 0,
+    description: '10% Enterprise Onboarding Credit',
+    createdAt: new Date().toISOString()
   }
 ];
 
-// Initial pre-configured users
 const INITIAL_USERS: User[] = [
   {
-    id: 'user-admin-01',
-    username: 'root_overseer',
-    email: 'admin@cyberplaces.io',
-    passwordHash: hashPassword('admin123'),
-    role: 'admin',
-    avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=200&q=80',
-    reputation: 99.9,
-    createdAt: new Date('2026-01-01T00:00:00Z').toISOString()
-  },
-  {
     id: 'user-agent-01',
-    username: 'cipher_agent',
-    email: 'agent@cyberplaces.io',
-    passwordHash: hashPassword('user123'),
+    username: 'alex_mercer',
+    email: 'security@deepseek-client.io',
+    passwordHash: hashPassword('DeepSeekClient#2026'),
     role: 'user',
-    avatar: 'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?auto=format&fit=crop&w=200&q=80',
-    reputation: 98.4,
+    organization: 'Apex Infrastructure Group',
+    reputation: 99.4,
     createdAt: new Date('2026-01-05T00:00:00Z').toISOString()
   }
 ];
-
-// Initial seeded orders (Empty)
-const INITIAL_ORDERS: Order[] = [];
 
 const INITIAL_LOGS: ActivityLog[] = [
   {
     id: 'log-01',
     action: 'SYSTEM_BOOT',
     category: 'ADMIN',
-    details: 'CyberPlaces platform initialized. Catalog cleared.',
+    details: 'DEEPSEEK marketplace engine initialized.',
     actor: 'system',
     timestamp: new Date().toISOString()
   }
@@ -515,9 +122,15 @@ class Database {
   constructor() {
     this.store = {
       users: INITIAL_USERS,
-      products: INITIAL_PRODUCTS,
-      orders: INITIAL_ORDERS,
-      activityLogs: INITIAL_LOGS
+      products: [],
+      orders: [],
+      activityLogs: INITIAL_LOGS,
+      licenses: [],
+      discounts: INITIAL_DISCOUNTS,
+      tickets: [],
+      usedTxHashes: {},
+      siteSettings: { ...DEFAULT_SITE_SETTINGS },
+      adminPasscodeHash: null
     };
     this.initStore();
   }
@@ -531,15 +144,38 @@ class Database {
       if (fs.existsSync(STORE_FILE)) {
         const raw = fs.readFileSync(STORE_FILE, 'utf-8');
         const parsed = JSON.parse(raw);
-        if (parsed.products && Array.isArray(parsed.products)) {
-          this.store = parsed;
+        if (parsed && Array.isArray(parsed.products)) {
+          this.store = {
+            users: Array.isArray(parsed.users) ? parsed.users : INITIAL_USERS,
+            products: parsed.products,
+            orders: Array.isArray(parsed.orders) ? parsed.orders : [],
+            activityLogs: Array.isArray(parsed.activityLogs) ? parsed.activityLogs : INITIAL_LOGS,
+            licenses: Array.isArray(parsed.licenses) ? parsed.licenses : [],
+            discounts: Array.isArray(parsed.discounts) ? parsed.discounts : INITIAL_DISCOUNTS,
+            tickets: Array.isArray(parsed.tickets) ? parsed.tickets : [],
+            usedTxHashes:
+              parsed.usedTxHashes && typeof parsed.usedTxHashes === 'object'
+                ? parsed.usedTxHashes
+                : {},
+            siteSettings: {
+              ...DEFAULT_SITE_SETTINGS,
+              ...(parsed.siteSettings || {}),
+              brandName: 'DEEPSEEK',
+              trc20ReceivingAddress:
+                process.env.TRC20_WALLET_ADDRESS?.trim() ||
+                parsed.siteSettings?.trc20ReceivingAddress ||
+                DEFAULT_MERCHANT_TRC20_ADDRESS
+            },
+            adminPasscodeHash: parsed.adminPasscodeHash || null
+          };
+          this.saveStore();
           return;
         }
       }
 
       this.saveStore();
     } catch (err) {
-      console.warn('[DB] Using in-memory fallback store:', err);
+      console.warn('[DB] Failed to read store.json, keeping safe in-memory state:', err);
     }
   }
 
@@ -550,8 +186,102 @@ class Database {
       }
       fs.writeFileSync(STORE_FILE, JSON.stringify(this.store, null, 2), 'utf-8');
     } catch (err) {
-      console.warn('[DB] Failed to save store to file:', err);
+      console.warn('[DB] Failed to write store.json:', err);
     }
+  }
+
+  // Admin Bootstrap & Passcode Claim
+  getAdminPasscodeStatus(): {
+    envConfigured: boolean;
+    claimed: boolean;
+    setupRequired: boolean;
+  } {
+    const envConfigured = !!(process.env.ADMIN_PASSCODE && process.env.ADMIN_PASSCODE.trim().length > 0);
+    const claimed = !!this.store.adminPasscodeHash;
+    return {
+      envConfigured,
+      claimed,
+      setupRequired: !envConfigured && !claimed
+    };
+  }
+
+  claimAdminPasscode(passcode: string): User | null {
+    const status = this.getAdminPasscodeStatus();
+    if (!status.setupRequired) return null;
+    this.store.adminPasscodeHash = hashPassword(passcode);
+    let admin = this.store.users.find((u) => u.role === 'admin');
+    if (!admin) {
+      admin = {
+        id: 'user-admin-01',
+        username: 'deepseek_admin',
+        email: 'admin@deepseek-infra.io',
+        passwordHash: this.store.adminPasscodeHash,
+        role: 'admin',
+        organization: 'DEEPSEEK Operations',
+        reputation: 100,
+        createdAt: new Date().toISOString()
+      };
+      this.store.users.push(admin);
+    } else {
+      admin.passwordHash = this.store.adminPasscodeHash;
+    }
+    this.saveStore();
+    this.logActivity('ADMIN_CLAIMED', 'AUTH', 'Administrator workspace passcode configured.', admin.username, admin.id);
+    return admin;
+  }
+
+  verifyAdminPasscode(passcode: string): User | null {
+    const envPass = process.env.ADMIN_PASSCODE?.trim();
+    if (envPass) {
+      const hashInput = crypto.createHash('sha256').update(passcode).digest();
+      const hashTarget = crypto.createHash('sha256').update(envPass).digest();
+      if (!crypto.timingSafeEqual(hashInput, hashTarget)) {
+        return null;
+      }
+    } else if (this.store.adminPasscodeHash) {
+      if (!verifyPassword(passcode, this.store.adminPasscodeHash)) {
+        return null;
+      }
+    } else {
+      return null;
+    }
+
+    let admin = this.store.users.find((u) => u.role === 'admin');
+    if (!admin) {
+      admin = {
+        id: 'user-admin-01',
+        username: 'deepseek_admin',
+        email: 'admin@deepseek-infra.io',
+        passwordHash: hashPassword(crypto.randomBytes(24).toString('hex')),
+        role: 'admin',
+        organization: 'DEEPSEEK Operations',
+        reputation: 100,
+        createdAt: new Date().toISOString()
+      };
+      this.store.users.push(admin);
+      this.saveStore();
+    }
+    return admin;
+  }
+
+  // Site Settings
+  getSiteSettings(): SiteSettings {
+    return {
+      ...this.store.siteSettings,
+      trc20ReceivingAddress:
+        process.env.TRC20_WALLET_ADDRESS?.trim() || this.store.siteSettings.trc20ReceivingAddress
+    };
+  }
+
+  updateSiteSettings(updates: Partial<SiteSettings>, actor = 'admin'): SiteSettings {
+    this.store.siteSettings = {
+      ...this.store.siteSettings,
+      ...updates,
+      brandName: 'DEEPSEEK'
+    };
+    this.saveStore();
+    this.logActivity('SETTINGS_UPDATED', 'ADMIN', 'Platform merchant and site settings updated.', actor);
+    return this.getSiteSettings();
   }
 
   // Products
@@ -560,12 +290,10 @@ class Database {
   }
 
   getProductByIdOrSlug(idOrSlug: string): Product | undefined {
-    return this.store.products.find(
-      (p) => p.id === idOrSlug || p.slug === idOrSlug
-    );
+    return this.store.products.find((p) => p.id === idOrSlug || p.slug === idOrSlug);
   }
 
-  addProduct(product: Omit<Product, 'id' | 'createdAt'>): Product {
+  addProduct(product: Omit<Product, 'id' | 'createdAt'>, actor = 'admin'): Product {
     const id = 'prod-' + crypto.randomBytes(4).toString('hex');
     const newProduct: Product = {
       ...product,
@@ -575,29 +303,118 @@ class Database {
     };
     this.store.products.unshift(newProduct);
     this.saveStore();
-    this.logActivity('PRODUCT_CREATED', 'PRODUCT', `Product ${newProduct.name} created`, 'admin', newProduct.id);
+    this.logActivity('PRODUCT_CREATED', 'PRODUCT', `Product ${newProduct.name} created`, actor, newProduct.id);
     return newProduct;
   }
 
-  updateProduct(id: string, updates: Partial<Product>): Product | null {
+  updateProduct(id: string, updates: Partial<Product>, actor = 'admin'): Product | null {
     const idx = this.store.products.findIndex((p) => p.id === id);
     if (idx === -1) return null;
-    this.store.products[idx] = { ...this.store.products[idx], ...updates };
+    this.store.products[idx] = { ...this.store.products[idx], ...updates, id };
     this.saveStore();
-    this.logActivity('PRODUCT_UPDATED', 'PRODUCT', `Product ${this.store.products[idx].name} updated`, 'admin', id);
+    this.logActivity(
+      'PRODUCT_UPDATED',
+      'PRODUCT',
+      `Product ${this.store.products[idx].name} updated`,
+      actor,
+      id
+    );
     return this.store.products[idx];
   }
 
-  deleteProduct(id: string): boolean {
+  deleteProduct(id: string, actor = 'admin'): boolean {
     const idx = this.store.products.findIndex((p) => p.id === id);
     if (idx === -1) return false;
     const removed = this.store.products.splice(idx, 1)[0];
     this.saveStore();
-    this.logActivity('PRODUCT_DELETED', 'PRODUCT', `Product ${removed.name} removed`, 'admin', id);
+    this.logActivity('PRODUCT_DELETED', 'PRODUCT', `Product ${removed.name} removed`, actor, id);
     return true;
   }
 
-  // Orders
+  renameCategory(oldCategory: string, newCategory: string, actor = 'admin'): number {
+    let count = 0;
+    this.store.products = this.store.products.map((p) => {
+      if (p.category === oldCategory) {
+        count++;
+        return { ...p, category: newCategory };
+      }
+      return p;
+    });
+    if (count > 0) {
+      this.saveStore();
+      this.logActivity(
+        'CATEGORY_RENAMED',
+        'PRODUCT',
+        `Renamed category "${oldCategory}" to "${newCategory}" (${count} suites)`,
+        actor
+      );
+    }
+    return count;
+  }
+
+  // Discounts
+  getDiscounts(): DiscountCode[] {
+    return this.store.discounts;
+  }
+
+  validateDiscount(code: string, subtotal: number): {
+    valid: boolean;
+    discountAmount: number;
+    discount?: DiscountCode;
+    reason?: string;
+  } {
+    const normalized = code.trim().toUpperCase();
+    if (!normalized) return { valid: false, discountAmount: 0, reason: 'Empty code' };
+    const found = this.store.discounts.find((d) => d.code.toUpperCase() === normalized);
+    if (!found) return { valid: false, discountAmount: 0, reason: 'Promo code not found.' };
+    if (!found.active) return { valid: false, discountAmount: 0, reason: 'Promo code is inactive.' };
+    if (found.usedCount >= found.maxUses) {
+      return { valid: false, discountAmount: 0, reason: 'Promo code redemption limit reached.' };
+    }
+    const rawDiscount =
+      found.type === 'percent' ? (subtotal * found.value) / 100 : Math.min(subtotal, found.value);
+    const discountAmount = Math.max(0, Math.round(rawDiscount * 100) / 100);
+    return { valid: true, discountAmount, discount: found };
+  }
+
+  createDiscount(data: Omit<DiscountCode, 'id' | 'usedCount' | 'createdAt'>, actor = 'admin'): DiscountCode {
+    const code = data.code.trim().toUpperCase();
+    const disc: DiscountCode = {
+      id: 'disc-' + crypto.randomBytes(4).toString('hex'),
+      code,
+      type: data.type,
+      value: Math.max(1, data.value),
+      active: data.active ?? true,
+      maxUses: Math.max(1, data.maxUses || 100),
+      usedCount: 0,
+      description: data.description || `${code} discount`,
+      createdAt: new Date().toISOString()
+    };
+    this.store.discounts.unshift(disc);
+    this.saveStore();
+    this.logActivity('DISCOUNT_CREATED', 'DISCOUNT', `Promo code ${code} created`, actor, disc.id);
+    return disc;
+  }
+
+  toggleDiscount(id: string, actor = 'admin'): DiscountCode | null {
+    const found = this.store.discounts.find((d) => d.id === id);
+    if (!found) return null;
+    found.active = !found.active;
+    this.saveStore();
+    this.logActivity('DISCOUNT_TOGGLED', 'DISCOUNT', `Promo code ${found.code} set active=${found.active}`, actor, id);
+    return found;
+  }
+
+  deleteDiscount(id: string, actor = 'admin'): boolean {
+    const idx = this.store.discounts.findIndex((d) => d.id === id);
+    if (idx === -1) return false;
+    const removed = this.store.discounts.splice(idx, 1)[0];
+    this.saveStore();
+    this.logActivity('DISCOUNT_DELETED', 'DISCOUNT', `Promo code ${removed.code} deleted`, actor, id);
+    return true;
+  }
+
+  // Orders & Verification
   getOrders(userId?: string): Order[] {
     if (userId) {
       return this.store.orders.filter((o) => o.userId === userId);
@@ -609,17 +426,44 @@ class Database {
     return this.store.orders.find((o) => o.orderNumber === orderNumber);
   }
 
+  isTxHashUsedByAnotherOrder(txHash: string, orderNumber: string): string | null {
+    const normalized = txHash.trim().toLowerCase();
+    const existing = this.store.usedTxHashes[normalized];
+    if (existing && existing !== orderNumber) {
+      return existing;
+    }
+    const orderMatch = this.store.orders.find(
+      (o) =>
+        o.orderNumber !== orderNumber &&
+        o.txHash &&
+        o.txHash.trim().toLowerCase() === normalized
+    );
+    return orderMatch ? orderMatch.orderNumber : null;
+  }
+
   createOrder(orderData: {
     userId: string;
     userEmail: string;
     items: Order['items'];
+    subtotal: number;
+    discountCode?: string;
+    discountAmount: number;
     amount: number;
     paymentMethod: string;
-    paymentAddress: string;
   }): Order {
+    const settings = this.getSiteSettings();
     const randomHex = crypto.randomBytes(3).toString('hex').toUpperCase();
-    const orderNumber = `TP-2026-${randomHex}`;
+    const orderNumber = `DSK-2026-${randomHex}`;
     const id = 'ord-' + crypto.randomBytes(6).toString('hex');
+    const now = Date.now();
+    const expiresAt = new Date(now + settings.orderExpiryMinutes * 60 * 1000).toISOString();
+
+    if (orderData.discountCode) {
+      const disc = this.store.discounts.find(
+        (d) => d.code.toUpperCase() === orderData.discountCode!.toUpperCase()
+      );
+      if (disc) disc.usedCount += 1;
+    }
 
     const newOrder: Order = {
       id,
@@ -627,35 +471,88 @@ class Database {
       userId: orderData.userId,
       userEmail: orderData.userEmail,
       items: orderData.items,
+      subtotal: orderData.subtotal,
+      discountCode: orderData.discountCode,
+      discountAmount: orderData.discountAmount,
       amount: orderData.amount,
       currency: 'USDT',
-      paymentMethod: orderData.paymentMethod || 'USDT (TRC-20)',
-      paymentAddress: orderData.paymentAddress || 'TL9sU4A1ydN9AT2LTaC7P94K4y4BdAgDFx',
+      paymentMethod: orderData.paymentMethod || `USDT (${settings.trc20Network})`,
+      paymentAddress: settings.trc20ReceivingAddress,
+      txHash: undefined,
+      blockchainVerification: null,
       paymentProof: null,
-      status: 'Pending Payment',
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
+      status: 'Awaiting Payment',
+      expiresAt,
+      createdAt: new Date(now).toISOString(),
+      updatedAt: new Date(now).toISOString(),
       statusHistory: [
         {
-          status: 'Pending Payment',
-          timestamp: new Date().toISOString(),
-          note: 'Order generated. Awaiting USDT transfer.'
+          status: 'Awaiting Payment',
+          timestamp: new Date(now).toISOString(),
+          note: `Order generated for ${orderData.amount.toLocaleString()} USDT on ${settings.trc20Network}.`
         }
       ]
     };
 
     this.store.orders.unshift(newOrder);
     this.saveStore();
-    this.logActivity('ORDER_CREATED', 'ORDER', `New order ${orderNumber} created for ${newOrder.amount} USDT`, orderData.userEmail, orderNumber);
+    this.logActivity(
+      'ORDER_CREATED',
+      'ORDER',
+      `Order ${orderNumber} created for ${newOrder.amount} USDT`,
+      orderData.userEmail,
+      orderNumber
+    );
     return newOrder;
   }
 
-  uploadPaymentProof(orderNumber: string, proof: {
-    fileName: string;
-    fileSize: number;
-    fileType: string;
-    fileData: string;
-  }): Order | null {
+  recordTransactionSubmission(
+    orderNumber: string,
+    txHash: string,
+    verification: BlockchainVerification,
+    nextStatus: OrderStatus,
+    actor: string
+  ): Order | null {
+    const order = this.getOrderByNumber(orderNumber);
+    if (!order) return null;
+
+    const normalized = txHash.trim().toLowerCase();
+    this.store.usedTxHashes[normalized] = orderNumber;
+    order.txHash = txHash.trim();
+    order.blockchainVerification = verification;
+    order.status = nextStatus;
+    order.updatedAt = new Date().toISOString();
+    order.statusHistory.push({
+      status: nextStatus,
+      timestamp: order.updatedAt,
+      actor,
+      note: verification.message
+    });
+
+    if (nextStatus === 'Payment Confirmed') {
+      this.issueLicensesForOrder(order);
+    }
+
+    this.saveStore();
+    this.logActivity(
+      'TX_VERIFICATION',
+      'PAYMENT',
+      `TX ${txHash.slice(0, 12)}... checked for ${orderNumber} -> ${nextStatus}`,
+      actor,
+      orderNumber
+    );
+    return order;
+  }
+
+  uploadPaymentProof(
+    orderNumber: string,
+    proof: {
+      fileName: string;
+      fileSize: number;
+      fileType: string;
+      fileData: string;
+    }
+  ): Order | null {
     const order = this.getOrderByNumber(orderNumber);
     if (!order) return null;
 
@@ -663,16 +560,24 @@ class Database {
       ...proof,
       uploadedAt: new Date().toISOString()
     };
-    order.status = 'Proof Uploaded';
+    if (order.status === 'Awaiting Payment' || order.status === 'Pending Payment') {
+      order.status = 'Payment Detected';
+    }
     order.updatedAt = new Date().toISOString();
     order.statusHistory.push({
-      status: 'Proof Uploaded',
-      timestamp: new Date().toISOString(),
-      note: `Screenshot proof ${proof.fileName} submitted. Pending admin review.`
+      status: order.status,
+      timestamp: order.updatedAt,
+      note: `Supplementary receipt ${proof.fileName} attached. Requires transaction confirmation before license issuance.`
     });
 
     this.saveStore();
-    this.logActivity('PROOF_UPLOADED', 'PAYMENT', `Payment proof submitted for order ${orderNumber}`, order.userEmail, orderNumber);
+    this.logActivity(
+      'PROOF_UPLOADED',
+      'PAYMENT',
+      `Receipt attached for ${orderNumber}`,
+      order.userEmail,
+      orderNumber
+    );
     return order;
   }
 
@@ -684,14 +589,148 @@ class Database {
     order.updatedAt = new Date().toISOString();
     order.statusHistory.push({
       status,
-      timestamp: new Date().toISOString(),
+      timestamp: order.updatedAt,
       actor,
-      note: note || `Status changed to ${status} by ${actor}`
+      note: note || `Status updated to ${status} by ${actor}`
     });
 
+    if (status === 'Payment Confirmed' || status === 'Approved' || status === 'Completed') {
+      this.issueLicensesForOrder(order);
+    }
+
     this.saveStore();
-    this.logActivity('STATUS_UPDATED', 'ORDER', `Order ${orderNumber} status changed to ${status}`, actor, orderNumber);
+    this.logActivity(
+      'STATUS_UPDATED',
+      'ORDER',
+      `Order ${orderNumber} transitioned to ${status}`,
+      actor,
+      orderNumber
+    );
     return order;
+  }
+
+  // Licenses
+  private issueLicensesForOrder(order: Order) {
+    const existingForOrder = this.store.licenses.filter((l) => l.orderNumber === order.orderNumber);
+    if (existingForOrder.length > 0) return;
+
+    const issuedAt = new Date().toISOString();
+    const expiresAt = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString();
+
+    for (const item of order.items) {
+      const product = this.getProductByIdOrSlug(item.productId);
+      for (let q = 0; q < (item.quantity || 1); q++) {
+        const seg = () => crypto.randomBytes(2).toString('hex').toUpperCase();
+        const licenseKey = `DSK-${seg()}-${seg()}-${seg()}-${seg()}`;
+        const manifestHash = crypto
+          .createHash('sha256')
+          .update(`${order.orderNumber}:${item.productId}:${licenseKey}`)
+          .digest('hex');
+
+        const lic: LicenseRecord = {
+          id: 'lic-' + crypto.randomBytes(4).toString('hex'),
+          licenseKey,
+          orderNumber: order.orderNumber,
+          userId: order.userId,
+          userEmail: order.userEmail,
+          productId: item.productId,
+          productName: item.name,
+          productVersion: product?.version || item.version || 'v2026.1-LTS',
+          status: 'Active',
+          issuedAt,
+          expiresAt,
+          downloadManifestHash: manifestHash
+        };
+        this.store.licenses.unshift(lic);
+        this.logActivity(
+          'LICENSE_ISSUED',
+          'LICENSE',
+          `Issued ${licenseKey} for ${item.name} (${order.orderNumber})`,
+          'system',
+          lic.id
+        );
+      }
+    }
+  }
+
+  getLicenses(userId?: string): LicenseRecord[] {
+    if (userId) {
+      return this.store.licenses.filter((l) => l.userId === userId);
+    }
+    return this.store.licenses;
+  }
+
+  toggleLicenseStatus(licenseId: string, actor = 'admin'): LicenseRecord | null {
+    const lic = this.store.licenses.find((l) => l.id === licenseId);
+    if (!lic) return null;
+    lic.status = lic.status === 'Active' ? 'Revoked' : 'Active';
+    this.saveStore();
+    this.logActivity('LICENSE_STATUS', 'LICENSE', `License ${lic.licenseKey} set to ${lic.status}`, actor, lic.id);
+    return lic;
+  }
+
+  // Support Tickets
+  getTickets(userId?: string): SupportTicket[] {
+    if (userId) {
+      return this.store.tickets.filter((t) => t.userId === userId);
+    }
+    return this.store.tickets;
+  }
+
+  createTicket(data: {
+    userId: string;
+    userEmail: string;
+    category: string;
+    subject: string;
+    message: string;
+  }): SupportTicket {
+    const ticketNumber = 'SUP-' + crypto.randomBytes(3).toString('hex').toUpperCase();
+    const now = new Date().toISOString();
+    const ticket: SupportTicket = {
+      id: 'tkt-' + crypto.randomBytes(4).toString('hex'),
+      ticketNumber,
+      userId: data.userId,
+      userEmail: data.userEmail,
+      category: data.category,
+      subject: data.subject,
+      message: data.message,
+      status: 'Open',
+      replies: [],
+      createdAt: now,
+      updatedAt: now
+    };
+    this.store.tickets.unshift(ticket);
+    this.saveStore();
+    this.logActivity('TICKET_CREATED', 'SUPPORT', `Ticket ${ticketNumber}: ${data.subject}`, data.userEmail, ticket.id);
+    return ticket;
+  }
+
+  replyToTicket(
+    ticketId: string,
+    author: string,
+    role: 'user' | 'admin',
+    message: string,
+    status?: SupportTicket['status']
+  ): SupportTicket | null {
+    const ticket = this.store.tickets.find((t) => t.id === ticketId || t.ticketNumber === ticketId);
+    if (!ticket) return null;
+    const now = new Date().toISOString();
+    ticket.replies.push({
+      id: 'rep-' + crypto.randomBytes(3).toString('hex'),
+      author,
+      role,
+      message,
+      timestamp: now
+    });
+    if (status) {
+      ticket.status = status;
+    } else if (role === 'admin' && ticket.status === 'Open') {
+      ticket.status = 'In Progress';
+    }
+    ticket.updatedAt = now;
+    this.saveStore();
+    this.logActivity('TICKET_REPLY', 'SUPPORT', `Reply added to ${ticket.ticketNumber}`, author, ticket.id);
+    return ticket;
   }
 
   // Users & Auth
@@ -707,7 +746,20 @@ class Database {
     return this.store.users.find((u) => u.email.toLowerCase() === email.toLowerCase());
   }
 
-  createUser(username: string, email: string, passwordHash: string, role: 'user' | 'admin' = 'user'): User {
+  upgradeUserPasswordHash(userId: string, newPlaintext: string) {
+    const user = this.getUserById(userId);
+    if (!user) return;
+    user.passwordHash = hashPassword(newPlaintext);
+    this.saveStore();
+  }
+
+  createUser(
+    username: string,
+    email: string,
+    passwordHash: string,
+    role: 'user' | 'admin' = 'user',
+    organization?: string
+  ): User {
     const id = 'user-' + crypto.randomBytes(4).toString('hex');
     const newUser: User = {
       id,
@@ -715,21 +767,28 @@ class Database {
       email,
       passwordHash,
       role,
+      organization: organization || 'Independent Engineering Team',
       reputation: 100,
       createdAt: new Date().toISOString()
     };
     this.store.users.push(newUser);
     this.saveStore();
-    this.logActivity('USER_REGISTER', 'AUTH', `New user registered: ${username}`, username, id);
+    this.logActivity('USER_REGISTER', 'AUTH', `New account registered: ${username}`, email, id);
     return newUser;
   }
 
   // Activity Logs
-  getActivityLogs(limit = 50): ActivityLog[] {
+  getActivityLogs(limit = 100): ActivityLog[] {
     return this.store.activityLogs.slice(0, limit);
   }
 
-  logActivity(action: string, category: ActivityLog['category'], details: string, actor: string, targetId?: string) {
+  logActivity(
+    action: string,
+    category: ActivityLog['category'],
+    details: string,
+    actor: string,
+    targetId?: string
+  ) {
     const log: ActivityLog = {
       id: 'log-' + crypto.randomBytes(4).toString('hex'),
       action,
@@ -746,16 +805,26 @@ class Database {
     this.saveStore();
   }
 
-  // Stats
+  // Admin Stats
   getAdminStats() {
+    const isConfirmed = (s: OrderStatus) =>
+      s === 'Payment Confirmed' || s === 'Approved' || s === 'Completed';
+    const isPending = (s: OrderStatus) =>
+      s === 'Awaiting Payment' ||
+      s === 'Payment Detected' ||
+      s === 'Confirming on Blockchain' ||
+      s === 'Pending Payment' ||
+      s === 'Proof Uploaded' ||
+      s === 'Under Review';
+    const isFailed = (s: OrderStatus) =>
+      s === 'Payment Failed' || s === 'Payment Expired' || s === 'Rejected';
+
     const totalOrders = this.store.orders.length;
-    const pendingVerification = this.store.orders.filter(
-      (o) => o.status === 'Proof Uploaded' || o.status === 'Under Review' || o.status === 'Pending Payment'
-    ).length;
-    const approvedOrders = this.store.orders.filter((o) => o.status === 'Approved' || o.status === 'Completed').length;
-    const rejectedOrders = this.store.orders.filter((o) => o.status === 'Rejected').length;
+    const pendingVerification = this.store.orders.filter((o) => isPending(o.status)).length;
+    const approvedOrders = this.store.orders.filter((o) => isConfirmed(o.status)).length;
+    const rejectedOrders = this.store.orders.filter((o) => isFailed(o.status)).length;
     const totalVolumeUSDT = this.store.orders
-      .filter((o) => o.status === 'Approved' || o.status === 'Completed')
+      .filter((o) => isConfirmed(o.status))
       .reduce((sum, o) => sum + o.amount, 0);
 
     return {
@@ -765,7 +834,9 @@ class Database {
       rejectedOrders,
       totalVolumeUSDT,
       totalProducts: this.store.products.length,
-      totalUsers: this.store.users.length
+      totalUsers: this.store.users.length,
+      activeLicenses: this.store.licenses.filter((l) => l.status === 'Active').length,
+      openTickets: this.store.tickets.filter((t) => t.status !== 'Resolved').length
     };
   }
 }

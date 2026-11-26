@@ -483,5 +483,34 @@
       "actor": "system",
       "timestamp": "2026-10-15T17:23:21.290Z"
     }
-  ]
+  ],
+  "licenses": [],
+  "discounts": [
+    {
+      "id": "disc-enterprise-10",
+      "code": "DEEPSEEK10",
+      "type": "percent",
+      "value": 10,
+      "active": true,
+      "maxUses": 100,
+      "usedCount": 0,
+      "description": "10% Enterprise Onboarding Credit",
+      "createdAt": "2026-11-25T21:54:08.338Z"
+    }
+  ],
+  "tickets": [],
+  "usedTxHashes": {},
+  "siteSettings": {
+    "brandName": "DEEPSEEK",
+    "tagline": "Deephat & Developer Infrastructure Marketplace",
+    "supportEmail": "support@deepseek-infra.io",
+    "announcementText": "Independent Deephat & Developer Infrastructure Marketplace · USDT (TRC-20) On-Chain Settlement",
+    "announcementActive": true,
+    "trc20ReceivingAddress": "TL9sU4A1ydN9AT2LTaC7P94K4y4BdAgDFx",
+    "trc20Network": "TRC20",
+    "requiredConfirmations": 19,
+    "orderExpiryMinutes": 60,
+    "dispatchChannel": "@getfilex_bot"
+  },
+  "adminPasscodeHash": null
 }

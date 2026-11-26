@@ -1,4 +1,11 @@
-export type OrderStatus = 
+export type OrderStatus =
+  | 'Awaiting Payment'
+  | 'Payment Detected'
+  | 'Confirming on Blockchain'
+  | 'Payment Confirmed'
+  | 'Payment Failed'
+  | 'Payment Expired'
+  // Legacy compatibility statuses
   | 'Pending Payment'
   | 'Proof Uploaded'
   | 'Under Review'
@@ -24,6 +31,9 @@ export interface Product {
   productCode?: string;
   version?: string;
   architecture?: string;
+  supportedPlatforms?: string[];
+  documentationUrl?: string;
+  licenseType?: string;
   createdAt: string;
 }
 
@@ -31,10 +41,25 @@ export interface PaymentProof {
   fileName: string;
   fileSize: number;
   fileType: string;
-  fileData: string; // base64 or URL
+  fileData: string;
   uploadedAt: string;
   verifiedAt?: string;
   adminNote?: string;
+}
+
+export interface BlockchainVerification {
+  txHash: string;
+  network: string;
+  verified: boolean;
+  confirmations: number;
+  requiredConfirmations: number;
+  blockNumber?: number;
+  detectedAmount?: number;
+  recipientAddress?: string;
+  senderAddress?: string;
+  checkedAt: string;
+  provider: 'trongrid' | 'manual_audit' | 'validation';
+  message: string;
 }
 
 export interface OrderItem {
@@ -44,6 +69,8 @@ export interface OrderItem {
   quantity: number;
   image: string;
   category: string;
+  version?: string;
+  productCode?: string;
 }
 
 export interface Order {
@@ -52,12 +79,18 @@ export interface Order {
   userId: string;
   userEmail: string;
   items: OrderItem[];
+  subtotal?: number;
+  discountCode?: string;
+  discountAmount?: number;
   amount: number;
   currency: 'USDT';
   paymentMethod: string;
   paymentAddress: string;
+  txHash?: string;
+  blockchainVerification?: BlockchainVerification | null;
   paymentProof?: PaymentProof | null;
   status: OrderStatus;
+  expiresAt?: string;
   createdAt: string;
   updatedAt: string;
   statusHistory: {
@@ -74,15 +107,78 @@ export interface User {
   email: string;
   passwordHash: string;
   role: 'user' | 'admin';
+  organization?: string;
   avatar?: string;
   reputation: number;
   createdAt: string;
 }
 
+export interface LicenseRecord {
+  id: string;
+  licenseKey: string;
+  orderNumber: string;
+  userId: string;
+  userEmail: string;
+  productId: string;
+  productName: string;
+  productVersion: string;
+  status: 'Active' | 'Revoked';
+  issuedAt: string;
+  expiresAt: string;
+  downloadManifestHash: string;
+}
+
+export interface DiscountCode {
+  id: string;
+  code: string;
+  type: 'percent' | 'fixed';
+  value: number;
+  active: boolean;
+  maxUses: number;
+  usedCount: number;
+  description: string;
+  createdAt: string;
+}
+
+export interface SupportTicketReply {
+  id: string;
+  author: string;
+  role: 'user' | 'admin';
+  message: string;
+  timestamp: string;
+}
+
+export interface SupportTicket {
+  id: string;
+  ticketNumber: string;
+  userId: string;
+  userEmail: string;
+  category: string;
+  subject: string;
+  message: string;
+  status: 'Open' | 'In Progress' | 'Resolved';
+  replies: SupportTicketReply[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface SiteSettings {
+  brandName: string;
+  tagline: string;
+  supportEmail: string;
+  announcementText: string;
+  announcementActive: boolean;
+  trc20ReceivingAddress: string;
+  trc20Network: string;
+  requiredConfirmations: number;
+  orderExpiryMinutes: number;
+  dispatchChannel: string;
+}
+
 export interface ActivityLog {
   id: string;
   action: string;
-  category: 'ORDER' | 'PAYMENT' | 'PRODUCT' | 'AUTH' | 'ADMIN';
+  category: 'ORDER' | 'PAYMENT' | 'PRODUCT' | 'AUTH' | 'ADMIN' | 'LICENSE' | 'SUPPORT' | 'DISCOUNT';
   details: string;
   actor: string;
   targetId?: string;

@@ -1,27 +1,34 @@
 import { Router, Request, Response } from 'express';
-import { db, hashPassword } from '../db';
-import { AuthenticatedRequest } from '../middleware/auth';
+import { db, hashPassword, verifyPassword } from '../db';
+import { AuthenticatedRequest, requireAuth, signAuthToken } from '../middleware/auth';
 
 const router = Router();
 
-// GET /api/auth/me - Current user session
-router.get('/me', (req: AuthenticatedRequest, res: Response) => {
-  const user = req.user;
-  if (!user) {
-    return res.status(401).json({ error: 'UNAUTHENTICATED' });
-  }
+function serializeUser(user: {
+  id: string;
+  username: string;
+  email: string;
+  role: 'user' | 'admin';
+  organization?: string;
+  avatar?: string;
+  reputation: number;
+  createdAt: string;
+}) {
+  return {
+    id: user.id,
+    username: user.username,
+    email: user.email,
+    role: user.role,
+    organization: user.organization,
+    avatar: user.avatar,
+    reputation: user.reputation,
+    createdAt: user.createdAt
+  };
+}
 
-  res.json({
-    user: {
-      id: user.id,
-      username: user.username,
-      email: user.email,
-      role: user.role,
-      avatar: user.avatar,
-      reputation: user.reputation,
-      createdAt: user.createdAt
-    }
-  });
+// GET /api/auth/me - Current authenticated user session
+router.get('/me', requireAuth, (req: AuthenticatedRequest, res: Response) => {
+  res.json({ user: serializeUser(req.user!) });
 });
 
 // POST /api/auth/login
@@ -29,93 +36,146 @@ router.post('/login', (req: Request, res: Response) => {
   const { email, password } = req.body;
 
   if (!email || !password) {
-    return res.status(400).json({ error: 'CREDENTIALS_REQUIRED', message: 'Email and passphrase are required.' });
+    return res.status(400).json({
+      error: 'CREDENTIALS_REQUIRED',
+      message: 'Email and password are required.'
+    });
   }
 
-  const user = db.getUserByEmail(email);
-  if (!user) {
-    return res.status(401).json({ error: 'INVALID_CREDENTIALS', message: 'Invalid credentials or user key.' });
+  const user = db.getUserByEmail(String(email).trim());
+  if (!user || !verifyPassword(String(password), user.passwordHash)) {
+    return res.status(401).json({
+      error: 'INVALID_CREDENTIALS',
+      message: 'Invalid email or password.'
+    });
   }
 
-  const hashed = hashPassword(password);
-  if (user.passwordHash !== hashed) {
-    return res.status(401).json({ error: 'INVALID_CREDENTIALS', message: 'Passphrase verification failed.' });
+  // Upgrade legacy SHA-256 hash seamlessly on successful sign-in
+  if (!user.passwordHash.startsWith('scrypt:')) {
+    db.upgradeUserPasswordHash(user.id, String(password));
   }
 
-  const token = `${user.id}:${Buffer.from(user.email).toString('base64')}`;
-
-  db.logActivity('USER_LOGIN', 'AUTH', `User ${user.username} logged into console`, user.username, user.id);
+  const token = signAuthToken(user);
+  db.logActivity('USER_LOGIN', 'AUTH', `User ${user.username} signed in`, user.email, user.id);
 
   res.json({
     token,
-    user: {
-      id: user.id,
-      username: user.username,
-      email: user.email,
-      role: user.role,
-      avatar: user.avatar,
-      reputation: user.reputation,
-      createdAt: user.createdAt
-    }
+    user: serializeUser(user)
   });
 });
 
 // POST /api/auth/register
 router.post('/register', (req: Request, res: Response) => {
-  const { username, email, password } = req.body;
+  const { username, email, password, organization } = req.body;
 
   if (!username || !email || !password) {
-    return res.status(400).json({ error: 'FIELDS_REQUIRED', message: 'Alias, email, and passphrase required.' });
+    return res.status(400).json({
+      error: 'FIELDS_REQUIRED',
+      message: 'Name, email, and password are required.'
+    });
   }
 
-  if (password.length < 6) {
-    return res.status(400).json({ error: 'WEAK_PASSWORD', message: 'Passphrase must be at least 6 characters.' });
+  const cleanEmail = String(email).trim().toLowerCase();
+  const cleanName = String(username).trim();
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanEmail)) {
+    return res.status(400).json({
+      error: 'INVALID_EMAIL',
+      message: 'Please provide a valid email address.'
+    });
   }
 
-  const existing = db.getUserByEmail(email);
-  if (existing) {
-    return res.status(409).json({ error: 'USER_EXISTS', message: 'An identity with this email already exists.' });
+  if (String(password).length < 8) {
+    return res.status(400).json({
+      error: 'WEAK_PASSWORD',
+      message: 'Password must be at least 8 characters.'
+    });
   }
 
-  const hashed = hashPassword(password);
-  const newUser = db.createUser(username.trim(), email.trim(), hashed, 'user');
-  const token = `${newUser.id}:${Buffer.from(newUser.email).toString('base64')}`;
+  if (db.getUserByEmail(cleanEmail)) {
+    return res.status(409).json({
+      error: 'USER_EXISTS',
+      message: 'An account with this email already exists.'
+    });
+  }
+
+  const hashed = hashPassword(String(password));
+  const newUser = db.createUser(
+    cleanName,
+    cleanEmail,
+    hashed,
+    'user',
+    organization ? String(organization).trim() : undefined
+  );
+  const token = signAuthToken(newUser);
 
   res.status(201).json({
     token,
-    user: {
-      id: newUser.id,
-      username: newUser.username,
-      email: newUser.email,
-      role: newUser.role,
-      avatar: newUser.avatar,
-      reputation: newUser.reputation,
-      createdAt: newUser.createdAt
-    }
+    user: serializeUser(newUser)
   });
 });
 
-// POST /api/auth/switch-role - For switching between User and Admin roles
-router.post('/switch-role', (req: Request, res: Response) => {
-  const { targetRole } = req.body; // 'admin' or 'user'
-  const users = db.getUsers();
-  const matchedUser = users.find((u) => u.role === (targetRole === 'admin' ? 'admin' : 'user')) || users[0];
+// GET /api/auth/admin-status - reports whether first-run admin setup is needed
+router.get('/admin-status', (_req: Request, res: Response) => {
+  const status = db.getAdminPasscodeStatus();
+  res.json(status);
+});
 
-  const token = `${matchedUser.id}:${Buffer.from(matchedUser.email).toString('base64')}`;
+// POST /api/auth/claim-admin - one-time admin passphrase claim if unconfigured
+router.post('/claim-admin', (req: Request, res: Response) => {
+  const { passcode } = req.body;
+  const status = db.getAdminPasscodeStatus();
+  if (!status.setupRequired) {
+    return res.status(409).json({
+      error: 'ADMIN_ALREADY_CONFIGURED',
+      message: 'Administrator access is already configured. Sign in with your admin credentials.'
+    });
+  }
+  if (!passcode || String(passcode).trim().length < 8) {
+    return res.status(400).json({
+      error: 'WEAK_PASSCODE',
+      message: 'Administrator passcode must be at least 8 characters.'
+    });
+  }
 
-  db.logActivity('ROLE_SWITCH', 'AUTH', `Switched role to ${matchedUser.role} (${matchedUser.username})`, matchedUser.username);
+  const admin = db.claimAdminPasscode(String(passcode).trim());
+  if (!admin) {
+    return res.status(409).json({
+      error: 'CLAIM_FAILED',
+      message: 'Unable to claim administrator access.'
+    });
+  }
+
+  const token = signAuthToken(admin);
+  res.status(201).json({
+    token,
+    user: serializeUser(admin)
+  });
+});
+
+// POST /api/auth/admin-login - verify server-side admin passcode
+router.post('/admin-login', (req: Request, res: Response) => {
+  const { passcode } = req.body;
+  if (!passcode) {
+    return res.status(400).json({
+      error: 'PASSCODE_REQUIRED',
+      message: 'Administrator passcode is required.'
+    });
+  }
+
+  const admin = db.verifyAdminPasscode(String(passcode).trim());
+  if (!admin) {
+    return res.status(401).json({
+      error: 'INVALID_ADMIN_PASSCODE',
+      message: 'Administrator verification failed.'
+    });
+  }
+
+  const token = signAuthToken(admin);
+  db.logActivity('ADMIN_LOGIN', 'AUTH', 'Administrator console session unlocked', admin.email, admin.id);
 
   res.json({
     token,
-    user: {
-      id: matchedUser.id,
-      username: matchedUser.username,
-      email: matchedUser.email,
-      role: matchedUser.role,
-      avatar: matchedUser.avatar,
-      reputation: matchedUser.reputation,
-      createdAt: matchedUser.createdAt
-    }
+    user: serializeUser(admin)
   });
 });
 

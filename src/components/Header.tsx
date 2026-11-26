@@ -1,13 +1,30 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useMarket } from '../context/MarketContext';
+import { DeepSeekLogo } from './DeepSeekLogo';
+import { PWAInstallButton } from './PWAInstallButton';
+import { ProductLiveVisual } from './ProductLiveVisual';
 import {
-  Shield,
   Search,
   ShoppingCart,
   ChevronDown,
-  Key
+  LayoutDashboard,
+  Compass,
+  Layers,
+  BookOpen,
+  FileCode2,
+  LifeBuoy,
+  Menu,
+  X,
+  Heart,
+  Package,
+  Shield,
+  ArrowUpRight,
+  LogIn,
+  LogOut,
+  Info,
+  Home as HomeIcon
 } from 'lucide-react';
-import { PWAInstallButton } from './PWAInstallButton';
+import { motion, AnimatePresence } from 'motion/react';
 
 export const Header: React.FC = () => {
   const {
@@ -17,235 +34,559 @@ export const Header: React.FC = () => {
     setIsCartOpen,
     searchQuery,
     setSearchQuery,
+    products,
     categories,
     selectedCategory,
     setSelectedCategory,
-    currentUser
+    openProductDetails,
+    currentUser,
+    userRole,
+    setAuthModalOpen,
+    logout,
+    wishlist
   } = useMarket();
 
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showCategoryMenu, setShowCategoryMenu] = useState(false);
+  const [showResearchMenu, setShowResearchMenu] = useState(false);
+  const [showSearchDropdown, setShowSearchDropdown] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  const searchContainerRef = useRef<HTMLDivElement | null>(null);
+  const userMenuRef = useRef<HTMLDivElement | null>(null);
+  const catMenuRef = useRef<HTMLDivElement | null>(null);
+  const resMenuRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      const target = e.target as Node;
+      if (searchContainerRef.current && !searchContainerRef.current.contains(target)) {
+        setShowSearchDropdown(false);
+      }
+      if (userMenuRef.current && !userMenuRef.current.contains(target)) {
+        setShowUserMenu(false);
+      }
+      if (catMenuRef.current && !catMenuRef.current.contains(target)) {
+        setShowCategoryMenu(false);
+      }
+      if (resMenuRef.current && !resMenuRef.current.contains(target)) {
+        setShowResearchMenu(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const searchSuggestions = searchQuery.trim()
+    ? products
+        .filter((p) => {
+          const q = searchQuery.toLowerCase();
+          return (
+            p.name.toLowerCase().includes(q) ||
+            p.category.toLowerCase().includes(q) ||
+            (p.productCode && p.productCode.toLowerCase().includes(q)) ||
+            p.description.toLowerCase().includes(q)
+          );
+        })
+        .slice(0, 5)
+    : [];
+
+  const handleNavClick = (tab: typeof activeTab) => {
+    setActiveTab(tab);
+    setMobileMenuOpen(false);
+    setShowCategoryMenu(false);
+    setShowResearchMenu(false);
+    setShowUserMenu(false);
+  };
+
+  const initials = currentUser
+    ? currentUser.username
+        .split(/[\s_]+/)
+        .map((n) => n[0])
+        .join('')
+        .toUpperCase()
+        .slice(0, 2)
+    : 'AC';
 
   return (
-    <header className="sticky top-0 z-30 bg-[#050705]/95 backdrop-blur-md border-b border-[#1d271d]">
+    <header className="sticky top-0 z-30 bg-[#07090B]/92 backdrop-blur-md border-b border-[#1E2936]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-14 gap-6">
-          {/* Zone 1: Brand Wordmark */}
-          <button
-            onClick={() => setActiveTab('home')}
-            className="flex items-center gap-2.5 group cursor-pointer text-left whitespace-nowrap shrink-0"
-          >
-            <div className="w-8 h-8 bg-[#0b100b] border border-emerald-500/40 flex items-center justify-center group-hover:border-emerald-400 transition-colors">
-              <Shield className="w-4 h-4 text-emerald-400" />
-            </div>
-            <span className="font-mono font-bold text-base tracking-[0.14em] text-zinc-100 group-hover:text-emerald-400 transition-colors">
-              CYBERPLACES
-            </span>
-          </button>
-
-          {/* Zone 2: Navigation Links */}
-          <nav className="hidden md:flex items-center gap-6 font-mono text-xs">
+        <div className="flex items-center justify-between h-16 gap-3">
+          {/* Left: Mobile menu toggle + DEEPSEEK Brand Logo */}
+          <div className="flex items-center gap-3 shrink-0">
             <button
-              onClick={() => setActiveTab('home')}
-              className={`py-1 transition-colors cursor-pointer whitespace-nowrap shrink-0 border-b ${
-                activeTab === 'home'
-                  ? 'text-emerald-400 border-emerald-400 font-semibold'
-                  : 'text-zinc-400 border-transparent hover:text-zinc-100'
-              }`}
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="lg:hidden p-2 rounded-lg bg-[#0D1116] border border-[#1E2936] text-[#8F9CA8] hover:text-[#F4F7F6] transition-colors cursor-pointer"
+              aria-label="Toggle navigation menu"
             >
-              Index
+              {mobileMenuOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
             </button>
+
             <button
-              onClick={() => setActiveTab('marketplace')}
-              className={`py-1 transition-colors cursor-pointer whitespace-nowrap shrink-0 border-b ${
-                activeTab === 'marketplace'
-                  ? 'text-emerald-400 border-emerald-400 font-semibold'
-                  : 'text-zinc-400 border-transparent hover:text-zinc-100'
+              onClick={() => handleNavClick('home')}
+              className="cursor-pointer whitespace-nowrap shrink-0"
+            >
+              <DeepSeekLogo />
+            </button>
+          </div>
+
+          {/* Center: Single-Line Navigation */}
+          <nav className="hidden lg:flex items-center gap-1 xl:gap-1.5">
+            <button
+              onClick={() => handleNavClick('home')}
+              className={`relative px-2.5 py-2 text-xs font-medium transition-colors cursor-pointer whitespace-nowrap shrink-0 rounded-md ${
+                activeTab === 'home' ? 'text-[#00D69A]' : 'text-[#8F9CA8] hover:text-[#F4F7F6]'
               }`}
             >
-              Market
+              Home
+              {activeTab === 'home' && (
+                <motion.span
+                  layoutId="dsk-nav-indicator"
+                  className="absolute bottom-0 left-2.5 right-2.5 h-0.5 bg-[#00D69A]"
+                />
+              )}
+            </button>
+
+            <button
+              onClick={() => handleNavClick('products')}
+              className={`relative px-2.5 py-2 text-xs font-medium transition-colors cursor-pointer whitespace-nowrap shrink-0 rounded-md ${
+                activeTab === 'products' || activeTab === 'product'
+                  ? 'text-[#00D69A]'
+                  : 'text-[#8F9CA8] hover:text-[#F4F7F6]'
+              }`}
+            >
+              Products
+              {(activeTab === 'products' || activeTab === 'product') && (
+                <motion.span
+                  layoutId="dsk-nav-indicator"
+                  className="absolute bottom-0 left-2.5 right-2.5 h-0.5 bg-[#00D69A]"
+                />
+              )}
             </button>
 
             {/* Categories Dropdown */}
-            <div className="relative">
+            <div className="relative" ref={catMenuRef}>
               <button
                 onClick={() => setShowCategoryMenu(!showCategoryMenu)}
-                className={`py-1 transition-colors flex items-center gap-1 cursor-pointer whitespace-nowrap shrink-0 border-b ${
-                  selectedCategory !== 'All Categories'
-                    ? 'text-emerald-400 border-emerald-400 font-semibold'
-                    : 'text-zinc-400 border-transparent hover:text-zinc-100'
+                className={`relative px-2.5 py-2 text-xs font-medium transition-colors flex items-center gap-1 cursor-pointer whitespace-nowrap shrink-0 rounded-md ${
+                  activeTab === 'categories' || selectedCategory !== 'All Categories'
+                    ? 'text-[#00D69A]'
+                    : 'text-[#8F9CA8] hover:text-[#F4F7F6]'
                 }`}
               >
-                <span>Sectors</span>
-                <ChevronDown className="w-3.5 h-3.5" />
+                <span>Categories</span>
+                <ChevronDown
+                  className={`w-3.5 h-3.5 transition-transform duration-150 ${
+                    showCategoryMenu ? 'rotate-180' : ''
+                  }`}
+                />
               </button>
 
-              {showCategoryMenu && (
-                <div
-                  className="absolute left-0 mt-2 w-64 bg-[#080a08] border border-[#243024] p-1.5 shadow-2xl z-50"
-                  onMouseLeave={() => setShowCategoryMenu(false)}
-                >
-                  <div className="text-[10px] font-mono text-zinc-500 px-2.5 py-1.5 uppercase tracking-wider border-b border-[#182018] mb-1">
-                    Market Directories
-                  </div>
-                  {categories.map((cat) => (
+              <AnimatePresence>
+                {showCategoryMenu && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 6 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 6 }}
+                    transition={{ duration: 0.14 }}
+                    className="absolute left-0 mt-2 w-72 rounded-xl bg-[#11161D] border border-[#1E2936] p-2 shadow-2xl z-50"
+                  >
                     <button
-                      key={cat}
-                      onClick={() => {
-                        setSelectedCategory(cat);
-                        setShowCategoryMenu(false);
-                        setActiveTab('marketplace');
-                      }}
-                      className={`w-full text-left px-2.5 py-1.5 text-xs transition-colors font-mono cursor-pointer flex items-center justify-between ${
-                        selectedCategory === cat
-                          ? 'bg-emerald-500/15 text-emerald-300 font-semibold'
-                          : 'text-zinc-300 hover:bg-[#111611] hover:text-emerald-300'
-                      }`}
+                      onClick={() => handleNavClick('categories')}
+                      className="w-full text-left px-2.5 py-2 rounded-lg text-xs font-semibold text-[#00D69A] hover:bg-[#0D1116] flex items-center justify-between border-b border-[#1E2936] mb-1.5 cursor-pointer"
                     >
-                      <span className="truncate">{cat}</span>
-                      {selectedCategory === cat && (
-                        <span className="text-[10px] text-emerald-400 ml-2">[x]</span>
-                      )}
+                      <span>All Infrastructure Domains</span>
+                      <ArrowUpRight className="w-3.5 h-3.5" />
                     </button>
-                  ))}
-                </div>
-              )}
+                    <div className="max-h-72 overflow-y-auto space-y-0.5">
+                      {categories.map((cat) => (
+                        <button
+                          key={cat}
+                          onClick={() => {
+                            setSelectedCategory(cat);
+                            setShowCategoryMenu(false);
+                            setActiveTab('products');
+                          }}
+                          className={`w-full text-left px-2.5 py-2 rounded-lg text-xs transition-colors cursor-pointer flex items-center justify-between ${
+                            selectedCategory === cat
+                              ? 'bg-[#00D69A]/12 text-[#00D69A] font-semibold'
+                              : 'text-[#D1D9E0] hover:bg-[#0D1116] hover:text-[#00D69A]'
+                          }`}
+                        >
+                          <span className="truncate pr-2">{cat}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+
+            {/* Research & Documentation Dropdown */}
+            <div className="relative" ref={resMenuRef}>
+              <button
+                onClick={() => setShowResearchMenu(!showResearchMenu)}
+                className={`relative px-2.5 py-2 text-xs font-medium transition-colors flex items-center gap-1 cursor-pointer whitespace-nowrap shrink-0 rounded-md ${
+                  activeTab === 'research' || activeTab === 'docs'
+                    ? 'text-[#00D69A]'
+                    : 'text-[#8F9CA8] hover:text-[#F4F7F6]'
+                }`}
+              >
+                <span>Research &amp; Docs</span>
+                <ChevronDown
+                  className={`w-3.5 h-3.5 transition-transform duration-150 ${
+                    showResearchMenu ? 'rotate-180' : ''
+                  }`}
+                />
+              </button>
+
+              <AnimatePresence>
+                {showResearchMenu && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 6 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 6 }}
+                    transition={{ duration: 0.14 }}
+                    className="absolute left-0 mt-2 w-60 rounded-xl bg-[#11161D] border border-[#1E2936] p-2 shadow-2xl z-50 space-y-1"
+                  >
+                    <button
+                      onClick={() => handleNavClick('research')}
+                      className="w-full text-left px-3 py-2.5 rounded-lg hover:bg-[#0D1116] text-xs flex items-start gap-2.5 cursor-pointer"
+                    >
+                      <BookOpen className="w-4 h-4 text-[#00D69A] shrink-0 mt-0.5" />
+                      <div>
+                        <div className="font-semibold text-[#F4F7F6]">Research Library</div>
+                        <div className="text-[11px] text-[#8F9CA8]">Security briefings &amp; whitepapers</div>
+                      </div>
+                    </button>
+                    <button
+                      onClick={() => handleNavClick('docs')}
+                      className="w-full text-left px-3 py-2.5 rounded-lg hover:bg-[#0D1116] text-xs flex items-start gap-2.5 cursor-pointer"
+                    >
+                      <FileCode2 className="w-4 h-4 text-[#0EA5A4] shrink-0 mt-0.5" />
+                      <div>
+                        <div className="font-semibold text-[#F4F7F6]">Documentation</div>
+                        <div className="text-[11px] text-[#8F9CA8]">CLI verification &amp; API reference</div>
+                      </div>
+                    </button>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
 
             <button
-              onClick={() => setActiveTab('orders')}
-              className={`py-1 transition-colors cursor-pointer whitespace-nowrap shrink-0 border-b ${
-                activeTab === 'orders'
-                  ? 'text-emerald-400 border-emerald-400 font-semibold'
-                  : 'text-zinc-400 border-transparent hover:text-zinc-100'
+              onClick={() => handleNavClick('about')}
+              className={`relative px-2.5 py-2 text-xs font-medium transition-colors cursor-pointer whitespace-nowrap shrink-0 rounded-md ${
+                activeTab === 'about' ? 'text-[#00D69A]' : 'text-[#8F9CA8] hover:text-[#F4F7F6]'
               }`}
             >
-              Escrow Orders
+              About
+              {activeTab === 'about' && (
+                <motion.span
+                  layoutId="dsk-nav-indicator"
+                  className="absolute bottom-0 left-2.5 right-2.5 h-0.5 bg-[#00D69A]"
+                />
+              )}
             </button>
 
             <button
-              onClick={() => setActiveTab('support')}
-              className={`py-1 transition-colors cursor-pointer whitespace-nowrap shrink-0 border-b ${
-                activeTab === 'support'
-                  ? 'text-emerald-400 border-emerald-400 font-semibold'
-                  : 'text-zinc-400 border-transparent hover:text-zinc-100'
+              onClick={() => handleNavClick('support')}
+              className={`relative px-2.5 py-2 text-xs font-medium transition-colors cursor-pointer whitespace-nowrap shrink-0 rounded-md ${
+                activeTab === 'support' ? 'text-[#00D69A]' : 'text-[#8F9CA8] hover:text-[#F4F7F6]'
               }`}
             >
-              PGP Support
+              Support
+              {activeTab === 'support' && (
+                <motion.span
+                  layoutId="dsk-nav-indicator"
+                  className="absolute bottom-0 left-2.5 right-2.5 h-0.5 bg-[#00D69A]"
+                />
+              )}
             </button>
           </nav>
 
-          {/* Zone 3: Search, Install App, Cart & Operator Identity */}
-          <div className="flex items-center gap-2 flex-1 md:flex-initial justify-end shrink-0">
-            <div className="relative hidden xl:block w-48">
-              <Search className="w-3.5 h-3.5 text-zinc-500 absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+          {/* Right Controls: Search, Wishlist, Cart, Account, Install App */}
+          <div className="flex items-center gap-2 shrink-0">
+            {/* Search */}
+            <div className="relative hidden md:block w-44 xl:w-52" ref={searchContainerRef}>
+              <Search className="w-3.5 h-3.5 text-[#8F9CA8] absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
               <input
                 type="text"
                 value={searchQuery}
+                onFocus={() => setShowSearchDropdown(true)}
                 onChange={(e) => {
                   setSearchQuery(e.target.value);
-                  if (activeTab !== 'marketplace') setActiveTab('marketplace');
+                  setShowSearchDropdown(true);
                 }}
-                placeholder="Query catalog..."
-                className="w-full bg-[#090c09] border border-[#1f291f] pl-8 pr-10 py-1.5 text-xs text-zinc-200 placeholder-zinc-600 focus:outline-none focus:border-emerald-500/60 transition-colors font-mono"
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    setShowSearchDropdown(false);
+                    setActiveTab('products');
+                  }
+                  if (e.key === 'Escape') {
+                    setShowSearchDropdown(false);
+                  }
+                }}
+                placeholder="Search products, IDs..."
+                className="w-full rounded-lg bg-[#0D1116] border border-[#1E2936] pl-8 pr-7 py-1.5 text-xs text-[#F4F7F6] placeholder-[#8F9CA8]/70 focus:outline-none focus:border-[#00D69A] transition-colors"
               />
               {searchQuery && (
                 <button
-                  onClick={() => setSearchQuery('')}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] text-zinc-500 hover:text-emerald-400 font-mono cursor-pointer"
+                  onClick={() => {
+                    setSearchQuery('');
+                    setShowSearchDropdown(false);
+                  }}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-[#8F9CA8] hover:text-[#F4F7F6] cursor-pointer"
+                  aria-label="Clear search"
                 >
-                  ESC
+                  <X className="w-3 h-3" />
                 </button>
               )}
+
+              <AnimatePresence>
+                {showSearchDropdown && searchQuery.trim().length > 0 && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 6 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 6 }}
+                    transition={{ duration: 0.14 }}
+                    className="absolute right-0 mt-2 w-80 rounded-xl bg-[#11161D] border border-[#1E2936] p-2 shadow-2xl z-50"
+                  >
+                    <div className="flex items-center justify-between px-2 py-1 text-[10px] font-mono text-[#8F9CA8] uppercase border-b border-[#1E2936] mb-1">
+                      <span>Catalog Results</span>
+                      <span className="text-[#00D69A] tabular-nums">{searchSuggestions.length} shown</span>
+                    </div>
+                    {searchSuggestions.length === 0 ? (
+                      <div className="p-4 text-center text-xs text-[#8F9CA8]">
+                        No tools matched &quot;{searchQuery}&quot;
+                      </div>
+                    ) : (
+                      <div className="space-y-1">
+                        {searchSuggestions.map((item) => (
+                          <button
+                            key={item.id}
+                            onClick={() => {
+                              setShowSearchDropdown(false);
+                              openProductDetails(item);
+                            }}
+                            className="w-full flex items-center gap-2.5 p-2 rounded-lg hover:bg-[#0D1116] text-left transition-colors cursor-pointer group"
+                          >
+                            <ProductLiveVisual product={item} compact className="w-9 h-9 shrink-0" />
+                            <div className="min-w-0 flex-1">
+                              <div className="text-xs font-semibold text-[#F4F7F6] group-hover:text-[#00D69A] truncate">
+                                {item.name}
+                              </div>
+                              <div className="text-[10px] font-mono text-[#8F9CA8] truncate">
+                                {item.productCode || item.id} · {item.price.toLocaleString()} USDT
+                              </div>
+                            </div>
+                            <ArrowUpRight className="w-3.5 h-3.5 text-[#8F9CA8] group-hover:text-[#00D69A] shrink-0" />
+                          </button>
+                        ))}
+                        <button
+                          onClick={() => {
+                            setShowSearchDropdown(false);
+                            setActiveTab('products');
+                          }}
+                          className="w-full py-1.5 text-center text-[11px] font-medium text-[#00D69A] hover:bg-[#00D69A]/10 rounded-lg transition-colors cursor-pointer mt-1"
+                        >
+                          View all matching tools
+                        </button>
+                      </div>
+                    )}
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
 
-            {/* Install App Button (Hides automatically in standalone mode) */}
-            <PWAInstallButton />
+            {/* Wishlist quick link */}
+            <button
+              onClick={() => handleNavClick('dashboard')}
+              className="relative p-2 rounded-lg bg-[#0D1116] border border-[#1E2936] hover:border-[#00D69A]/50 text-[#8F9CA8] hover:text-[#F4F7F6] transition-colors cursor-pointer shrink-0"
+              title="Wishlist"
+              aria-label="Wishlist"
+            >
+              <Heart className="w-4 h-4" />
+              {wishlist.length > 0 && (
+                <span className="absolute -top-1 -right-1 min-w-4 h-4 px-1 rounded bg-[#0EA5A4] text-[#07090B] text-[10px] font-mono font-bold flex items-center justify-center tabular-nums">
+                  {wishlist.length}
+                </span>
+              )}
+            </button>
 
             {/* Cart Button */}
             <button
               onClick={() => setIsCartOpen(true)}
-              className="relative px-3 py-1.5 bg-[#0a0e0a] border border-[#243024] hover:border-emerald-500/60 text-zinc-200 hover:text-emerald-400 transition-colors cursor-pointer flex items-center gap-2 font-mono text-xs whitespace-nowrap shrink-0"
-              title="Open Cart"
+              className="relative px-2.5 py-2 rounded-lg bg-[#0D1116] border border-[#1E2936] hover:border-[#00D69A]/50 text-[#F4F7F6] hover:text-[#00D69A] transition-colors cursor-pointer flex items-center gap-1.5 text-xs font-medium whitespace-nowrap shrink-0"
+              title="Shopping Cart"
             >
-              <ShoppingCart className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Cart</span>
-              <span className="text-emerald-400 font-bold tabular-nums">[{cartItemCount}]</span>
+              <ShoppingCart className="w-4 h-4" />
+              <span className="font-mono font-bold text-[#00D69A] tabular-nums">{cartItemCount}</span>
             </button>
 
-            {/* User Account */}
-            <div className="relative">
-              <button
-                onClick={() => setShowUserMenu(!showUserMenu)}
-                className="flex items-center gap-2 px-2.5 py-1.5 border transition-colors cursor-pointer bg-[#0a0e0a] border-[#243024] hover:border-emerald-500/50 text-zinc-300 whitespace-nowrap shrink-0"
-              >
-                <span className="font-mono text-xs text-emerald-400 font-bold">
-                  {currentUser?.username || 'cipher_agent'}
-                </span>
-                <ChevronDown className="w-3 h-3 text-zinc-500" />
-              </button>
-
-              {showUserMenu && (
-                <div
-                  className="absolute right-0 mt-2 w-64 bg-[#080a08] border border-[#263326] p-3 shadow-2xl z-50"
-                  onMouseLeave={() => setShowUserMenu(false)}
-                >
-                  <div className="pb-2.5 mb-2.5 border-b border-[#1b241b]">
-                    <div className="flex items-center justify-between font-mono text-xs">
-                      <span className="font-bold text-zinc-100">
-                        {currentUser?.username}
-                      </span>
-                      <span className="text-[10px] text-emerald-400">
-                        VERIFIED NODE
-                      </span>
-                    </div>
-                    <div className="text-[11px] font-mono text-zinc-500 mt-0.5 break-all">
-                      {currentUser?.email}
-                    </div>
-                    <div className="flex items-center gap-1.5 text-[11px] text-emerald-400 font-mono mt-2">
-                      <Key className="w-3 h-3" />
-                      <span>Clearance: PGP Authenticated</span>
-                    </div>
-                  </div>
-
-                  <div className="text-[11px] font-mono text-zinc-400 p-2 bg-[#040504] border border-[#1a221a]">
-                    <span className="text-amber-400 font-semibold block mb-0.5">TRC-20 Escrow Enabled</span>
-                    Direct cryptographic settlement active
-                  </div>
-                </div>
-              )}
+            {/* Install App */}
+            <div className="hidden sm:block">
+              <PWAInstallButton />
             </div>
+
+            {/* User Account */}
+            {!currentUser ? (
+              <button
+                onClick={() => setAuthModalOpen(true)}
+                className="px-3 py-2 rounded-lg bg-[#00D69A] hover:bg-[#0EA5A4] text-[#07090B] font-semibold text-xs flex items-center gap-1.5 transition-colors cursor-pointer whitespace-nowrap shrink-0"
+              >
+                <LogIn className="w-3.5 h-3.5" />
+                <span>Account</span>
+              </button>
+            ) : (
+              <div className="relative" ref={userMenuRef}>
+                <button
+                  onClick={() => setShowUserMenu(!showUserMenu)}
+                  className="flex items-center gap-2 pl-1.5 pr-2.5 py-1 rounded-lg bg-[#0D1116] border border-[#1E2936] hover:border-[#00D69A]/50 transition-colors cursor-pointer whitespace-nowrap shrink-0"
+                >
+                  <div className="w-7 h-7 rounded-md bg-[#00D69A]/15 border border-[#00D69A]/40 flex items-center justify-center text-[11px] font-mono font-bold text-[#00D69A]">
+                    {initials}
+                  </div>
+                  <div className="hidden xl:block text-left">
+                    <div className="text-xs font-semibold text-[#F4F7F6] leading-tight max-w-[92px] truncate">
+                      {currentUser.username}
+                    </div>
+                    <div className="text-[10px] font-mono text-[#8F9CA8] leading-tight uppercase">
+                      {userRole === 'admin' ? 'Admin' : 'Account'}
+                    </div>
+                  </div>
+                  <ChevronDown className="w-3.5 h-3.5 text-[#8F9CA8]" />
+                </button>
+
+                <AnimatePresence>
+                  {showUserMenu && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 6 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: 6 }}
+                      transition={{ duration: 0.14 }}
+                      className="absolute right-0 mt-2 w-60 rounded-xl bg-[#11161D] border border-[#1E2936] p-2.5 shadow-2xl z-50"
+                    >
+                      <div className="px-2 pb-2.5 mb-2 border-b border-[#1E2936]">
+                        <div className="text-xs font-semibold text-[#F4F7F6] truncate">
+                          {currentUser.username}
+                        </div>
+                        <div className="text-[10px] font-mono text-[#8F9CA8] truncate mt-0.5">
+                          {currentUser.email}
+                        </div>
+                      </div>
+
+                      <div className="space-y-0.5 text-xs">
+                        <button
+                          onClick={() => handleNavClick('dashboard')}
+                          className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-[#F4F7F6] hover:bg-[#0D1116] hover:text-[#00D69A] transition-colors cursor-pointer"
+                        >
+                          <LayoutDashboard className="w-3.5 h-3.5 text-[#00D69A]" />
+                          <span>User Dashboard</span>
+                        </button>
+
+                        <button
+                          onClick={() => handleNavClick('orders')}
+                          className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-[#F4F7F6] hover:bg-[#0D1116] hover:text-[#00D69A] transition-colors cursor-pointer"
+                        >
+                          <Package className="w-3.5 h-3.5 text-[#0EA5A4]" />
+                          <span>Orders &amp; Licenses</span>
+                        </button>
+
+                        {userRole === 'admin' && (
+                          <button
+                            onClick={() => handleNavClick('admin')}
+                            className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-[#F4F7F6] hover:bg-[#0D1116] hover:text-[#E5B84B] transition-colors cursor-pointer"
+                          >
+                            <Shield className="w-3.5 h-3.5 text-[#E5B84B]" />
+                            <span>Admin Console</span>
+                          </button>
+                        )}
+
+                        <div className="pt-2 mt-2 border-t border-[#1E2936]">
+                          <button
+                            onClick={() => {
+                              logout();
+                              setShowUserMenu(false);
+                            }}
+                            className="w-full flex items-center gap-2 px-2.5 py-2 rounded-lg text-[#8F9CA8] hover:text-red-300 hover:bg-[#0D1116] transition-colors cursor-pointer"
+                          >
+                            <LogOut className="w-3.5 h-3.5" />
+                            <span>Sign Out</span>
+                          </button>
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            )}
           </div>
         </div>
-
-        {/* Mobile Submenu Bar */}
-        <div className="flex md:hidden items-center justify-around py-2 border-t border-[#182018] text-[11px] font-mono text-zinc-400">
-          <button
-            onClick={() => setActiveTab('home')}
-            className={`cursor-pointer whitespace-nowrap ${activeTab === 'home' ? 'text-emerald-400 font-bold' : ''}`}
-          >
-            Index
-          </button>
-          <button
-            onClick={() => setActiveTab('marketplace')}
-            className={`cursor-pointer whitespace-nowrap ${activeTab === 'marketplace' ? 'text-emerald-400 font-bold' : ''}`}
-          >
-            Market
-          </button>
-          <button
-            onClick={() => setActiveTab('orders')}
-            className={`cursor-pointer whitespace-nowrap ${activeTab === 'orders' ? 'text-emerald-400 font-bold' : ''}`}
-          >
-            Orders
-          </button>
-          <button
-            onClick={() => setActiveTab('support')}
-            className={`cursor-pointer whitespace-nowrap ${activeTab === 'support' ? 'text-emerald-400 font-bold' : ''}`}
-          >
-            Support
-          </button>
-        </div>
       </div>
+
+      {/* Responsive Mobile Navigation Drawer */}
+      <AnimatePresence>
+        {mobileMenuOpen && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.16 }}
+            className="lg:hidden border-t border-[#1E2936] bg-[#0D1116] overflow-hidden"
+          >
+            <div className="px-4 py-4 space-y-3">
+              <div className="relative">
+                <Search className="w-4 h-4 text-[#8F9CA8] absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') handleNavClick('products');
+                  }}
+                  placeholder="Search products, IDs, categories..."
+                  className="w-full rounded-lg bg-[#07090B] border border-[#1E2936] pl-9 pr-3 py-2.5 text-xs text-[#F4F7F6] placeholder-[#8F9CA8] focus:outline-none focus:border-[#00D69A]"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-2 text-xs">
+                {[
+                  { id: 'home' as const, label: 'Home', icon: HomeIcon },
+                  { id: 'products' as const, label: 'Products', icon: Compass },
+                  { id: 'categories' as const, label: 'Categories', icon: Layers },
+                  { id: 'research' as const, label: 'Research Library', icon: BookOpen },
+                  { id: 'docs' as const, label: 'Documentation', icon: FileCode2 },
+                  { id: 'about' as const, label: 'About', icon: Info },
+                  { id: 'support' as const, label: 'Support', icon: LifeBuoy },
+                  { id: 'dashboard' as const, label: 'Dashboard', icon: LayoutDashboard }
+                ].map((item) => {
+                  const Icon = item.icon;
+                  return (
+                    <button
+                      key={item.id}
+                      onClick={() => handleNavClick(item.id)}
+                      className={`flex items-center gap-2 px-3 py-2.5 rounded-lg border font-medium cursor-pointer ${
+                        activeTab === item.id
+                          ? 'bg-[#00D69A]/15 border-[#00D69A]/50 text-[#00D69A]'
+                          : 'bg-[#11161D] border-[#1E2936] text-[#F4F7F6]'
+                      }`}
+                    >
+                      <Icon className="w-4 h-4" />
+                      <span>{item.label}</span>
+                    </button>
+                  );
+                })}
+              </div>
+
+              <div className="pt-2 border-t border-[#1E2936] flex items-center justify-between">
+                <span className="text-xs text-[#8F9CA8]">Standalone App</span>
+                <PWAInstallButton />
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </header>
   );
 };
