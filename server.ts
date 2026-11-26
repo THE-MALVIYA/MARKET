@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import express from 'express';
 import path from 'path';
 import { createServer as createViteServer } from 'vite';
@@ -11,20 +12,44 @@ import platformRouter from './server/routes/platform';
 
 async function startServer() {
   const app = express();
-  const PORT = 3000;
+  app.set('trust proxy', 1);
+  const PORT = Number(process.env.PORT) || 3000;
 
-  // CORS handling
+  // CORS handling (same-origin, local dev, or explicit ALLOWED_ORIGINS allowlist)
+  const configuredOrigins = new Set(
+    (process.env.ALLOWED_ORIGINS || '')
+      .split(',')
+      .map((s) => s.trim())
+      .filter(Boolean)
+  );
+
   app.use((req, res, next) => {
     const origin = req.headers.origin;
     if (origin) {
-      res.setHeader('Access-Control-Allow-Origin', origin);
-      res.setHeader('Vary', 'Origin');
-    } else {
-      res.setHeader('Access-Control-Allow-Origin', '*');
+      let allowed = configuredOrigins.has(origin);
+      if (!allowed) {
+        try {
+          const parsedOrigin = new URL(origin);
+          const reqHost = (req.headers.host || '').split(':')[0];
+          if (
+            (reqHost && parsedOrigin.hostname === reqHost) ||
+            parsedOrigin.hostname === 'localhost' ||
+            parsedOrigin.hostname === '127.0.0.1'
+          ) {
+            allowed = true;
+          }
+        } catch {
+          allowed = false;
+        }
+      }
+      if (allowed) {
+        res.setHeader('Access-Control-Allow-Origin', origin);
+        res.setHeader('Vary', 'Origin');
+        res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
+        res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
+        res.setHeader('Access-Control-Max-Age', '86400');
+      }
     }
-    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
-    res.setHeader('Access-Control-Max-Age', '86400');
 
     if (req.method === 'OPTIONS') {
       return res.status(204).end();
